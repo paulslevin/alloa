@@ -1,12 +1,8 @@
-# This is alloa.py by Mante Zelvyte and Ulrich Kraehmer 
-
-# See the configuration file alloa.conf and the
-# documentation alloa.tex for more information.
-
-# Search for comments containing the string
-# python2 if you want to use it with python2. 
-
-# 0. Print welcome message
+import time
+import csv
+import random
+import os
+import ConfigParser
 
 print
 print "##############################################################"
@@ -19,20 +15,18 @@ print "# Runtime with 100 agents at each hierarchy is a few minutes #"
 print "#                                                            #"
 print "##############################################################"
 
-# 1. Load the python modules alloa will use.
-
-import time
-import csv
-import random
-import os
 
 # 2. Declare a variable config of type dictionary and
 # load the user settings from alloa.conf into this 
 # dictionary. For python2, replace the 2nd line with 
 # execfile("alloa.conf", config)
  
-config = {}
-exec(open("alloa.conf").read(), config)
+# config = {}
+# exec(open("alloa.conf").read(), config)
+
+config = ConfigParser.ConfigParser()
+config.read("alloa.conf")
+
 
 # 3. Create three temporary ASCII files containing the
 # input data about the agents of hierarchy 1,2,3.
