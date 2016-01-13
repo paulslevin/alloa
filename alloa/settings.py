@@ -2,33 +2,51 @@
 # Make configuration changes in alloa.conf (for security reasons)
 
 import ConfigParser
+import os
 
-config = ConfigParser.ConfigParser()
+config = ConfigParser.RawConfigParser()
 config.read("alloa.conf")
 
 # would probably be better here to allow an arbitrary number of levels
-
-LEVEL1_DATA = config.get("main_allocation_data", "level1_data")
-USER_DELIMITER1 = config.get("main_allocation_data", "user_delimiter1")
-LEVEL1 = config.get("output_files", "level1")
-
-LEVEL2_DATA = config.get("main_allocation_data", "level2_data")
-USER_DELIMITER2 = config.get("main_allocation_data", "user_delimiter2")
-LEVEL2 = config.get("output_files", "level2")
-
-LEVEL3_DATA = config.get("main_allocation_data", "level3_data")
-USER_DELIMITER3 = config.get("main_allocation_data", "user_delimiter3")
-LEVEL3 = config.get("output_files", "level3")
-
-LEVEL4_ALLOCATION = config.get("second_supervisor_allocation",
-                               "level4_allocation")
-LEVEL4_DATA = config.get("second_supervisor_allocation", "level4_data")
-USER_DELIMITER4 = config.get("second_supervisor_allocation", "user_delimiter4")
-LEVEL4 = config.get("output_files", "level4")
-
+# Remove the extra quotes using replace
 
 # Path for storing temporary files
-WORKING_FILES=config.get("temporary_files", "working_files")
+
+WORKING_FILES = config.get("temporary_files", "working_files").replace("'","")
+
+
+LEVEL1_DATA = config.get("main_allocation_data", "level1_data").replace("'","")
+LEVEL1_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
+                                           os.pardir,
+                                           WORKING_FILES,
+                                           LEVEL1_DATA))
+LEVEL1 = config.get("output_files", "level1").replace("'", "")
+
+LEVEL2_DATA = config.get("main_allocation_data", "level2_data").replace("'","")
+LEVEL2_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
+                                           os.pardir,
+                                           WORKING_FILES,
+                                           LEVEL2_DATA))
+LEVEL2 = config.get("output_files", "level2").replace("'","")
+
+LEVEL3_DATA = config.get("main_allocation_data", "level3_data").replace("'","")
+LEVEL3_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
+                                           os.pardir,
+                                           WORKING_FILES,
+                                           LEVEL3_DATA))
+LEVEL3 = config.get("output_files", "level3").replace("'","")
+
+LEVEL4_ALLOCATION = config.get("second_supervisor_allocation",
+                               "level4_allocation").replace("'","")
+
+LEVEL4_DATA = config.get("second_supervisor_allocation",
+                         "level4_data").replace("'","")
+LEVEL4_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
+                                           os.pardir,
+                                           WORKING_FILES,
+                                           LEVEL4_DATA))
+LEVEL4 = config.get("output_files", "level4").replace("'","")
+
 
 # Delete temporary files at completion (Yes/No)
 delete_files='No'

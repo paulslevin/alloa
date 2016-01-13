@@ -6,6 +6,8 @@ import settings
 
 from modules.manipulations import csv_to_results
 
+date = time.strftime("%d/%m/%y")
+
 # print
 # print "##############################################################"
 # print "#                                                            #"
@@ -17,58 +19,11 @@ from modules.manipulations import csv_to_results
 # print "#                                                            #"
 # print "##############################################################"
 
+# Convert csv files to lists
 
-# 3. Create three temporary ASCII files containing the
-# input data about the agents of hierarchy 1,2,3.
-
-# 3.1.  Generate the file names using the current date
-# and the path working_files given in the dictionary config 
-# date is in the format DD/MM/YY, so date[6]+date[7] is YY 
- 
-date = time.strftime("%d/%m/%y")
-print date
-# file2=config['working_files']+'result2_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
-# file3=config['working_files']+'result3_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
-#
-# # 3.2. Open the first input file level1_data specified
-# # in alloa.conf (r=read-only), read all lines into a single
-# # variable lines and close the input file.
-#
-
-
-#
-# # 3.3. Open the first temporary file (w=write), write
-# # the content of lines into it and close it.
-# # %d - digit, %s - string, % (-,-) specifies these
-# # variables, enumerate - numbering (from_where,
-# # starting point), user_delimiter1 is the character
-# # used to separate the entries in one row; this is
-# # specified in alloa.conf
-#
-
-#
-# # 3.4 Repeat 3.3 and 3.4 for level 2 and level 3:
-#
-# infile=open(config["level2_data"], 'r')
-# lines=infile.readlines()
-# infile.close()
-# outtext =['%d%s%s' % (i,config["user_delimiter2"], row) for i, row in enumerate(lines,0)]
-# outfile = open(file2,"w")
-# outfile.writelines(str("".join(outtext)))
-# outfile.close()
-# infile=open(config["level3_data"], 'r')
-# lines=infile.readlines()
-# infile.close()
-# outtext = ['%d%s%s' % (i,config["user_delimiter3"], row) for i, row in enumerate(lines,0)]
-# outfile = open(file3,"w")
-# outfile.writelines(str("".join(outtext)))
-# outfile.close()
-
-# 4. Turn the content of the temporary files into lists
-# called results1, results2, results3
-
-results1 = csv_to_results("C:/Programming/alloa/test/s.csv")
-print results1
+results1 = csv_to_results(settings.LEVEL1_PATH)
+results2 = csv_to_results(settings.LEVEL2_PATH)
+results3 = csv_to_results(settings.LEVEL3_PATH)
 
 
 ##################
@@ -77,19 +32,10 @@ print results1
 ###### PAUL ######
 ##################
 ##################
-#################
-
-# results2 = []
-# with open(file2) as inputfile:
-#     for line in inputfile:
-#         results2.append(line.strip().split(config["user_delimiter2"]))
-#
-# results3 = []
-# with open(file3) as inputfile:
-# 	for line in inputfile:
-# 		results3.append(line.strip().split(config["user_delimiter3"]))
+##################
 
 # 5. Create dictionaries that assign to each agent a number
+
 
 students = dict(zip([results1[i][1] for i in range(1,len(results1))], [i for i in range(1, len(results1))]))
 #print students
