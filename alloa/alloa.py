@@ -25,8 +25,8 @@ from modules.manipulations import csv_to_results
 # and the path working_files given in the dictionary config 
 # date is in the format DD/MM/YY, so date[6]+date[7] is YY 
  
-date=time.strftime("%x")
-#
+date = time.strftime("%d/%m/%y")
+print date
 # file2=config['working_files']+'result2_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
 # file3=config['working_files']+'result3_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
 #
@@ -77,6 +77,7 @@ print results1
 ###### PAUL ######
 ##################
 ##################
+#################
 
 # results2 = []
 # with open(file2) as inputfile:
