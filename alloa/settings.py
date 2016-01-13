@@ -27,4 +27,11 @@ USER_DELIMITER4 = config.get("second_supervisor_allocation", "user_delimiter4")
 LEVEL4 = config.get("output_files", "level4")
 
 
+# Path for storing temporary files
+WORKING_FILES=config.get("temporary_files", "working_files")
+
+# Delete temporary files at completion (Yes/No)
+delete_files='No'
+
+
 WEIGHTED_HIERARCHIES = config.get("optimisation_depth", "weighted_hierarchies")

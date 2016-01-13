@@ -4,16 +4,18 @@ import random
 import os
 import settings
 
-print
-print "##############################################################"
-print "#                                                            #"
-print "# This is alloa by Mante Zelvyte and Uli Kraehmer            #"
-print "#                                                            #"
-print "# ulrich.kraehmer@glasgow.ac.uk                              #"
-print "#                                                            #"
-print "# Runtime with 100 agents at each hierarchy is a few minutes #" 
-print "#                                                            #"
-print "##############################################################"
+from modules.manipulations import csv_to_results
+
+# print
+# print "##############################################################"
+# print "#                                                            #"
+# print "# This is alloa by Mante Zelvyte and Uli Kraehmer            #"
+# print "#                                                            #"
+# print "# ulrich.kraehmer@glasgow.ac.uk                              #"
+# print "#                                                            #"
+# print "# Runtime with 100 agents at each hierarchy is a few minutes #"
+# print "#                                                            #"
+# print "##############################################################"
 
 
 # 3. Create three temporary ASCII files containing the
@@ -24,72 +26,74 @@ print "##############################################################"
 # date is in the format DD/MM/YY, so date[6]+date[7] is YY 
  
 date=time.strftime("%x")
+#
+# file2=config['working_files']+'result2_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
+# file3=config['working_files']+'result3_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
+#
+# # 3.2. Open the first input file level1_data specified
+# # in alloa.conf (r=read-only), read all lines into a single
+# # variable lines and close the input file.
+#
 
-file1=config['working_files']+'result1_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
-file2=config['working_files']+'result2_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
-file3=config['working_files']+'result3_'+date[0]+date[1]+date[3]+date[4]+date[6]+date[7]+'.txt'
 
-# 3.2. Open the first input file level1_data specified
-# in alloa.conf (r=read-only), read all lines into a single
-# variable lines and close the input file.
+#
+# # 3.3. Open the first temporary file (w=write), write
+# # the content of lines into it and close it.
+# # %d - digit, %s - string, % (-,-) specifies these
+# # variables, enumerate - numbering (from_where,
+# # starting point), user_delimiter1 is the character
+# # used to separate the entries in one row; this is
+# # specified in alloa.conf
+#
 
-infile=open(config["level1_data"], 'r')
-lines=infile.readlines()
-infile.close()
-
-# 3.3. Open the first temporary file (w=write), write
-# the content of lines into it and close it. 
-# %d - digit, %s - string, % (-,-) specifies these
-# variables, enumerate - numbering (from_where,
-# starting point), user_delimiter1 is the character
-# used to separate the entries in one row; this is
-# specified in alloa.conf 
-
-outtext =['%d%s%s' % (i,config["user_delimiter1"], row) for i, row in enumerate(lines,0)]
-outfile = open(file1,"w")
-outfile.writelines(str("".join(outtext)))
-outfile.close()
-
-# 3.4 Repeat 3.3 and 3.4 for level 2 and level 3:
-
-infile=open(config["level2_data"], 'r')
-lines=infile.readlines()
-infile.close()
-outtext =['%d%s%s' % (i,config["user_delimiter2"], row) for i, row in enumerate(lines,0)]
-outfile = open(file2,"w")
-outfile.writelines(str("".join(outtext)))
-outfile.close()
-infile=open(config["level3_data"], 'r')
-lines=infile.readlines()
-infile.close()
-outtext = ['%d%s%s' % (i,config["user_delimiter3"], row) for i, row in enumerate(lines,0)]
-outfile = open(file3,"w")
-outfile.writelines(str("".join(outtext)))
-outfile.close()
+#
+# # 3.4 Repeat 3.3 and 3.4 for level 2 and level 3:
+#
+# infile=open(config["level2_data"], 'r')
+# lines=infile.readlines()
+# infile.close()
+# outtext =['%d%s%s' % (i,config["user_delimiter2"], row) for i, row in enumerate(lines,0)]
+# outfile = open(file2,"w")
+# outfile.writelines(str("".join(outtext)))
+# outfile.close()
+# infile=open(config["level3_data"], 'r')
+# lines=infile.readlines()
+# infile.close()
+# outtext = ['%d%s%s' % (i,config["user_delimiter3"], row) for i, row in enumerate(lines,0)]
+# outfile = open(file3,"w")
+# outfile.writelines(str("".join(outtext)))
+# outfile.close()
 
 # 4. Turn the content of the temporary files into lists
 # called results1, results2, results3
 
-results1 = []
-with open(file1) as inputfile:
-    for line in inputfile:
-        results1.append(line.strip().split(config["user_delimiter1"]))
+results1 = csv_to_results("C:/Programming/alloa/test/s.csv")
+print results1
 
-results2 = []
-with open(file2) as inputfile:
-    for line in inputfile:
-        results2.append(line.strip().split(config["user_delimiter2"]))
 
-results3 = []
-with open(file3) as inputfile:
-	for line in inputfile:
-		results3.append(line.strip().split(config["user_delimiter3"]))
+##################
+##################
+##################
+###### PAUL ######
+##################
+##################
+
+# results2 = []
+# with open(file2) as inputfile:
+#     for line in inputfile:
+#         results2.append(line.strip().split(config["user_delimiter2"]))
+#
+# results3 = []
+# with open(file3) as inputfile:
+# 	for line in inputfile:
+# 		results3.append(line.strip().split(config["user_delimiter3"]))
 
 # 5. Create dictionaries that assign to each agent a number
 
 students = dict(zip([results1[i][1] for i in range(1,len(results1))], [i for i in range(1, len(results1))]))
-projects=dict(zip([results2[i][1] for i in range(1,len(results2))], [i for i in range(1, len(results2))]))
-supervisors=dict(zip([results3[i][1] for i in range(1,len(results3))], [i for i in range(1, len(results3))]))
+#print students
+# projects=dict(zip([results2[i][1] for i in range(1,len(results2))], [i for i in range(1, len(results2))]))
+# supervisors=dict(zip([results3[i][1] for i in range(1,len(results3))], [i for i in range(1, len(results3))]))
 
 # 6. Create dictionaries that store the data in the
 # format needed. level1 are the capacities of the
@@ -102,6 +106,8 @@ supervisors=dict(zip([results3[i][1] for i in range(1,len(results3))], [i for i 
 level1=[[i,results1[i][2],results1[i][3]]for i in range(1, len(results1))]
 proj=[[projects[results1[i][j]] for j in range(4, len(results1[i]))] for i in range(1, len(results1))]
 level1_data=[level1[i]+proj[i] for i in range(0, len(level1))]
+
+print "level1_data", level1_data
 
 level2=[[results2[i][2],results2[i][3]] for i in range(1, len(results2))]
 super=[[supervisors[results2[i][j]] for j in range(4, len(results2[i]))] for i in range(1, len(results2))]
