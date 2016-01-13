@@ -2,7 +2,7 @@ import time
 import csv
 import random
 import os
-import ConfigParser
+import settings
 
 print
 print "##############################################################"
@@ -14,18 +14,6 @@ print "#                                                            #"
 print "# Runtime with 100 agents at each hierarchy is a few minutes #" 
 print "#                                                            #"
 print "##############################################################"
-
-
-# 2. Declare a variable config of type dictionary and
-# load the user settings from alloa.conf into this 
-# dictionary. For python2, replace the 2nd line with 
-# execfile("alloa.conf", config)
- 
-# config = {}
-# exec(open("alloa.conf").read(), config)
-
-config = ConfigParser.ConfigParser()
-config.read("alloa.conf")
 
 
 # 3. Create three temporary ASCII files containing the
