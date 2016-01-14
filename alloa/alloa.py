@@ -3,8 +3,9 @@ import csv
 import random
 import os
 import settings
+from itertools import izip
 
-from modules.manipulations import csv_to_results
+from modules.manipulations import csv_to_results, results_to_preferences1, results_to_id
 
 date = time.strftime("%d/%m/%y")
 
@@ -21,10 +22,38 @@ date = time.strftime("%d/%m/%y")
 
 # Convert csv files to lists
 
-results1 = csv_to_results(settings.LEVEL1_PATH)
-results2 = csv_to_results(settings.LEVEL2_PATH)
-results3 = csv_to_results(settings.LEVEL3_PATH)
+results1 = csv_to_results(settings.LEVEL1_PATH, settings.LEVEL1_DELIMITER)
+results2 = csv_to_results(settings.LEVEL2_PATH, settings.LEVEL2_DELIMITER)
+results3 = csv_to_results(settings.LEVEL3_PATH, settings.LEVEL3_DELIMITER)
 
+
+# 5. Create dictionaries that assign to each agent a number
+
+
+level1_id = results_to_id(results1)
+level2_id = results_to_id(results2)
+level3_id = results_to_id(results3)
+
+
+# 6. Create lists that store the data in the
+# format needed. level1 are the capacities of the
+# agents of hierarchy 1, level1_data are their
+# preference lists, level2 the capacities of the agents
+# of hierarchy 2, level2_data their preference lists,
+# and level3_data (not very consistent...) the
+# capacities of the agents of hierarchy 3 
+
+level1_preferences = results_to_preferences1(results1)
+
+print level1_preferences
+
+level2=[[results2[i][2],results2[i][3]] for i in range(1, len(results2))]
+super=[[supervisors[results2[i][j]] for j in range(4, len(results2[i]))] for i in range(1, len(results2))]
+level2_data=[level2[i]+super[i] for i in range(0, len(level2))]
+
+print super
+
+level3_data=[[results3[i][2],results3[i][3]] for i in range(1, len(results3))]
 
 ##################
 ##################
@@ -34,33 +63,6 @@ results3 = csv_to_results(settings.LEVEL3_PATH)
 ##################
 ##################
 
-# 5. Create dictionaries that assign to each agent a number
-
-
-students = dict(zip([results1[i][1] for i in range(1,len(results1))], [i for i in range(1, len(results1))]))
-#print students
-# projects=dict(zip([results2[i][1] for i in range(1,len(results2))], [i for i in range(1, len(results2))]))
-# supervisors=dict(zip([results3[i][1] for i in range(1,len(results3))], [i for i in range(1, len(results3))]))
-
-# 6. Create dictionaries that store the data in the
-# format needed. level1 are the capacities of the
-# agenets of hierarchy 1, level1_data are their
-# preference lists, level2 the capacities of the agents
-# of hierarchy 2, level2_data their preference lists,
-# and level3_data (not very consistent...) the
-# capacities of the agents of hierarchy 3 
-
-level1=[[i,results1[i][2],results1[i][3]]for i in range(1, len(results1))]
-proj=[[projects[results1[i][j]] for j in range(4, len(results1[i]))] for i in range(1, len(results1))]
-level1_data=[level1[i]+proj[i] for i in range(0, len(level1))]
-
-print "level1_data", level1_data
-
-level2=[[results2[i][2],results2[i][3]] for i in range(1, len(results2))]
-super=[[supervisors[results2[i][j]] for j in range(4, len(results2[i]))] for i in range(1, len(results2))]
-level2_data=[level2[i]+super[i] for i in range(0, len(level2))]
-
-level3_data=[[results3[i][2],results3[i][3]] for i in range(1, len(results3))]
 
 # 7. Count the number of agents in each hierarchy and print them out
 # str turns an integer into a string

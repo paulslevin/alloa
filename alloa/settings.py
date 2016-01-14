@@ -20,21 +20,27 @@ LEVEL1_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
                                            os.pardir,
                                            WORKING_FILES,
                                            LEVEL1_DATA))
-LEVEL1 = config.get("output_files", "level1").replace("'", "")
+LEVEL1_DELIMITER = config.get("main_allocation_data",
+                              "level1_delimiter").replace("'","")
+LEVEL1_NAME = config.get("output_files", "level1").replace("'", "")
 
 LEVEL2_DATA = config.get("main_allocation_data", "level2_data").replace("'","")
 LEVEL2_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
                                            os.pardir,
                                            WORKING_FILES,
                                            LEVEL2_DATA))
-LEVEL2 = config.get("output_files", "level2").replace("'","")
+LEVEL2_DELIMITER = config.get("main_allocation_data",
+                              "level2_delimiter").replace("'","")
+LEVEL2_NAME = config.get("output_files", "level2").replace("'","")
 
 LEVEL3_DATA = config.get("main_allocation_data", "level3_data").replace("'","")
 LEVEL3_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
                                            os.pardir,
                                            WORKING_FILES,
                                            LEVEL3_DATA))
-LEVEL3 = config.get("output_files", "level3").replace("'","")
+LEVEL3_DELIMITER = config.get("main_allocation_data",
+                              "level3_delimiter").replace("'","")
+LEVEL3_NAME = config.get("output_files", "level3").replace("'","")
 
 LEVEL4_ALLOCATION = config.get("second_supervisor_allocation",
                                "level4_allocation").replace("'","")
@@ -45,7 +51,9 @@ LEVEL4_PATH = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
                                            os.pardir,
                                            WORKING_FILES,
                                            LEVEL4_DATA))
-LEVEL4 = config.get("output_files", "level4").replace("'","")
+LEVEL4_DELIMITER = config.get("main_allocation_data",
+                              "level1_delimiter").replace("'","")
+LEVEL4_NAME = config.get("output_files", "level4").replace("'","")
 
 
 # Delete temporary files at completion (Yes/No)
