@@ -1,56 +1,19 @@
 import time
-import csv
 import random
 import os
 import settings
-from itertools import izip
+import modules.manipulations
 
-from modules.manipulations import csv_to_results, results_to_preferences1, \
-    results_to_id, results_to_preferences2, results_to_capacities, \
-    max_preference_length
-
-date = time.strftime("%d/%m/%y")
-
-# print "##############################################################"
-# print "#                                                            #"
-# print "# This is alloa by Mante Zelvyte and Uli Kraehmer            #"
-# print "#                                                            #"
-# print "# ulrich.kraehmer@glasgow.ac.uk                              #"
-# print "#                                                            #"
-# print "# Runtime with 100 agents at each hierarchy is a few minutes #"
-# print "#                                                            #"
-# print "##############################################################"
-
-
-# Convert csv files to lists
-results1 = csv_to_results(settings.LEVEL1_PATH, settings.LEVEL1_DELIMITER)
-results2 = csv_to_results(settings.LEVEL2_PATH, settings.LEVEL2_DELIMITER)
-results3 = csv_to_results(settings.LEVEL3_PATH, settings.LEVEL3_DELIMITER)
-
-# Create dictionaries that assign to each agent a number
-level1_id = results_to_id(results1)
-level2_id = results_to_id(results2)
-level3_id = results_to_id(results3)
-
-# Create lists that store the data in the format needed
-level1_preferences = results_to_preferences1(results1)
-level2_preferences = results_to_preferences2(results2, level3_id)
-
-level3_capacities = results_to_capacities(results3)
-
-# Count the number of agents in each hierarchy and print them out
-level1_number = len(level1_id)
-level2_number = len(level2_id)
-level3_number = len(level3_id)
-
-# print level1_number, "agents of hierarchy 1"
-# print level2_number, "agents of hierarchy 2"
-# print level3_number, "agents of hierarchy 3"
-
-# Determine the maximal length of preference lists at levels 1 and 2
-
-max1 = max_preference_length(level1_preferences)
-max2 = max_preference_length(level2_preferences)
+print
+print "##############################################################"
+print "#                                                            #"
+print "# This is alloa by Mante Zelvyte and Uli Kraehmer            #"
+print "#                                                            #"
+print "# ulrich.kraehmer@glasgow.ac.uk                              #"
+print "#                                                            #"
+print "# Runtime with 100 agents at each hierarchy is a few minutes #"
+print "#                                                            #"
+print "##############################################################"
 
 
 ##################
