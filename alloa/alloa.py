@@ -16,77 +16,6 @@ print "#                                                            #"
 print "##############################################################"
 
 
-##################
-##################
-##################
-###### PAUL ######
-##################
-##################
-##################
-
-# python file stuff
-
-# defining filename of the file to be written
-filename0 = config['working_files'] + 'allocation_graph_networkx_' + date[0] + \
-            date[1] + date[3] + date[4] + date[6] + date[7] + '.py'
-
-# adding beginning of the code
-outfile = open(filename0, "w")
-outtext = "import networkx as nx\nimport math\nG=nx.DiGraph()\n"
-outfile.write(outtext)
-outfile.close()
-
-# student node demands +
-
-outfile = open(filename0, "a")
-for i in range(0, num_lines):
-    outtexts = 'G.add_node(%(stud)d, demand=%(dem)d)\n' % dict(stud=i + 1,
-                                                               dem=int(
-                                                                       level1_data[
-                                                                           i][
-                                                                           1]))
-    outfile.write(outtexts)
-outfile.close()
-
-# student node demands -
-outfile = open(filename0, "a")
-for i in range(0, num_lines):
-    outtexts = 'G.add_node(%(stud)d, demand=%(dem)d)\n' % dict(
-            stud=(num_lines) + i + 1, dem=-int(level1_data[i][1]))
-    outfile.write(outtexts)
-outfile.close()
-
-# project node demands +
-demand1 = config['working_files'] + 'demand1_' + date[0] + date[1] + date[3] + \
-          date[4] + date[6] + date[7] + '.py'
-outfile = open(demand1, "w")
-for i in range(0, num_lines):
-    for j in range(3, len(level1_data[i])):
-        outtexts = 'G.add_node(%(proj)d, demand=%(dem)d)\n' % dict(
-                proj=int(level1_data[i][j]) + (num_lines) * 2,
-                dem=int(level2_data[int(level1_data[i][j]) - 1][0]))
-        outfile.write(outtexts)
-outfile.close()
-
-# project node demands -
-outfile = open(demand1, "a")
-for i in range(0, num_lines):
-    for j in range(3, len(level1_data[i])):
-        outtexts = 'G.add_node(%(proj)d, demand=%(dem)d)\n' % dict(
-                proj=int(level1_data[i][j]) + (num_lines) * 2 + num_of_proj,
-                dem=-int(level2_data[int(level1_data[i][j]) - 1][0]))
-        outfile.write(outtexts)
-outfile.close()
-
-# removing duplicated nodes
-lines_seen = set()  # holds lines already seen
-outfile = open(filename0, "a")
-for line in open(demand1, "r"):
-    if line not in lines_seen:  # not a duplicate
-        outfile.write(line)
-        lines_seen.add(line)
-outfile.close()
-
 # supervisor node demands +
 demand2 = config['working_files'] + 'demand2_' + date[0] + date[1] + date[3] + \
           date[4] + date[6] + date[7] + '.py'
@@ -102,6 +31,15 @@ for i in range(0, num_lines):
                                 0]))
             outfile.write(outtexts)
 outfile.close()
+
+##################
+##################
+##################
+###### PAUL ######
+##################
+##################
+##################
+
 
 # supervisor node demands -
 outfile = open(demand2, "a")

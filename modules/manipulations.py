@@ -1,7 +1,7 @@
-import time
 import settings
 
 from copy import deepcopy
+
 
 # helper functions
 def get_integer(choice):
@@ -35,11 +35,11 @@ def results_to_preferences1(results):
     return preference_list
 
 
-def results_to_preferences2(results, id):
+def results_to_preferences2(results, ids):
     preference_list = []
     results_copy = deepcopy(results)[1:]
     for result in results_copy:
-        id_list = [id[agent] for agent in result[4:]]
+        id_list = [ids[agent] for agent in result[4:]]
         next_list = result[2:4] + id_list
         preference_list.append(next_list)
     return preference_list
@@ -50,7 +50,14 @@ def results_to_capacities(results):
 
 
 def max_preference_length(preferences):
-    return  max(len(preference[2:]) for preference in preferences)
+    return max(len(preference[2:]) for preference in preferences)
+
+
+def chosen(preference, level):
+    idx = 3
+    if level == 2:
+        idx = 2
+    return preference[idx:]
 
 
 # Convert csv files to lists
@@ -82,3 +89,19 @@ level3_number = len(level3_id)
 
 max1 = max_preference_length(level1_preferences)
 max2 = max_preference_length(level2_preferences)
+
+# Determine the level 2 agents that were chosen by level 1 agents
+# so that we avoid unnecessary analysis
+
+level2_chosen_all = set().union(
+        *(chosen(preference, 1) for preference in level1_preferences))
+
+# Determine the level 3 agents that were chosen by level 2 agents that
+# were chosen by level 1 agents.
+
+level3_chosen_all = set().union(
+        *(chosen(level2_preferences[choice - 1], 2) for choice in
+          level2_chosen_all))
+
+level2_chosen_number = len(level2_chosen_all)
+level3_chosen_number = len(level3_chosen_all)
