@@ -16,21 +16,7 @@ print "#                                                            #"
 print "##############################################################"
 
 
-# supervisor node demands +
-demand2 = config['working_files'] + 'demand2_' + date[0] + date[1] + date[3] + \
-          date[4] + date[6] + date[7] + '.py'
-outfile = open(demand2, "w")
-for i in range(0, num_lines):
-    for j in range(3, len(level1_data[i])):
-        for k in range(2, len(level2_data[int(level1_data[i][j]) - 1])):
-            outtexts = 'G.add_node(%(sup)d, demand=%(dem)d)\n' % dict(
-                    sup=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                              num_lines) * 2 + num_of_proj * 2,
-                    dem=int(level3_data[int(
-                            level2_data[int(level1_data[i][j]) - 1][k]) - 1][
-                                0]))
-            outfile.write(outtexts)
-outfile.close()
+
 
 ##################
 ##################
@@ -40,62 +26,24 @@ outfile.close()
 ##################
 ##################
 
+# print level1_number, "agents of hierarchy 1"
+# print level2_number, "agents of hierarchy 2"
+# print level3_number, "agents of hierarchy 3"
 
-# supervisor node demands -
-outfile = open(demand2, "a")
-for i in range(0, num_lines):
-    for j in range(3, len(level1_data[i])):
-        for k in range(2, len(level2_data[int(level1_data[i][j]) - 1])):
-            outtexts = 'G.add_node(%(sup)d, demand=%(dem)d)\n' % dict(
-                    sup=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                              num_lines) * 2 + num_of_proj * 2 + num_of_sup,
-                    dem=-int(level3_data[int(
-                            level2_data[int(level1_data[i][j]) - 1][k]) - 1][
-                                 0]))
-            outfile.write(outtexts)
-outfile.close()
+# students to projects, with option to pick the weighting - input the number
+#  of weighted hierarchies - i.e., 0,1 or 2. If 2 - fully generous algorithm.
+# If 1 - generous only for students. If 0 - not generous.
 
-# removing duplicated nodes
-lines_seen = set()  # holds lines already seen
-outfile = open(filename0, "a")
-for line in open(demand2, "r"):
-    if line not in lines_seen:  # not a duplicate
-        outfile.write(line)
-        lines_seen.add(line)
-outfile.close()
 
-# source to students
-edges_prerand = config['working_files'] + 'edges_prerand_' + date[0] + date[1] + \
-                date[3] + date[4] + date[6] + date[7] + '.txt'
-outtexts = ['G.add_edge(0, %d, weight=0)\n' % (i) for i in
-            range(1, num_lines + 1)]
-outfile = open(edges_prerand, "w")
-outfile.writelines(str("".join(outtexts)))
-outfile.close()
-
-# randomization of source to students edges
-lines = open(edges_prerand).readlines()
-random.shuffle(lines)
-open(filename0, 'a').writelines(lines)
-
-# student to student duplicates
-outfile = open(filename0, "a")
-for i in range(0, num_lines):
-    outtexts = "G.add_edge(%(stud)d, %(stud_dup)d,capacity=%(cap)d, weight=0)\n" % dict(
-            stud=int(level1_data[i][0]), stud_dup=num_lines + i + 1,
-            cap=int(level1_data[i][2]) - int(level1_data[i][1]))
-    outfile.write(outtexts)
-outfile.close()
-
-# students to projects, with option to pick the weighting - input the number of weighted hierarchies - i.e., 0,1 or 2. If 2 - fully generous algorithm. If 1 - generous only for students. If 0 - not generous.
 outfile = open(filename0, "a")
 
 hierarchy_weight = int(config["weighted_hierarchies"])
 if hierarchy_weight == 0:
     # POTENTIAL BUG WHEN REPLACING n BY num_lines
-    for i in range(0, num_lines):
-        for j in range(3, len(level1_data[i])):
+    for i in range(0, num_lines): # for each student
+        for j in range(3, len(level1_data[i])): # for each project that student has selected
             outtexts = "G.add_edge(%(number)d, %(proj)d, weight=0)\n" % dict(
+                        #add_edge from that - student to the project +
                     number=int(level1_data[i][0]) + (num_lines),
                     proj=int(level1_data[i][j]) + (num_lines) * 2)
             outfile.write(outtexts)

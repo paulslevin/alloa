@@ -60,4 +60,5 @@ LEVEL4_NAME = config.get("output_files", "level4").replace("'","")
 delete_files='No'
 
 
-WEIGHTED_HIERARCHIES = config.get("optimisation_depth", "weighted_hierarchies")
+WEIGHTED_HIERARCHIES = int(config.get("optimisation_depth",
+                                      "weighted_hierarchies"))

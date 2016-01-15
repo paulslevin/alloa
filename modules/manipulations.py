@@ -81,9 +81,7 @@ level1_number = len(level1_id)
 level2_number = len(level2_id)
 level3_number = len(level3_id)
 
-# print level1_number, "agents of hierarchy 1"
-# print level2_number, "agents of hierarchy 2"
-# print level3_number, "agents of hierarchy 3"
+
 
 # Determine the maximal length of preference lists at levels 1 and 2
 
