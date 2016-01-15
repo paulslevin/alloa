@@ -6,11 +6,11 @@ import settings
 from itertools import izip
 
 from modules.manipulations import csv_to_results, results_to_preferences1, \
-    results_to_id, results_to_preferences2, results_to_capacities
+    results_to_id, results_to_preferences2, results_to_capacities, \
+    max_preference_length
 
 date = time.strftime("%d/%m/%y")
 
-# print
 # print "##############################################################"
 # print "#                                                            #"
 # print "# This is alloa by Mante Zelvyte and Uli Kraehmer            #"
@@ -21,24 +21,37 @@ date = time.strftime("%d/%m/%y")
 # print "#                                                            #"
 # print "##############################################################"
 
+
 # Convert csv files to lists
 results1 = csv_to_results(settings.LEVEL1_PATH, settings.LEVEL1_DELIMITER)
 results2 = csv_to_results(settings.LEVEL2_PATH, settings.LEVEL2_DELIMITER)
 results3 = csv_to_results(settings.LEVEL3_PATH, settings.LEVEL3_DELIMITER)
-
 
 # Create dictionaries that assign to each agent a number
 level1_id = results_to_id(results1)
 level2_id = results_to_id(results2)
 level3_id = results_to_id(results3)
 
-
-# 6. Create lists that store the data in the format needed.
-
+# Create lists that store the data in the format needed
 level1_preferences = results_to_preferences1(results1)
 level2_preferences = results_to_preferences2(results2, level3_id)
 
 level3_capacities = results_to_capacities(results3)
+
+# Count the number of agents in each hierarchy and print them out
+level1_number = len(level1_id)
+level2_number = len(level2_id)
+level3_number = len(level3_id)
+
+# print level1_number, "agents of hierarchy 1"
+# print level2_number, "agents of hierarchy 2"
+# print level3_number, "agents of hierarchy 3"
+
+# Determine the maximal length of preference lists at levels 1 and 2
+
+max1 = max_preference_length(level1_preferences)
+max2 = max_preference_length(level2_preferences)
+
 
 ##################
 ##################
@@ -48,56 +61,7 @@ level3_capacities = results_to_capacities(results3)
 ##################
 ##################
 
-
-# 7. Count the number of agents in each hierarchy and print them out
-# str turns an integer into a string
-
-num_lines = len(list(csv.reader(open(config["level1_data"])))) - 1
-num_of_sup = len(list(csv.reader(open(config["level3_data"])))) - 1
-num_of_proj = len(list(csv.reader(open(config["level2_data"])))) - 1
-
-print
-print str(num_lines) + " agents of hierarchy 1"
-print str(num_of_proj) + " agents of hierarchy 2"
-print str(num_of_sup) + " agents of hierarchy 3"
-
-# ??? Determine the maximal length of preferecne lists at hierarchy 2.
-# The lengths of the preference lists will be stoed in a temporary file
-
-length_of_supervisor_lists = config['working_files'] + 'length_of_sup_list_' + \
-                             date[0] + date[1] + date[3] + date[4] + date[6] + \
-                             date[7] + '.txt'
-
-outfile = open(length_of_supervisor_lists, "w")
-for i in range(0, num_of_proj):
-    outtexts = "%(pref)d\n" % dict(pref=len(level2_data[i]) - 2)
-    outfile.write(outtexts)
-outfile.close()
-
-f = open(length_of_supervisor_lists, 'r')
-
-data = f.readlines()
-data = data[0:]
-f.close()
-max_alt_sup = int(max(data))
-
-# ??? Dame for preferecne lists at hierarchy 1. 
-
-length_of_stud_lists = config['working_files'] + 'length_of_stud_list_' + date[
-    0] + date[1] + date[3] + date[4] + date[6] + date[7] + '.txt'
-
-outfile = open(length_of_stud_lists, "w")
-for i in range(0, num_lines):
-    outtexts = "%(pref)d\n" % dict(pref=len(level1_data[i]) - 2)
-    outfile.write(outtexts)
-outfile.close()
-
-f = open(length_of_stud_lists, 'r')
-
-data = f.readlines()
-data = data[0:]
-f.close()
-max_alt_proj = int(max(data))
+# python file stuff
 
 # defining filename of the file to be written
 filename0 = config['working_files'] + 'allocation_graph_networkx_' + date[0] + \
@@ -125,7 +89,7 @@ outfile.close()
 outfile = open(filename0, "a")
 for i in range(0, num_lines):
     outtexts = 'G.add_node(%(stud)d, demand=%(dem)d)\n' % dict(
-        stud=(num_lines) + i + 1, dem=-int(level1_data[i][1]))
+            stud=(num_lines) + i + 1, dem=-int(level1_data[i][1]))
     outfile.write(outtexts)
 outfile.close()
 
@@ -136,8 +100,8 @@ outfile = open(demand1, "w")
 for i in range(0, num_lines):
     for j in range(3, len(level1_data[i])):
         outtexts = 'G.add_node(%(proj)d, demand=%(dem)d)\n' % dict(
-            proj=int(level1_data[i][j]) + (num_lines) * 2,
-            dem=int(level2_data[int(level1_data[i][j]) - 1][0]))
+                proj=int(level1_data[i][j]) + (num_lines) * 2,
+                dem=int(level2_data[int(level1_data[i][j]) - 1][0]))
         outfile.write(outtexts)
 outfile.close()
 
@@ -146,8 +110,8 @@ outfile = open(demand1, "a")
 for i in range(0, num_lines):
     for j in range(3, len(level1_data[i])):
         outtexts = 'G.add_node(%(proj)d, demand=%(dem)d)\n' % dict(
-            proj=int(level1_data[i][j]) + (num_lines) * 2 + num_of_proj,
-            dem=-int(level2_data[int(level1_data[i][j]) - 1][0]))
+                proj=int(level1_data[i][j]) + (num_lines) * 2 + num_of_proj,
+                dem=-int(level2_data[int(level1_data[i][j]) - 1][0]))
         outfile.write(outtexts)
 outfile.close()
 
@@ -168,10 +132,11 @@ for i in range(0, num_lines):
     for j in range(3, len(level1_data[i])):
         for k in range(2, len(level2_data[int(level1_data[i][j]) - 1])):
             outtexts = 'G.add_node(%(sup)d, demand=%(dem)d)\n' % dict(
-                sup=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                      num_lines) * 2 + num_of_proj * 2,
-                dem=int(level3_data[int(
-                        level2_data[int(level1_data[i][j]) - 1][k]) - 1][0]))
+                    sup=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
+                                                                              num_lines) * 2 + num_of_proj * 2,
+                    dem=int(level3_data[int(
+                            level2_data[int(level1_data[i][j]) - 1][k]) - 1][
+                                0]))
             outfile.write(outtexts)
 outfile.close()
 
@@ -181,10 +146,11 @@ for i in range(0, num_lines):
     for j in range(3, len(level1_data[i])):
         for k in range(2, len(level2_data[int(level1_data[i][j]) - 1])):
             outtexts = 'G.add_node(%(sup)d, demand=%(dem)d)\n' % dict(
-                sup=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                      num_lines) * 2 + num_of_proj * 2 + num_of_sup,
-                dem=-int(level3_data[int(
-                        level2_data[int(level1_data[i][j]) - 1][k]) - 1][0]))
+                    sup=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
+                                                                              num_lines) * 2 + num_of_proj * 2 + num_of_sup,
+                    dem=-int(level3_data[int(
+                            level2_data[int(level1_data[i][j]) - 1][k]) - 1][
+                                 0]))
             outfile.write(outtexts)
 outfile.close()
 
@@ -215,8 +181,8 @@ open(filename0, 'a').writelines(lines)
 outfile = open(filename0, "a")
 for i in range(0, num_lines):
     outtexts = "G.add_edge(%(stud)d, %(stud_dup)d,capacity=%(cap)d, weight=0)\n" % dict(
-        stud=int(level1_data[i][0]), stud_dup=num_lines + i + 1,
-        cap=int(level1_data[i][2]) - int(level1_data[i][1]))
+            stud=int(level1_data[i][0]), stud_dup=num_lines + i + 1,
+            cap=int(level1_data[i][2]) - int(level1_data[i][1]))
     outfile.write(outtexts)
 outfile.close()
 
@@ -229,24 +195,24 @@ if hierarchy_weight == 0:
     for i in range(0, num_lines):
         for j in range(3, len(level1_data[i])):
             outtexts = "G.add_edge(%(number)d, %(proj)d, weight=0)\n" % dict(
-                number=int(level1_data[i][0]) + (num_lines),
-                proj=int(level1_data[i][j]) + (num_lines) * 2)
+                    number=int(level1_data[i][0]) + (num_lines),
+                    proj=int(level1_data[i][j]) + (num_lines) * 2)
             outfile.write(outtexts)
 elif hierarchy_weight == 1:
     for i in range(0, n):
         for j in range(3, len(level1_data[i])):
             outtexts = "G.add_edge(%(number)d, %(proj)d, weight=%(cost1)d)\n" % dict(
-                number=int(level1_data[i][0]) + (num_lines),
-                proj=int(level1_data[i][j]) + (num_lines) * 2,
-                cost1=(num_lines) ** (j - 3))
+                    number=int(level1_data[i][0]) + (num_lines),
+                    proj=int(level1_data[i][j]) + (num_lines) * 2,
+                    cost1=(num_lines) ** (j - 3))
             outfile.write(outtexts)
 else:
     for i in range(0, num_lines):
         for j in range(3, len(level1_data[i])):
             outtexts = "G.add_edge(%(number)d, %(proj)d, weight=%(cost2)d)\n" % dict(
-                number=int(level1_data[i][0]) + (num_lines),
-                proj=int(level1_data[i][j]) + (num_lines) * 2,
-                cost2=(num_lines) ** (j - 3 + max_alt_sup - 1))
+                    number=int(level1_data[i][0]) + (num_lines),
+                    proj=int(level1_data[i][j]) + (num_lines) * 2,
+                    cost2=(num_lines) ** (j - 3 + max_alt_sup - 1))
             outfile.write(outtexts)
 
 outfile.close()
@@ -260,10 +226,10 @@ outfile = open(edges1, "w")
 for i in range(0, num_lines):
     for j in range(3, len(level1_data[i])):
         outtexts = "G.add_edge(%(proj)d,%(proj_dup)d, capacity=%(cap)d, weight=0)\n" % dict(
-            proj=int(level1_data[i][j]) + (num_lines) * 2,
-            proj_dup=(num_lines) * 2 + num_of_proj + int(level1_data[i][j]),
-            cap=int(level2_data[int(level1_data[i][j]) - 1][1]) - int(
-                    level2_data[int(level1_data[i][j]) - 1][0]))
+                proj=int(level1_data[i][j]) + (num_lines) * 2,
+                proj_dup=(num_lines) * 2 + num_of_proj + int(level1_data[i][j]),
+                cap=int(level2_data[int(level1_data[i][j]) - 1][1]) - int(
+                        level2_data[int(level1_data[i][j]) - 1][0]))
         outfile.write(outtexts)
 
 outfile.close()
@@ -289,10 +255,11 @@ if hierarchy_weight == 0:
         for j in range(3, len(level1_data[i])):
             for k in range(2, len(level2_data[int(level1_data[i][j]) - 1])):
                 outtexts = "G.add_edge(%(number)d, %(super)d, weight=0)\n" % dict(
-                    number=(num_lines) * 2 + num_of_proj + int(
-                            level1_data[i][j]),
-                    super=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                            num_lines) * 2 + num_of_proj * 2)
+                        number=(num_lines) * 2 + num_of_proj + int(
+                                level1_data[i][j]),
+                        super=int(
+                                level2_data[int(level1_data[i][j]) - 1][k]) + (
+                                                                                  num_lines) * 2 + num_of_proj * 2)
                 outfile.write(outtexts)
 elif hierarchy_weight == 1:
     # POTENTIAL BUG
@@ -300,21 +267,23 @@ elif hierarchy_weight == 1:
         for j in range(3, len(level1_data[i])):
             for k in range(2, len(level2_data[int(level1_data[i][j]) - 1])):
                 outtexts = "G.add_edge(%(number)d, %(super)d, weight=0)\n" % dict(
-                    number=(num_lines) * 2 + num_of_proj + int(
-                            level1_data[i][j]),
-                    super=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                            num_lines) * 2 + num_of_proj * 2)
+                        number=(num_lines) * 2 + num_of_proj + int(
+                                level1_data[i][j]),
+                        super=int(
+                                level2_data[int(level1_data[i][j]) - 1][k]) + (
+                                                                                  num_lines) * 2 + num_of_proj * 2)
                 outfile.write(outtexts)
 else:
     for i in range(0, num_lines):
         for j in range(3, len(level1_data[i])):
             for k in range(2, len(level2_data[int(level1_data[i][j]) - 1])):
                 outtexts = "G.add_edge(%(number)d, %(super)d, weight=%(cost)d)\n" % dict(
-                    number=(num_lines) * 2 + num_of_proj + int(
-                            level1_data[i][j]),
-                    super=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                            num_lines) * 2 + num_of_proj * 2,
-                    cost=(num_lines) ** (k - 2))
+                        number=(num_lines) * 2 + num_of_proj + int(
+                                level1_data[i][j]),
+                        super=int(
+                                level2_data[int(level1_data[i][j]) - 1][k]) + (
+                                                                                  num_lines) * 2 + num_of_proj * 2,
+                        cost=(num_lines) ** (k - 2))
                 outfile.write(outtexts)
 
 outfile.close()
@@ -339,14 +308,16 @@ for i in range(0, num_lines):
     for j in range(3, len(level1_data[i])):
         for k in range(2, len(level2_data[int(level1_data[i][j]) - 1])):
             outtexts = "G.add_edge(%(super)d, %(super_dup)d, capacity=%(cap)d, weight=0)\n" % dict(
-                super=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                        num_lines) * 2 + num_of_proj * 2,
-                super_dup=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                            num_lines) * 2 + num_of_proj * 2 + num_of_sup,
-                cap=int(level3_data[int(
-                        level2_data[int(level1_data[i][j]) - 1][k]) - 1][
-                            1]) - int(level3_data[int(
-                        level2_data[int(level1_data[i][j]) - 1][k]) - 1][0]))
+                    super=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
+                                                                                num_lines) * 2 + num_of_proj * 2,
+                    super_dup=int(
+                            level2_data[int(level1_data[i][j]) - 1][k]) + (
+                                                                              num_lines) * 2 + num_of_proj * 2 + num_of_sup,
+                    cap=int(level3_data[int(
+                            level2_data[int(level1_data[i][j]) - 1][k]) - 1][
+                                1]) - int(level3_data[int(
+                            level2_data[int(level1_data[i][j]) - 1][k]) - 1][
+                                              0]))
             outfile.write(outtexts)
 outfile.close()
 
@@ -370,9 +341,10 @@ for i in range(0, num_lines):
     for j in range(3, len(level1_data[i])):
         for k in range(1, len(level2_data[int(level1_data[i][j]) - 1])):
             outtexts = "G.add_edge(%(super_dup)d, %(node_sink)d, weight=0)\n" % dict(
-                node_sink=sink,
-                super_dup=int(level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                            num_lines) * 2 + num_of_proj * 2 + num_of_sup)
+                    node_sink=sink,
+                    super_dup=int(
+                            level2_data[int(level1_data[i][j]) - 1][k]) + (
+                                                                              num_lines) * 2 + num_of_proj * 2 + num_of_sup)
             outfile.write(outtexts)
 outfile.close()
 
@@ -387,7 +359,7 @@ outfile.close()
 # adding ending of the code
 outfile = open(filename0, "a")
 outtext = "import sys\ntry:\n J=nx.max_flow_min_cost(G,0,%(node_sink)d)\nexcept nx.NetworkXUnfeasible:\n  print('Allocation satisfying the lower bounds is not possible. Try reducing lower bounds.')\n  sys.exit(1)\nexcept nx.NetworkXError:\n  print('The input graph is not directed or not connected. Please check the data if all the choices on the level 1 list are included in the level 2 list and the choices on the level 2 list are included in the level 3 list.')\n  sys.exit(1)\nexcept nx.NetworkXUnbounded:\n  print('Allocation is not possible because some upper capacity bounds at level 1 have not been set up. Please check the data.')\n  sys.exit(1)" % dict(
-    node_sink=sink)
+        node_sink=sink)
 outfile.write(outtext)
 outfile.close()
 
@@ -455,7 +427,8 @@ else:
                            inv_supervisors[s - num_lines * 2 - num_of_proj * 2],
                            int(round(math.log(G[m][v]['weight'], num_lines),
                                      0) - int(max_alt_sup) + 2), int(
-            round(math.log(G[l][s]['weight'], num_lines), 0) + 1)] for u in J if
+                round(math.log(G[l][s]['weight'], num_lines), 0) + 1)] for u in
+                          J if
                           u > 0 if u < num_lines + 1 for m in J[u] if
                           m > num_lines if m < num_lines * 2 + 1 for v in J[m]
                           if v > num_lines * 2 if
@@ -512,7 +485,7 @@ level3_name = config['level3']
 
 outfile = open(filename, "w")
 outtext = "%(lev1)s, %(lev2)s, %(lev3)s,  %(lev1)s preference, %(lev2)s preference\n\n" % dict(
-    lev1=level1_name, lev2=level2_name, lev3=level3_name)
+        lev1=level1_name, lev2=level2_name, lev3=level3_name)
 outfile.write(outtext)
 outfile.close()
 
@@ -521,9 +494,9 @@ outfile.close()
 outfile = open(filename, "a")
 for i in range(0, len(allocation_results)):
     outtext2 = "%(arg)s, %(arg2)s, %(arg3)s, %(arg4)s, %(arg5)s \n" % dict(
-        arg=allocation_results[i][0], arg2=allocation_results[i][1],
-        arg3=allocation_results[i][2], arg4=allocation_results[i][3],
-        arg5=allocation_results[i][4])
+            arg=allocation_results[i][0], arg2=allocation_results[i][1],
+            arg3=allocation_results[i][2], arg4=allocation_results[i][3],
+            arg5=allocation_results[i][4])
     outfile.write(outtext2)
 outfile.close()
 
@@ -533,7 +506,7 @@ filename2 = config['allocation_results'] + 'allocation_profile_' + date[0] + \
 # writing profile results
 outfile = open(filename2, "w")
 outtextcount = "Total number of assigned level 1 agents is %(flow)d\nTotal cost of assginment is %(cost)d\n\nLevel 1 preference count\n\n" % dict(
-    flow=flow, cost=C)
+        flow=flow, cost=C)
 outfile.write(outtextcount)
 outfile.close()
 
@@ -542,8 +515,8 @@ if hierarchy_weight >= 1:
     #    for i in range(0, len(results1[i])-4):
     for i in range(0, max_alt_proj - 1):
         outtextpref = "%(pref)s,%(pref2)d\n" % dict(
-            pref=level2_name + ' that was choice no.' + str(i + 1),
-            pref2=num_of_prefs[i])
+                pref=level2_name + ' that was choice no.' + str(i + 1),
+                pref2=num_of_prefs[i])
         outfile.write(outtextpref)
     outfile.close()
 else:
@@ -561,8 +534,8 @@ if hierarchy_weight >= 2:
     outfile = open(filename2, "a")
     for i in range(0, max_alt_sup):
         outtextpref = "%(pref)s, %(pref2)d \n" % dict(
-            pref=level3_name + ' that was choice no.' + str(i + 1),
-            pref2=num_of_super_prefs[i])
+                pref=level3_name + ' that was choice no.' + str(i + 1),
+                pref2=num_of_super_prefs[i])
         outfile.write(outtextpref)
     outfile.close()
 else:
@@ -674,8 +647,8 @@ outfile.close()
 outfile = open(filename_markers, "a")
 for i in range(0, len(marking_capacities)):
     outtexts = 'M.add_node(%(super)d, demand=%(dem)d)\n' % dict(
-        super=marking_capacities[i][0] + num_of_proj * 2,
-        dem=marking_capacities[i][1])
+            super=marking_capacities[i][0] + num_of_proj * 2,
+            dem=marking_capacities[i][1])
     outfile.write(outtexts)
 outfile.close()
 
@@ -684,9 +657,9 @@ outfile.close()
 outfile = open(filename_markers, "a")
 for i in range(0, len(marking_capacities)):
     outtexts = 'M.add_node(%(super)d, demand=%(dem)d)\n' % dict(
-        super=marking_capacities[i][0] + len(
-            marking_capacities) + num_of_proj * 2,
-        dem=-marking_capacities[i][1])
+            super=marking_capacities[i][0] + len(
+                    marking_capacities) + num_of_proj * 2,
+            dem=-marking_capacities[i][1])
     outfile.write(outtexts)
 outfile.close()
 
@@ -698,7 +671,7 @@ markers1 = config['working_files'] + 'markers1_' + date[0] + date[1] + date[3] +
 outfile = open(markers1, "w")
 for i in range(0, len(taken_edges)):
     outtexts = 'M.add_edge(0, %(proj)d, weight=0)\n' % dict(
-        proj=taken_edges[i][0])
+            proj=taken_edges[i][0])
     outfile.writelines(str("".join(outtexts)))
 outfile.close()
 
@@ -718,9 +691,9 @@ markers2 = config['working_files'] + 'markers2_' + date[0] + date[1] + date[3] +
 outfile = open(markers2, "w")
 for i in range(0, len(project_numbers_taken)):
     outtexts = "M.add_edge(%(proj)d, %(proj_dup)d, capacity=%(cap)d, weight=0)\n" % dict(
-        proj=project_numbers_taken[i][0],
-        proj_dup=project_numbers_taken[i][0] + num_of_proj,
-        cap=project_numbers_taken[i][1])
+            proj=project_numbers_taken[i][0],
+            proj_dup=project_numbers_taken[i][0] + num_of_proj,
+            cap=project_numbers_taken[i][1])
     outfile.write(outtexts)
 outfile.close()
 
@@ -738,8 +711,8 @@ outfile.close()
 outfile = open(filename_markers, "a")
 for i in range(0, len(marker_edges)):
     outtexts = "M.add_edge(%(proj)d, %(mark)d, weight=0, capacity=1)\n" % dict(
-        proj=marker_edges[i][0] + num_of_proj,
-        mark=marker_edges[i][1] + num_of_proj * 2)
+            proj=marker_edges[i][0] + num_of_proj,
+            mark=marker_edges[i][1] + num_of_proj * 2)
     outfile.write(outtexts)
 outfile.close()
 
@@ -748,10 +721,10 @@ outfile.close()
 outfile = open(filename_markers, "a")
 for i in range(0, len(marking_capacities)):
     outtexts = "M.add_edge(%(mark)d,%(mark_dup)d, capacity=%(cap)d, weight=0)\n" % dict(
-        mark=marking_capacities[i][0] + num_of_proj * 2,
-        mark_dup=marking_capacities[i][0] + num_of_proj * 2 + len(
-            marking_capacities),
-        cap=marking_capacities[i][2] - marking_capacities[i][1])
+            mark=marking_capacities[i][0] + num_of_proj * 2,
+            mark_dup=marking_capacities[i][0] + num_of_proj * 2 + len(
+                    marking_capacities),
+            cap=marking_capacities[i][2] - marking_capacities[i][1])
     outfile.write(outtexts)
 
 outfile.close()
@@ -764,16 +737,16 @@ sink2 = num_of_proj * 2 + num_of_sup * 2 + 1
 outfile = open(filename_markers, "a")
 for i in range(0, len(marking_capacities)):
     outtexts = "M.add_edge(%(mark_dup)d, %(node_sink2)d, weight=0)\n" % dict(
-        node_sink2=sink2,
-        mark_dup=marking_capacities[i][0] + num_of_proj * 2 + len(
-            marking_capacities))
+            node_sink2=sink2,
+            mark_dup=marking_capacities[i][0] + num_of_proj * 2 + len(
+                    marking_capacities))
     outfile.write(outtexts)
 outfile.close()
 
 # adding ending of the code
 outfile = open(filename_markers, "a")
 outtext = "import sys\ntry:\n K=nx.max_flow_min_cost(M,0,%(node_sink2)d)\nexcept nx.NetworkXUnfeasible:\n  print('Second allocation satisfying the level 4 lower bounds is not possible. Try reducing lower bounds.')\n  sys.exit(1)\nexcept nx.NetworkXError:\n  print('The input graph is not directed or not connected. Please check the data if all the choices on the level 1 list are included in the level 2 list and the choices on the level 2 list are included in the level 3 list.')\n  sys.exit(1)\nexcept nx.NetworkXUnbounded:\n  print('Allocation is not possible because some upper capacity bounds at level 1 have not been set up. Please check the data.')\n  sys.exit(1)" % dict(
-    node_sink2=sink2)
+        node_sink2=sink2)
 outfile.write(outtext)
 outfile.close()
 
@@ -813,7 +786,7 @@ filename_markers_results = config[
 # writing allocation results in the file 'allocation.csv'
 outfile = open(filename_markers_results, "w")
 outtextcount = "Total number of assigned level 2 items is %(flow)d\n\n" % dict(
-    flow=flow_markers)
+        flow=flow_markers)
 outfile.write(outtextcount)
 outfile.close()
 
@@ -825,8 +798,8 @@ outfile.close()
 outfile = open(filename_markers_results, "a")
 for i in range(0, len(allocation_results_markers)):
     outtext2 = "%(arg)s, %(arg2)s\n" % dict(
-        arg=allocation_results_markers[i][0],
-        arg2=allocation_results_markers[i][1])
+            arg=allocation_results_markers[i][0],
+            arg2=allocation_results_markers[i][1])
     outfile.write(outtext2)
 outfile.close()
 
@@ -843,8 +816,8 @@ outfile.close()
 outfile = open(filename_markers_results2, "a")
 for j in range(0, len(allocation_results_markers_workload)):
     outtext4 = "%(arg)s, %(arg2)s \n" % dict(
-        arg=allocation_results_markers_workload[j][0],
-        arg2=allocation_results_markers_workload[j][1])
+            arg=allocation_results_markers_workload[j][0],
+            arg2=allocation_results_markers_workload[j][1])
     outfile.write(outtext4)
 outfile.close()
 
@@ -861,8 +834,9 @@ outfile.close()
 outfile = open(filename_total_results, "a")
 for j in range(0, len(allocation_results2)):
     outtext4 = "%(arg)s, %(arg2)s \n" % dict(
-        arg=allocation_results_markers_workload[j][0],
-        arg2=allocation_results_markers_workload[j][1] + allocation_results2[j][
-            1])
+            arg=allocation_results_markers_workload[j][0],
+            arg2=allocation_results_markers_workload[j][1] +
+                 allocation_results2[j][
+                     1])
     outfile.write(outtext4)
 outfile.close()

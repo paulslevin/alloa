@@ -44,3 +44,7 @@ def results_to_preferences2(results, id):
 
 def results_to_capacities(results):
     return [result[2:] for result in results[1:]]
+
+
+def max_preference_length(preferences):
+    return  max(len(preference[2:]) for preference in preferences)
