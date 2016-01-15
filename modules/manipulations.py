@@ -32,5 +32,15 @@ def results_to_preferences1(results):
     return preference_list
 
 
-def results_to_preferences2(results):
+def results_to_preferences2(results, id):
     preference_list = []
+    results_copy = deepcopy(results)[1:]
+    for result in results_copy:
+        id_list = [id[agent] for agent in result[4:]]
+        next_list = result[2:4] + id_list
+        preference_list.append(next_list)
+    return preference_list
+
+
+def results_to_capacities(results):
+    return [result[2:] for result in results[1:]]
