@@ -81,8 +81,6 @@ level1_number = len(level1_id)
 level2_number = len(level2_id)
 level3_number = len(level3_id)
 
-
-
 # Determine the maximal length of preference lists at levels 1 and 2
 
 max1 = max_preference_length(level1_preferences)
@@ -91,8 +89,13 @@ max2 = max_preference_length(level2_preferences)
 # Determine the level 2 agents that were chosen by level 1 agents
 # so that we avoid unnecessary analysis
 
-level2_chosen_all = set().union(
-        *(chosen(preference, 1) for preference in level1_preferences))
+level2_all_occurrences = sum(
+        (chosen(preference, 1) for preference in level1_preferences), [])
+
+level2_chosen_all = set(level2_all_occurrences)
+level1_preference_count = sorted(level2_chosen_all,
+                                 key=lambda n: level2_all_occurrences.count(n))
+
 
 # Determine the level 3 agents that were chosen by level 2 agents that
 # were chosen by level 1 agents.

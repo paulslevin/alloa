@@ -47,8 +47,11 @@ def add_edges_from_source(graph):
 
 
 def add_level1_duplicate_edges(graph):
-    for i in range(level1_number):
-        graph.add_edge(i + 1, i + 1 + level1_number, weight=0)
+    for i, choice in enumerate(level1_preferences):
+        graph.add_edge(i + 1,
+                       i + 1 + level1_number,
+                       capacity=int(choice[2]) - int(choice[1]),
+                       weight=0)
 
 
 def add_level1_to_level2_edges(graph):
@@ -117,11 +120,19 @@ add_level2_to_level3_edges(H)
 add_level3_duplicate_edges(H)
 add_level3_to_sink_edges(H)
 
+
 # For some reason this extra edge was added in the original code!
 # H.add_edge(435, 469, weight=0)
 
 try:
-    J = nx.max_flow_min_cost(H, 0, SINK)
+    max_flow_min_cost = nx.max_flow_min_cost(H, 0, SINK)
+    flow_cost = nx.cost_of_flow(H, max_flow_min_cost)
+    max_flow = nx.maximum_flow(H, 0, SINK)[0]
+
+    for d in max_flow_min_cost.items():
+        print d
+
+    print max({193: 0, 232: 0, 243: 1, 252: 0, 189: 0, 190: 0, 191: 0}, key=lambda x: {193: 0, 232: 0, 243: 1, 252: 0, 189: 0, 190: 0, 191: 0}[x] )
 except nx.NetworkXUnfeasible:
     print 'Allocation satisfying the lower bounds is not possible.'
     print 'Try reducing lower bounds.'
