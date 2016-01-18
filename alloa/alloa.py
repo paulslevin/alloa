@@ -28,58 +28,6 @@ print "##############################################################"
 
 
 
-# projects duplicated to supervisors, with option to pick the weighting
-
-
-
-# calculate the sink
-sink = (num_lines) * 2 + num_of_proj * 2 + num_of_sup * 2 + 1
-
-# supervisors to sink
-edges4 = config['working_files'] + 'edges4_' + date[0] + date[1] + date[3] + \
-         date[4] + date[6] + date[7] + '.py'
-outfile = open(edges4, "w")
-for i in range(0, num_lines):
-    for j in range(3, len(level1_data[i])):
-        for k in range(1, len(level2_data[int(level1_data[i][j]) - 1])):
-            outtexts = "G.add_edge(%(super_dup)d, %(node_sink)d, weight=0)\n" % dict(
-                    node_sink=sink,
-                    super_dup=int(
-                            level2_data[int(level1_data[i][j]) - 1][k]) + (
-                                                                              num_lines) * 2 + num_of_proj * 2 + num_of_sup)
-            outfile.write(outtexts)
-outfile.close()
-
-lines_seen = set()  # holds lines already seen
-outfile = open(filename0, "a")
-for line in open(edges4, "r"):
-    if line not in lines_seen:  # not a duplicate
-        outfile.write(line)
-        lines_seen.add(line)
-outfile.close()
-
-# adding ending of the code
-outfile = open(filename0, "a")
-outtext = "import sys\ntry:\n J=nx.max_flow_min_cost(G,0,%(node_sink)d)\nexcept nx.NetworkXUnfeasible:\n  print('Allocation satisfying the lower bounds is not possible. Try reducing lower bounds.')\n  sys.exit(1)\nexcept nx.NetworkXError:\n  print('The input graph is not directed or not connected. Please check the data if all the choices on the level 1 list are included in the level 2 list and the choices on the level 2 list are included in the level 3 list.')\n  sys.exit(1)\nexcept nx.NetworkXUnbounded:\n  print('Allocation is not possible because some upper capacity bounds at level 1 have not been set up. Please check the data.')\n  sys.exit(1)" % dict(
-        node_sink=sink)
-outfile.write(outtext)
-outfile.close()
-
-# deleting temporary files: 'Yes' to delete files (in alloa.conf for delete_files) or 'No' to leave them.
-delete_files = config["delete_files"]
-if delete_files == 'Yes':
-    os.remove(file1)
-    os.remove(file2)
-    os.remove(file3)
-    os.remove(edges1)
-    os.remove(edges2)
-    os.remove(demand1)
-    os.remove(demand2)
-    os.remove(edges_prerand)
-    os.remove(edges3)
-    os.remove(edges4)
-    os.remove(length_of_supervisor_lists)
-    os.remove(length_of_stud_lists)
 
 # inverse dictionary mapping
 # print supervisors
