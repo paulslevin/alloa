@@ -8,9 +8,10 @@ import time
 DATE = time.strftime("%d%m%y")
 
 config = ConfigParser.RawConfigParser()
-config.read("alloa.conf")
+config.read(os.path.join(os.path.realpath(os.getcwd()), "alloa.conf"))
 
 ALLOCATION_PROFILE_FILENAME = "allocation_profile_" + DATE + ".csv"
+ALLOCATION_FILENAME = "allocation_" + DATE + ".csv"
 
 # would probably be better here to allow an arbitrary number of levels
 # Remove the extra quotes using replace
@@ -18,19 +19,26 @@ ALLOCATION_PROFILE_FILENAME = "allocation_profile_" + DATE + ".csv"
 # Path for storing temporary files
 
 WORKING_FILES = config.get("temporary_files", "working_files").replace("'", "")
-WORKING_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+WORKING_PATH = os.path.abspath(os.path.join(os.path.realpath(__file__),
                                             os.pardir,
                                             os.path.normpath(WORKING_FILES)))
 
 ALLOCATION_PROFILE_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__),
+    os.path.join(os.path.realpath(os.getcwd()),
                  os.pardir,
                  WORKING_FILES,
-                 ALLOCATION_PROFILE_FILENAME))
+                 ALLOCATION_PROFILE_FILENAME)
+)
 
+ALLOCATION_PATH = os.path.abspath(
+    os.path.join(os.path.realpath(os.getcwd()),
+                 os.pardir,
+                 WORKING_FILES,
+                 ALLOCATION_FILENAME)
+)
 
 LEVEL1_DATA = config.get("main_allocation_data", "level1_data").replace("'", "")
-LEVEL1_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+LEVEL1_PATH = os.path.abspath(os.path.join(os.path.realpath(os.getcwd()),
                                            os.pardir,
                                            WORKING_FILES,
                                            LEVEL1_DATA))
@@ -40,7 +48,7 @@ LEVEL1_DELIMITER = config.get("main_allocation_data",
 LEVEL1_NAME = config.get("output_files", "level1").replace("'", "")
 
 LEVEL2_DATA = config.get("main_allocation_data", "level2_data").replace("'", "")
-LEVEL2_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+LEVEL2_PATH = os.path.abspath(os.path.join(os.path.realpath(os.getcwd()),
                                            os.pardir,
                                            WORKING_FILES,
                                            LEVEL2_DATA))
@@ -49,7 +57,7 @@ LEVEL2_DELIMITER = config.get("main_allocation_data",
 LEVEL2_NAME = config.get("output_files", "level2").replace("'", "")
 
 LEVEL3_DATA = config.get("main_allocation_data", "level3_data").replace("'", "")
-LEVEL3_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+LEVEL3_PATH = os.path.abspath(os.path.join(os.path.realpath(os.getcwd()),
                                            os.pardir,
                                            WORKING_FILES,
                                            LEVEL3_DATA))
@@ -62,7 +70,7 @@ LEVEL4_ALLOCATION = config.get("second_supervisor_allocation",
 
 LEVEL4_DATA = config.get("second_supervisor_allocation",
                          "level4_data").replace("'", "")
-LEVEL4_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+LEVEL4_PATH = os.path.abspath(os.path.join(os.path.realpath(os.getcwd()),
                                            os.pardir,
                                            WORKING_FILES,
                                            LEVEL4_DATA))

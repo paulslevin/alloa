@@ -60,6 +60,24 @@ def chosen(preference, level):
     return preference[idx:]
 
 
+def preference(level, agent, higher_agent):
+    i, preferences = 0, []
+    if level == 1:
+        preferences = level1_preferences
+        i = 3
+        if settings.WEIGHTED_HIERARCHIES == 0:
+            return "N/A"
+    elif level == 2:
+        preferences = level2_preferences
+        i = 2
+        if settings.WEIGHTED_HIERARCHIES in {0, 1}:
+            return "N/A"
+    if higher_agent in preferences[agent - 1][i:]:
+        return str(preferences[agent - 1][i:].index(higher_agent) + 1)
+    else:
+        return None
+
+
 # Convert csv files to lists
 results1 = csv_to_results(settings.LEVEL1_PATH, settings.LEVEL1_DELIMITER)
 results2 = csv_to_results(settings.LEVEL2_PATH, settings.LEVEL2_DELIMITER)
@@ -69,6 +87,11 @@ results3 = csv_to_results(settings.LEVEL3_PATH, settings.LEVEL3_DELIMITER)
 level1_id = results_to_id(results1)
 level2_id = results_to_id(results2)
 level3_id = results_to_id(results3)
+
+id_level1 = dict((v, k) for k, v in level1_id.items())
+id_level2 = dict((v, k) for k, v in level2_id.items())
+id_level3 = dict((v, k) for k, v in level3_id.items())
+
 
 # Create lists that store the data in the format needed
 level1_preferences = results_to_preferences1(results1)
@@ -82,13 +105,11 @@ level2_number = len(level2_id)
 level3_number = len(level3_id)
 
 # Determine the maximal length of preference lists at levels 1 and 2
-
 max1 = max_preference_length(level1_preferences)
 max2 = max_preference_length(level2_preferences)
 
 # Determine the level 2 agents that were chosen by level 1 agents
 # so that we avoid unnecessary analysis
-
 level2_all_occurrences = sum(
         (chosen(preference, 1) for preference in level1_preferences), [])
 
@@ -96,10 +117,8 @@ level2_chosen_all = set(level2_all_occurrences)
 level1_preference_count = sorted(level2_chosen_all,
                                  key=lambda n: level2_all_occurrences.count(n))
 
-
 # Determine the level 3 agents that were chosen by level 2 agents that
 # were chosen by level 1 agents.
-
 level3_chosen_all = set().union(
         *(chosen(level2_preferences[choice - 1], 2) for choice in
           level2_chosen_all))

@@ -128,11 +128,6 @@ try:
     max_flow_min_cost = nx.max_flow_min_cost(H, 0, SINK)
     flow_cost = nx.cost_of_flow(H, max_flow_min_cost)
     max_flow = nx.maximum_flow(H, 0, SINK)[0]
-
-    for d in max_flow_min_cost.items():
-        print d
-
-    print max({193: 0, 232: 0, 243: 1, 252: 0, 189: 0, 190: 0, 191: 0}, key=lambda x: {193: 0, 232: 0, 243: 1, 252: 0, 189: 0, 190: 0, 191: 0}[x] )
 except nx.NetworkXUnfeasible:
     print 'Allocation satisfying the lower bounds is not possible.'
     print 'Try reducing lower bounds.'
