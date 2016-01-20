@@ -19,7 +19,7 @@ def get_preferences_and_counts(agent, flow):
     name, preferences, counts1, counts2 = id_level1[agent], [], {}, {}
     higher_agent = level1_to_level2(agent, flow)
     higher_name = id_level2[higher_agent]
-    line = "{};{};".format(name, higher_name)
+    line = "{},{},".format(name, higher_name)
     for even_higher_agent in level2_to_level3(higher_agent, flow):
         even_higher_name = id_level3[even_higher_agent]
         preference1 = preference(1, agent, higher_agent)
@@ -34,7 +34,7 @@ def get_preferences_and_counts(agent, flow):
                 counts2[preference2] += 1
             else:
                 counts2[preference2] = 1
-        new_line = line + "{};{};{}".format(even_higher_name,
+        new_line = line + "{},{},{}".format(even_higher_name,
                                             preference1,
                                             preference2)
         preferences.append(new_line)
@@ -63,6 +63,7 @@ def write_and_get_counts(flow):
 allocation_profile = open(settings.ALLOCATION_PROFILE_PATH, "wb")
 allocation = open(settings.ALLOCATION_PATH, "wb")
 
+print settings.ALLOCATION_PROFILE_PATH
 
 writer = csv.writer(allocation, delimiter="\n")
 

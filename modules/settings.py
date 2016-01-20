@@ -9,7 +9,7 @@ DATE = time.strftime("%d%m%y")
 CURRENT = os.path.dirname(os.path.realpath(__file__))
 CONFIG_PATH = os.path.abspath(os.path.join(CURRENT,
                               os.pardir))
-print CONFIG_PATH
+
 config = ConfigParser.RawConfigParser()
 config.read(os.path.join(CONFIG_PATH, "alloa.conf"))
 
