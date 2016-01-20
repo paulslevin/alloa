@@ -12,8 +12,8 @@ SINK = 2 * (level1_number + level2_number + level3_number) + 1
 
 # level 1 node demands + AND -
 def add_nodes1(graph):
-    for i, preference in enumerate(level1_preferences):
-        demand = int(preference[1])
+    for i, capacity in enumerate(level1_capacities):
+        demand = capacity[1]
         graph.add_node(i + 1, demand=demand)
         graph.add_node(i + 1 + level1_number, demand=-demand)
 
@@ -22,8 +22,8 @@ def add_nodes1(graph):
 def add_nodes2(graph):
     for choice in level2_chosen_all:
         # to make sure we don't overwrite an existing node
-        node_value = int(choice) + level1_number * 2
-        demand = int(level2_preferences[choice - 1][0])
+        node_value = choice + level1_number * 2
+        demand = level2_capacities[choice - 1][1]
         graph.add_node(node_value, demand=demand)
         graph.add_node(node_value + level2_number, demand=-demand)
 
@@ -31,10 +31,8 @@ def add_nodes2(graph):
 # level 3 node demands + AND -
 def add_nodes3(graph):
     for choice in level3_chosen_all:
-        node_value = int(choice) + level1_number * 2 + level2_number * 2
-        demand = int(level3_capacities[choice - 1][0])
-        # print "+ node is", node_value,
-        # print "- node is", node_value + level3_number
+        node_value = choice + level1_number * 2 + level2_number * 2
+        demand = level3_capacities[choice - 1][1]
         graph.add_node(node_value, demand=demand)
         graph.add_node(node_value + level3_number, demand=-demand)
 
@@ -43,33 +41,33 @@ def add_nodes3(graph):
 # No need for randomisation!
 def add_edges_from_source(graph):
     for i in range(level1_number):
-        graph.add_edge(0, i + 1, weight=0)
+        graph.add_edge(SOURCE, i + 1, weight=0)
 
 
 def add_level1_duplicate_edges(graph):
-    for i, choice in enumerate(level1_preferences):
+    for i, choice in enumerate(level1_capacities):
         graph.add_edge(i + 1,
                        i + 1 + level1_number,
-                       capacity=int(choice[2]) - int(choice[1]),
+                       capacity=choice[2] - choice[1],
                        weight=0)
 
 
 def add_level1_to_level2_edges(graph):
-    for i, preference in enumerate(level1_preferences):
-        for j, choice in enumerate(chosen(preference, 1)):
+    for i in range(level1_number):
+        for j, choice in enumerate(new_chosen(i + 1, level1_preferences)):
             weight = min(WEIGHTED_HIERARCHIES, 1) * (
                 level1_number ** (j + (WEIGHTED_HIERARCHIES - 1) * (max2 - 1)))
             graph.add_edge(i + 1 + level1_number,
-                           int(choice) + level1_number * 2,
+                           choice + level1_number * 2,
                            weight=weight)
 
 
 def add_level2_duplicate_edges(graph):
     for choice in level2_chosen_all:
-        out_node = int(choice) + level1_number * 2
+        out_node = choice + level1_number * 2
         in_node = out_node + level2_number
-        level2_agent = level2_preferences[choice - 1]
-        capacity = int(level2_agent[1]) - int(level2_agent[0])
+        level2_agent = level2_capacities[choice - 1]
+        capacity = level2_agent[2] - level2_agent[1]
         graph.add_edge(out_node,
                        in_node,
                        capacity=capacity,
@@ -79,9 +77,9 @@ def add_level2_duplicate_edges(graph):
 def add_level2_to_level3_edges(graph):
     cost_factor = {0: 0, 1: 0, 2: level1_number}[WEIGHTED_HIERARCHIES]
     for choice2 in level2_chosen_all:
-        out_node = int(choice2) + level1_number * 2 + level2_number
-        for j, choice3 in enumerate(chosen(level2_preferences[choice2 - 1], 2)):
-            in_node = int(choice3) + level1_number * 2 + level2_number * 2
+        out_node = choice2 + level1_number * 2 + level2_number
+        for j, choice3 in enumerate(new_chosen(choice2, level2_preferences)):
+            in_node = choice3 + level1_number * 2 + level2_number * 2
             graph.add_edge(out_node,
                            in_node,
                            weight=cost_factor ** j)
@@ -90,10 +88,10 @@ def add_level2_to_level3_edges(graph):
 def add_level3_duplicate_edges(graph):
     # This is near identical to level2
     for choice in level3_chosen_all:
-        out_node = int(choice) + level1_number * 2 + level2_number * 2
+        out_node = choice + level1_number * 2 + level2_number * 2
         in_node = out_node + level3_number
         level3_agent = level3_capacities[choice - 1]
-        capacity = int(level3_agent[1]) - int(level3_agent[0])
+        capacity = level3_agent[2] - level3_agent[1]
         graph.add_edge(out_node,
                        in_node,
                        capacity=capacity,
@@ -102,13 +100,12 @@ def add_level3_duplicate_edges(graph):
 
 def add_level3_to_sink_edges(graph):
     for choice in level3_chosen_all:
-        node_value = int(choice) + 2 * (
+        node_value = choice + 2 * (
             level1_number + level2_number) + level3_number
         graph.add_edge(node_value, SINK, weight=0)
 
 
 H = nx.DiGraph()
-
 add_nodes1(H)
 add_nodes2(H)
 add_nodes3(H)
@@ -119,10 +116,6 @@ add_level2_duplicate_edges(H)
 add_level2_to_level3_edges(H)
 add_level3_duplicate_edges(H)
 add_level3_to_sink_edges(H)
-
-
-# For some reason this extra edge was added in the original code!
-# H.add_edge(435, 469, weight=0)
 
 try:
     max_flow_min_cost = nx.max_flow_min_cost(H, 0, SINK)

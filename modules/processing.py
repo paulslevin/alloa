@@ -22,8 +22,12 @@ def get_preferences_and_counts(agent, flow):
     line = "{},{},".format(name, higher_name)
     for even_higher_agent in level2_to_level3(higher_agent, flow):
         even_higher_name = id_level3[even_higher_agent]
-        preference1 = preference(1, agent, higher_agent)
-        preference2 = preference(2, higher_agent, even_higher_agent)
+        preference1 = new_preference(agent,
+                                     higher_agent,
+                                     level1_preferences)
+        preference2 = new_preference(higher_agent,
+                                     even_higher_agent,
+                                     level2_preferences)
         if preference1 != "N/A":
             if preference1 in counts1:
                 counts1[preference1] += 1
@@ -39,7 +43,6 @@ def get_preferences_and_counts(agent, flow):
                                             preference2)
         preferences.append(new_line)
     return preferences, counts1, counts2
-
 
 # write allocation results
 def write_and_get_counts(flow):
@@ -63,9 +66,8 @@ def write_and_get_counts(flow):
 allocation_profile = open(settings.ALLOCATION_PROFILE_PATH, "wb")
 allocation = open(settings.ALLOCATION_PATH, "wb")
 
-print settings.ALLOCATION_PROFILE_PATH
-
 writer = csv.writer(allocation, delimiter="\n")
+
 
 # write allocation profile
 preference_count1, preference_count2 = write_and_get_counts(max_flow_min_cost)
@@ -80,13 +82,13 @@ initial_info = [
 
 next_info = [
     "Number of level 2 agents that where choice #{}: {}".format(
-            j, preference_count1.get(str(j), "N/A")
+            j, preference_count1.get(j, "N/A")
     ) for j in range(1, 8)
 ] + ["", "Level 2 Preference Count"]
 
 last_info = [
     "Number of level 3 agents that where choice #{}: {}".format(
-            j, preference_count2.get(str(j), "N/A")
+            j, preference_count2.get(j, "N/A")
     ) for j in range(1, 4)
 ]
 
