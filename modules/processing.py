@@ -22,10 +22,10 @@ def get_preferences_and_counts(agent, flow):
     line = "{},{},".format(name, higher_name)
     for even_higher_agent in level2_to_level3(higher_agent, flow):
         even_higher_name = id_level3[even_higher_agent]
-        preference1 = new_preference(agent,
+        preference1 = get_preference(agent,
                                      higher_agent,
                                      level1_preferences)
-        preference2 = new_preference(higher_agent,
+        preference2 = get_preference(higher_agent,
                                      even_higher_agent,
                                      level2_preferences)
         if preference1 != "N/A":
@@ -43,6 +43,7 @@ def get_preferences_and_counts(agent, flow):
                                             preference2)
         preferences.append(new_line)
     return preferences, counts1, counts2
+
 
 # write allocation results
 def write_and_get_counts(flow):

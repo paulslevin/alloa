@@ -24,6 +24,7 @@ def add_nodes2(graph):
         # to make sure we don't overwrite an existing node
         node_value = choice + level1_number * 2
         demand = level2_capacities[choice - 1][1]
+
         graph.add_node(node_value, demand=demand)
         graph.add_node(node_value + level2_number, demand=-demand)
 
@@ -54,7 +55,7 @@ def add_level1_duplicate_edges(graph):
 
 def add_level1_to_level2_edges(graph):
     for i in range(level1_number):
-        for j, choice in enumerate(new_chosen(i + 1, level1_preferences)):
+        for j, choice in enumerate(chosen(i + 1, level1_preferences)):
             weight = min(WEIGHTED_HIERARCHIES, 1) * (
                 level1_number ** (j + (WEIGHTED_HIERARCHIES - 1) * (max2 - 1)))
             graph.add_edge(i + 1 + level1_number,
@@ -78,7 +79,7 @@ def add_level2_to_level3_edges(graph):
     cost_factor = {0: 0, 1: 0, 2: level1_number}[WEIGHTED_HIERARCHIES]
     for choice2 in level2_chosen_all:
         out_node = choice2 + level1_number * 2 + level2_number
-        for j, choice3 in enumerate(new_chosen(choice2, level2_preferences)):
+        for j, choice3 in enumerate(chosen(choice2, level2_preferences)):
             in_node = choice3 + level1_number * 2 + level2_number * 2
             graph.add_edge(out_node,
                            in_node,
