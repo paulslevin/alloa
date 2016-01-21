@@ -25,6 +25,18 @@ class Agent(object):
     def give_name(self, name):
         self.name = name
 
+    def upper_capacity(self):
+        if self.capacities:
+            return self.capacities[1]
+        else:
+            return None
+
+    def lower_capacity(self):
+        if self.capacities:
+            return self.capacities[0]
+        else:
+            return None
+
 
 class Hierarchy(object):
 
