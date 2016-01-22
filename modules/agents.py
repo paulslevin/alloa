@@ -70,6 +70,10 @@ class Hierarchy(object):
     def all_preferred(self):
         return set(*(agent.preferences for agent in self.agents))
 
+    def reverse_names(self):
+        if self.names():
+            return dict((v, k) for k, v in self.names.items())
+
     def add_names(self, names):
         if not self.agents:
             raise (ValueError, "Not enough agents")
