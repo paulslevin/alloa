@@ -118,6 +118,8 @@ add_level2_to_level3_edges(H)
 add_level3_duplicate_edges(H)
 add_level3_to_sink_edges(H)
 
+print H.edges(data=True)
+
 try:
     max_flow_min_cost = nx.max_flow_min_cost(H, 0, SINK)
     flow_cost = nx.cost_of_flow(H, max_flow_min_cost)

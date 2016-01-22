@@ -37,6 +37,10 @@ class Agent(object):
         else:
             return None
 
+    def capacity_difference(self):
+        if self.capacities:
+            return self.upper_capacity() - self.lower_capacity()
+
 
 class Hierarchy(object):
 
@@ -62,6 +66,9 @@ class Hierarchy(object):
             return len(self.agents)
         else:
             return 0
+
+    def all_preferred(self):
+        return set(*(agent.preferences for agent in self.agents))
 
     def add_names(self, names):
         if not self.agents:
