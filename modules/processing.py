@@ -1,7 +1,10 @@
 import csv
 from allocation_graph_networkx import *
 from manipulations import *
+from copy import deepcopy
 
+# THERE IS A BUG
+# THE ALGORITHM WILL ASSIGN MULTIPLE SUPERVISORS TO PROJECTS
 
 # helper functions
 def level1_to_level2(agent, flow):
@@ -11,6 +14,7 @@ def level1_to_level2(agent, flow):
 
 def level2_to_level3(agent, flow):
     nodes = flow[agent + level1_number * 2 + level2_number]
+    print nodes
     return [node - level1_number * 2 - level2_number * 2 for node in nodes if
             nodes[node]]
 
@@ -20,6 +24,7 @@ def get_preferences_and_counts(agent, flow):
     higher_agent = level1_to_level2(agent, flow)
     higher_name = id_level2[higher_agent]
     line = "{},{},".format(name, higher_name)
+    print level2_to_level3(higher_agent, flow)
     for even_higher_agent in level2_to_level3(higher_agent, flow):
         even_higher_name = id_level3[even_higher_agent]
         preference1 = get_preference(agent,

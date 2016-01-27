@@ -118,12 +118,14 @@ add_level2_to_level3_edges(H)
 add_level3_duplicate_edges(H)
 add_level3_to_sink_edges(H)
 
-print H.edges(data=True)
 
 try:
     max_flow_min_cost = nx.max_flow_min_cost(H, 0, SINK)
     flow_cost = nx.cost_of_flow(H, max_flow_min_cost)
     max_flow = nx.maximum_flow(H, 0, SINK)[0]
+    for e in max_flow_min_cost:
+        print e, max_flow_min_cost[e]
+
 except nx.NetworkXUnfeasible:
     print 'Allocation satisfying the lower bounds is not possible.'
     print 'Try reducing lower bounds.'

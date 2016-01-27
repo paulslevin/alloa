@@ -14,9 +14,10 @@ class Agent(object):
                "id:  {}\n" \
                "capacities: {}\n" \
                "preferences: {}\n" \
-               "abilities: {}".format(
+               "abilities: {}\n" \
+                "name: {}\n".format(
                 str(self.hierarchy), str(self.id), str(self.capacities),
-                str(self.preferences), str(self.abilities)
+                str(self.preferences), str(self.abilities), str(self.name)
                 )
 
     def __repr__(self):
