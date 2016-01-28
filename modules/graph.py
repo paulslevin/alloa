@@ -21,7 +21,10 @@ class AllocationGraph(nx.DiGraph):
         self.first_level = block_list[0]
         self.last_level = block_list[-1]
 
-    def populate_edges_from_sink(self):
+    def __str__(self):
+        return "Graph with {} blocks".format(len(self.blocks))
+
+    def populate_edges_from_source(self):
         for node in self.first_level.positive_agent_nodes():
             self.add_edge(self.source, node, weight=0)
 
@@ -40,8 +43,15 @@ class AllocationGraph(nx.DiGraph):
                 in_node = block2.agent_to_positive_node(preference)
                 self.add_edge(out_node,
                               in_node,
-                              cost=cost_function(agent, preference),
-                              )
+                              cost=cost_function(agent, preference))
+
+    def setup_graph(self, *costs):
+        self.populate_edges_from_source()
+        self.populate_edges_to_sink()
+        self.populate_internal_edges()
+        for i, block in self.blocks[1:]:
+            cost = costs[i]
+            self.glue_blocks(self.blocks[i - 1], block, cost)
 
 
 class Block(nx.DiGraph):
@@ -70,7 +80,6 @@ class Block(nx.DiGraph):
             out_node = self.agent_to_positive_node(agent)
             in_node = self.agent_to_negative_node(agent)
             capacity = agent.capacity_difference()
-            print in_node, demand
             self.add_node(out_node, demand=demand)
             self.add_node(in_node, demand=-demand)
             self.add_edge(out_node,

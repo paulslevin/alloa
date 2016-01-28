@@ -1,24 +1,28 @@
-class Agent(object):
+import itertools
 
+
+class Agent(object):
     def __init__(self, id_number, hierarchy,
-                 capacities=None, preferences=None, abilities=None):
+                 capacities=None, preferences=None, abilities=None,
+                 name=None):
         self.hierarchy = hierarchy
         self.id = id_number
         self.capacities = capacities
         self.preferences = preferences
         self.abilities = abilities
-        self.name = None
+        self.name = name
 
     def __str__(self):
+        return "AGENT_{}_{}".format(self.hierarchy, self.id)
         return "agent at hierarchy: {}\n" \
                "id:  {}\n" \
                "capacities: {}\n" \
                "preferences: {}\n" \
                "abilities: {}\n" \
-                "name: {}\n".format(
+               "name: {}\n".format(
                 str(self.hierarchy), str(self.id), str(self.capacities),
                 str(self.preferences), str(self.abilities), str(self.name)
-                )
+        )
 
     def __repr__(self):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)
@@ -44,11 +48,13 @@ class Agent(object):
 
 
 class Hierarchy(object):
-
     def __init__(self, level, agents=None, names=None):
         self.level = level
         self.agents = agents
-        self.names = names
+        if names:
+            self.agent_to_name = names
+        else:
+            self.agent_to_name = {}
 
     def __str__(self):
         return str(self.level)
@@ -61,6 +67,7 @@ class Hierarchy(object):
             self.agents.append(agent)
         else:
             self.agents = [agent]
+        self.agent_to_name[agent] = agent.name
 
     def number_of_agents(self):
         if self.agents:
@@ -68,25 +75,36 @@ class Hierarchy(object):
         else:
             return 0
 
-    def all_preferred(self):
-        return set(*(agent.preferences for agent in self.agents))
+    def preferred(self, agent_subset):
+        preferred_set = set(itertools.chain.from_iterable(
+                agent.preferences for agent in agent_subset))
+        return sorted(preferred_set, key=lambda x: x.id)
 
-    def reverse_names(self):
-        if self.names():
-            return dict((v, k) for k, v in self.names.items())
+    @property
+    def all_preferred(self):
+        return self.preferred(self.agents)
+
+    def set_name(self, agent, name):
+        agent.name = name
+        self.agent_to_name[agent] = name
+
+    @property
+    def name_to_agent(self):
+        if self.agent_to_name:
+            return dict((v, k) for k, v in self.agent_to_name.iteritems())
 
     def add_names(self, names):
         if not self.agents:
             raise (ValueError, "Not enough agents")
         if len(names) != self.number_of_agents():
             raise (ValueError, "Incorrect number of names provided")
-        self.names = names
+        self.agent_to_name = names
 
     def give_names(self):
-        if not self.names:
+        if not self.agent_to_name:
             raise (ValueError, "No name dictionary has been provided")
         for agent in self.agents:
-            agent.give_name(self.names[agent.id])
+            agent.give_name(self.agent_to_name[agent.id])
 
     def largest_preferences_length(self):
         return max(len(agent.preferences) for agent in self.agents)
