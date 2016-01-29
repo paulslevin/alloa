@@ -136,8 +136,6 @@ f3 = FileData("C:/Programming/alloa/test/academics.csv", level=3)
 d = DataSequence(f1, f2, f3)
 g = d.get_graph()
 
-print g.first_level
-
 #
 # x = d.block_list[1]
 # print sorted(x.preferred_agents[0:2])

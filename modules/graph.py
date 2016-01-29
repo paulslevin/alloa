@@ -1,8 +1,8 @@
 import networkx as nx
+import sys
 
 
 class AgentNode(object):
-
     def __init__(self, agent, polarity):
         self.agent = agent
         self.polarity = polarity
@@ -12,7 +12,6 @@ class AgentNode(object):
 
 
 class AllocationGraph(nx.DiGraph):
-
     def __init__(self, block_list):
         super(AllocationGraph, self).__init__()
         self.blocks = block_list
@@ -20,6 +19,10 @@ class AllocationGraph(nx.DiGraph):
         self.sink = "SINK"
         self.first_level = block_list[0]
         self.last_level = block_list[-1]
+        self.hierarchies = [block.hierarchy for block in self.blocks]
+        self.flow = None
+        self.flow_cost = None
+        self.max_flow = None
 
     def __str__(self):
         return "Graph with {} blocks".format(len(self.blocks))
@@ -30,7 +33,12 @@ class AllocationGraph(nx.DiGraph):
 
     def populate_internal_edges(self):
         for block in self.blocks:
-            self.add_weighted_edges_from(block.edges(data=True))
+            weight = nx.get_edge_attributes(block, "weight")
+            capacity = nx.get_edge_attributes(block, "capacity")
+            for edge in block.edges():
+                self.add_edge(edge[0], edge[1],
+                              weight=weight[edge],
+                              capacity=capacity[edge])
 
     def populate_edges_to_sink(self):
         for node in self.last_level.negative_agent_nodes():
@@ -43,19 +51,39 @@ class AllocationGraph(nx.DiGraph):
                 in_node = block2.agent_to_positive_node(preference)
                 self.add_edge(out_node,
                               in_node,
-                              cost=cost_function(agent, preference))
+                              weight=cost_function(agent, preference))
 
     def setup_graph(self, *costs):
         self.populate_edges_from_source()
         self.populate_edges_to_sink()
         self.populate_internal_edges()
-        for i, block in self.blocks[1:]:
+        for i, block in enumerate(self.blocks[1:]):
             cost = costs[i]
-            self.glue_blocks(self.blocks[i - 1], block, cost)
+            self.glue_blocks(self.blocks[i], block, cost)
+
+    def set_flow(self):
+        try:
+            self.flow = nx.max_flow_min_cost(self, self.source, self.sink)
+            self.flow_cost = nx.cost_of_flow(self, self.flow)
+            self.max_flow = nx.maximum_flow(self, self.source, self.sink)[0]
+        except nx.NetworkXUnfeasible:
+            print 'Allocation satisfying the lower bounds is not possible.'
+            print 'Try reducing lower bounds.'
+            sys.exit(1)
+        except nx.NetworkXError:
+            print "The input graph is not directed or not connected."
+            print "Please check the data:"
+            print "e.g. if all the choices on the level 1 list are" \
+                  " included in the level 2 list and same for levels 2, 3."
+            sys.exit(1)
+        except nx.NetworkXUnbounded:
+            print "Allocation is not possible because some upper capacity" \
+                  "bounds at level 1 have not been set up. Please check " \
+                  "the data."
+            sys.exit(1)
 
 
 class Block(nx.DiGraph):
-
     def __init__(self, hierarchy, preferred_agents):
         super(Block, self).__init__()
         self.hierarchy = hierarchy
@@ -65,6 +93,12 @@ class Block(nx.DiGraph):
         self.preferred_agents = preferred_agents
         self.positive_dict = {}
         self.negative_dict = {}
+
+    def __repr__(self):
+        return "BLOCK_{}".format(self.level)
+
+    def __str__(self):
+        return "BLOCK_{}".format(self.level)
 
     def agents_to_nodes(self):
         for agent in self.preferred_agents:

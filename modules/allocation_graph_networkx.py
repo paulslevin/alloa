@@ -58,6 +58,7 @@ def add_level1_to_level2_edges(graph):
         for j, choice in enumerate(chosen(i + 1, level1_preferences)):
             weight = min(WEIGHTED_HIERARCHIES, 1) * (
                 level1_number ** (j + (WEIGHTED_HIERARCHIES - 1) * (max2 - 1)))
+            print j, weight
             graph.add_edge(i + 1 + level1_number,
                            choice + level1_number * 2,
                            weight=weight)
@@ -84,6 +85,7 @@ def add_level2_to_level3_edges(graph):
             graph.add_edge(out_node,
                            in_node,
                            weight=cost_factor ** j)
+            print j, cost_factor ** j
 
 
 def add_level3_duplicate_edges(graph):
@@ -119,12 +121,17 @@ add_level3_duplicate_edges(H)
 add_level3_to_sink_edges(H)
 
 
+# for e in H.edges():
+#     print nx.get_edge_attributes(H, "weight")[e]
+
+
 try:
     max_flow_min_cost = nx.max_flow_min_cost(H, 0, SINK)
     flow_cost = nx.cost_of_flow(H, max_flow_min_cost)
     max_flow = nx.maximum_flow(H, 0, SINK)[0]
-    for e in max_flow_min_cost:
-        print e, max_flow_min_cost[e]
+
+    print flow_cost
+
 
 except nx.NetworkXUnfeasible:
     print 'Allocation satisfying the lower bounds is not possible.'

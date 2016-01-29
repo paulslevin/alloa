@@ -21,8 +21,7 @@ class Agent(object):
                "abilities: {}\n" \
                "name: {}\n".format(
                 str(self.hierarchy), str(self.id), str(self.capacities),
-                str(self.preferences), str(self.abilities), str(self.name)
-        )
+                str(self.preferences), str(self.abilities), str(self.name))
 
     def __repr__(self):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)
@@ -35,6 +34,9 @@ class Agent(object):
             return self.capacities[1]
         else:
             return None
+
+    def preference_position(self, higher_agent):
+        return self.preferences.index(higher_agent)
 
     def lower_capacity(self):
         if self.capacities:
@@ -69,6 +71,7 @@ class Hierarchy(object):
             self.agents = [agent]
         self.agent_to_name[agent] = agent.name
 
+    @property
     def number_of_agents(self):
         if self.agents:
             return len(self.agents)
@@ -106,8 +109,10 @@ class Hierarchy(object):
         for agent in self.agents:
             agent.give_name(self.agent_to_name[agent.id])
 
-    def largest_preferences_length(self):
+    @property
+    def max_preferences_length(self):
         return max(len(agent.preferences) for agent in self.agents)
 
-    def largest_abilities_length(self):
+    @property
+    def max_abilities_length(self):
         return max(len(agent.abilities) for agent in self.agents)

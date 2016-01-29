@@ -8,11 +8,10 @@ import time
 DATE = time.strftime("%d%m%y")
 CURRENT = os.path.dirname(os.path.realpath(__file__))
 CONFIG_PATH = os.path.abspath(os.path.join(CURRENT,
-                              os.pardir))
+                                           os.pardir))
 
 config = ConfigParser.RawConfigParser()
 config.read(os.path.join(CONFIG_PATH, "alloa.conf"))
-
 
 ALLOCATION_PROFILE_FILENAME = "allocation_profile_" + DATE + ".csv"
 ALLOCATION_FILENAME = "allocation_" + DATE + ".csv"
@@ -28,18 +27,29 @@ WORKING_PATH = os.path.abspath(os.path.join(CURRENT,
                                             os.path.normpath(WORKING_FILES)))
 
 ALLOCATION_PROFILE_PATH = os.path.abspath(
-    os.path.join(CURRENT,
-                 os.pardir,
-                 WORKING_FILES,
-                 ALLOCATION_PROFILE_FILENAME)
+        os.path.join(CURRENT,
+                     os.pardir,
+                     WORKING_FILES,
+                     ALLOCATION_PROFILE_FILENAME)
 )
 
 ALLOCATION_PATH = os.path.abspath(
-    os.path.join(CURRENT,
-                 os.pardir,
-                 WORKING_FILES,
-                 ALLOCATION_FILENAME)
+        os.path.join(CURRENT,
+                     os.pardir,
+                     WORKING_FILES,
+                     ALLOCATION_FILENAME)
 )
+
+MAIN_ALLOCATION_INFO = config.items("main_allocation_data")
+NUMBER_OF_LEVELS = int(MAIN_ALLOCATION_INFO[0][1])
+LEVEL_FILES = {int(x[0][5]): x[1].replace("'", "") for x in MAIN_ALLOCATION_INFO
+               if x[0].endswith('data')}
+LEVEL_PATHS_DICTIONARY = {i: os.path.abspath(os.path.join(CURRENT,
+                                                          os.pardir,
+                                                          WORKING_FILES,
+                                                          LEVEL_FILES[i])
+                                             ) for i in LEVEL_FILES}
+LEVEL_PATHS = [p[1] for p in sorted(LEVEL_PATHS_DICTIONARY.items(), key=lambda (k, v): k)]
 
 LEVEL1_DATA = config.get("main_allocation_data", "level1_data").replace("'", "")
 LEVEL1_PATH = os.path.abspath(os.path.join(CURRENT,
