@@ -41,7 +41,7 @@ class FileData(object):
             self.agents_to_id = {}
 
     def __repr__(self):
-        return "Level {} Data".format(self.level)
+        return "LEVEL_{}_Data".format(self.level)
 
     def id_to_agents(self):
         return {id_number: agent for agent, id_number in
@@ -129,16 +129,3 @@ class DataSequence(object):
         self.set_block_list()
         graph = AllocationGraph(self.block_list)
         return graph
-
-#
-# x = d.block_list[1]
-# print sorted(x.preferred_agents[0:2])
-#
-#
-#
-# # print f.results()
-# # f.set_agents_and_ids()
-# #
-# # agents = f.agents_to_id.keys()
-# # for agent in sorted(agents):
-# #     print agent

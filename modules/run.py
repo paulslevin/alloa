@@ -1,8 +1,6 @@
 from files import FileData, DataSequence
-from agents import Agent
 import settings
 import csv
-from copy import deepcopy
 
 
 class Allocation(object):
@@ -14,6 +12,24 @@ class Allocation(object):
         self.sequence = DataSequence(*self.data_objects)
         self.number_of_levels = len(self.sequence)
         self.graph = self.sequence.get_graph()
+
+    def intro_string(self):
+        print '''
+################################################################
+#                                                              #
+# This is alloa by Mante Zelvyte, Uli Kraehmer and Paul Slevin #
+#                                                              #
+#    ulrich.kraehmer@glasgow.ac.uk                             #
+#    paul.slevin@cantab.net                                    #
+#                                                              #
+# Runtime with 100 agents at each hierarchy is a few ms        #
+#                                                              #
+################################################################\n
+                '''
+        for i in xrange(self.number_of_levels):
+            print "{} agents of hierarchy {}".format(self.graph.hierarchies[
+                                                         i].number_of_agents,
+                                                     i + 1)
 
     def setup_allocation(self, *costs):
         assert len(costs) == len(self.data_objects) - 1
@@ -45,8 +61,6 @@ class Allocation(object):
                 writer.writerow(["Number of level {} agents that were "
                                 "choice #".format(i + 2) + str(j + 1) + ": " +
                                  count])
-
-
         profile.close()
 
     @property
@@ -91,3 +105,12 @@ class Example(object):
 
     def set_up(self):
         self.allocation.setup_allocation(*self.costs)
+
+
+def run_project_allocation():
+    example = Example()
+    example.set_up()
+    allocation = example.allocation
+    allocation.write_allocations()
+    allocation.write_profile()
+    allocation.intro_string()
