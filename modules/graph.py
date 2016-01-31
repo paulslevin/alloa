@@ -8,7 +8,7 @@ class AgentNode(object):
         self.polarity = polarity
 
     def __repr__(self):
-        return str((self.agent, self.polarity))
+        return str(self.agent) + "(" + self.polarity + ")"
 
 
 class AllocationGraph(nx.DiGraph):
@@ -17,18 +17,23 @@ class AllocationGraph(nx.DiGraph):
         self.blocks = block_list
         self.source = "SOURCE"
         self.sink = "SINK"
-        self.first_level = block_list[0]
-        self.last_level = block_list[-1]
+        self.first_block = block_list[0]
+        self.last_block = block_list[-1]
         self.hierarchies = [block.hierarchy for block in self.blocks]
+        self.first_level_agents = self.hierarchies[0].agents
+        self.first_level = self.hierarchies[0].level
+        self.last_level = self.hierarchies[-1].level
         self.flow = None
         self.flow_cost = None
         self.max_flow = None
+        self.simple_flow = None
+        self.allocation = []
 
     def __str__(self):
         return "Graph with {} blocks".format(len(self.blocks))
 
     def populate_edges_from_source(self):
-        for node in self.first_level.positive_agent_nodes():
+        for node in self.first_block.positive_agent_nodes():
             self.add_edge(self.source, node, weight=0)
 
     def populate_internal_edges(self):
@@ -41,7 +46,7 @@ class AllocationGraph(nx.DiGraph):
                               capacity=capacity[edge])
 
     def populate_edges_to_sink(self):
-        for node in self.last_level.negative_agent_nodes():
+        for node in self.last_block.negative_agent_nodes():
             self.add_edge(node, self.sink, weight=0)
 
     def glue_blocks(self, block1, block2, cost_function):
@@ -81,6 +86,32 @@ class AllocationGraph(nx.DiGraph):
                   "bounds at level 1 have not been set up. Please check " \
                   "the data."
             sys.exit(1)
+
+    def simplify_flow(self):
+        positives = {k.agent: v for k, v in self.flow.items() if
+                     isinstance(k, AgentNode) and k.polarity == "-"}
+        for k in positives:
+            positives[k] = {k.agent: v for k, v in positives[k].items() if
+                            isinstance(k, AgentNode) and v}
+        self.simple_flow = {k: v for k, v in positives.items() if positives[k]}
+
+    def get_single_agent_allocation(self, agent):
+        if agent.level == self.last_level:
+            return [agent]
+        next_agent = next(self.simple_flow[agent].iterkeys())
+        if self.simple_flow[agent][next_agent] == 1:
+            del self.simple_flow[agent][next_agent]
+        else:
+            self.simple_flow[agent][next_agent] -= 1
+        return [agent] + self.get_single_agent_allocation(next_agent)
+
+    def allocate(self):
+        matrix = [self.get_single_agent_allocation(agent) for
+                  agent in self.first_level_agents]
+        for row in matrix:
+            row += [row[i].preference_position(agent) for i, agent in
+                    enumerate(row[1:])]
+        self.allocation = matrix
 
 
 class Block(nx.DiGraph):

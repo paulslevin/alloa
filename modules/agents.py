@@ -11,6 +11,7 @@ class Agent(object):
         self.preferences = preferences
         self.abilities = abilities
         self.name = name
+        self.level = self.hierarchy.level
 
     def __str__(self):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)
@@ -36,7 +37,7 @@ class Agent(object):
             return None
 
     def preference_position(self, higher_agent):
-        return self.preferences.index(higher_agent)
+        return self.preferences.index(higher_agent) + 1
 
     def lower_capacity(self):
         if self.capacities:

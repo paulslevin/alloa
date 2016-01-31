@@ -83,7 +83,7 @@ level2_number = len(results2)
 level3_number = len(results3)
 
 # Create dictionaries that assign to each agent a number
-level1_id = results_to_id(results1, randomise=True)
+level1_id = results_to_id(results1, randomise=False)
 level2_id = results_to_id(results2)
 level3_id = results_to_id(results3)
 

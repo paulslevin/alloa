@@ -87,13 +87,13 @@ initial_info = [
 ]
 
 next_info = [
-    "Number of level 2 agents that where choice #{}: {}".format(
+    "Number of level 2 agents that were choice #{}: {}".format(
             j, preference_count1.get(j, "N/A")
     ) for j in range(1, 8)
 ] + ["", "Level 2 Preference Count"]
 
 last_info = [
-    "Number of level 3 agents that where choice #{}: {}".format(
+    "Number of level 3 agents that were choice #{}: {}".format(
             j, preference_count2.get(j, "N/A")
     ) for j in range(1, 4)
 ]

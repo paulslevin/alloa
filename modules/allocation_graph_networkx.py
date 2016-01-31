@@ -58,7 +58,7 @@ def add_level1_to_level2_edges(graph):
         for j, choice in enumerate(chosen(i + 1, level1_preferences)):
             weight = min(WEIGHTED_HIERARCHIES, 1) * (
                 level1_number ** (j + (WEIGHTED_HIERARCHIES - 1) * (max2 - 1)))
-            print j, weight
+            # print j, weight
             graph.add_edge(i + 1 + level1_number,
                            choice + level1_number * 2,
                            weight=weight)
@@ -85,7 +85,7 @@ def add_level2_to_level3_edges(graph):
             graph.add_edge(out_node,
                            in_node,
                            weight=cost_factor ** j)
-            print j, cost_factor ** j
+            # print j, cost_factor ** j
 
 
 def add_level3_duplicate_edges(graph):

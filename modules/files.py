@@ -90,6 +90,9 @@ class DataSequence(object):
         self.hierarchies = []
         self.block_list = []
 
+    def __len__(self):
+        return len(self.sequence)
+
     def set_hierarchies(self):
         backwards = self.sequence[::-1]
         backwards[0].set_agents_and_ids()
@@ -126,15 +129,6 @@ class DataSequence(object):
         self.set_block_list()
         graph = AllocationGraph(self.block_list)
         return graph
-
-
-
-f1 = FileData("C:/Programming/alloa/test/students.csv", level=1)
-f2 = FileData("C:/Programming/alloa/test/projects.csv", level=2)
-f3 = FileData("C:/Programming/alloa/test/academics.csv", level=3)
-
-d = DataSequence(f1, f2, f3)
-g = d.get_graph()
 
 #
 # x = d.block_list[1]
