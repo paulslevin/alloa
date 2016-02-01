@@ -81,8 +81,6 @@ class Example(object):
         self.number_of_students = self.student_hierarchy.number_of_agents
 
     def student_project_cost(self, student, project):
-        if settings.WEIGHTED_HIERARCHIES == 0:
-            return 0
         preference_position = student.preference_position(project)
         if settings.WEIGHTED_HIERARCHIES == 1:
             return self.number_of_students ** (preference_position - 1)

@@ -15,14 +15,6 @@ class Agent(object):
 
     def __str__(self):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)
-        return "agent at hierarchy: {}\n" \
-               "id:  {}\n" \
-               "capacities: {}\n" \
-               "preferences: {}\n" \
-               "abilities: {}\n" \
-               "name: {}\n".format(
-                str(self.hierarchy), str(self.id), str(self.capacities),
-                str(self.preferences), str(self.abilities), str(self.name))
 
     def __repr__(self):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)
@@ -100,7 +92,7 @@ class Hierarchy(object):
     def add_names(self, names):
         if not self.agents:
             raise (ValueError, "Not enough agents")
-        if len(names) != self.number_of_agents():
+        if len(names) != self.number_of_agents:
             raise (ValueError, "Incorrect number of names provided")
         self.agent_to_name = names
 
