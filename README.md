@@ -15,4 +15,4 @@ http://www.sciencedirect.com/science/article/pii/S1570866706000207
 
 # How to run
 Type python alloa.py in the command line which will take the projects, students, academics files in the test folder
-and generate the allocation. 
+and generate the allocation. The allocation_* files in /test are the outputs of the program.
