@@ -4,11 +4,14 @@ import csv
 
 
 class Allocation(object):
-
-    def __init__(self, *paths):
+    def __init__(self, *paths, **kwargs):
         self.data_objects = []
+        self.randomised = kwargs.get('randomised', {})
         for i, path in enumerate(paths):
-            self.data_objects.append(FileData(path, level=i + 1))
+            randomise = self.randomised.get(i + 1, False)
+            self.data_objects.append(FileData(path,
+                                              level=i + 1,
+                                              randomise=randomise))
         self.sequence = DataSequence(*self.data_objects)
         self.number_of_levels = len(self.sequence)
         self.graph = self.sequence.get_graph()
@@ -49,9 +52,9 @@ class Allocation(object):
         profile = open(settings.ALLOCATION_PROFILE_PATH, "wb")
         writer = csv.writer(profile, delimiter="\n")
         writer.writerow(["Total number of assigned level 1 agents is " +
-                        str(self.graph.max_flow),
-                        "Total cost of assignment is " + str(
-                            self.graph.flow_cost)])
+                         str(self.graph.max_flow),
+                         "Total cost of assignment is " + str(
+                             self.graph.flow_cost)])
         for i in xrange(self.number_of_levels - 1):
             writer.writerow(["", "Level {} Preference Count".format(i + 1)])
             for j in xrange(self.graph.hierarchies[i].max_preferences_length):
@@ -59,7 +62,7 @@ class Allocation(object):
                 column = [row[split_point + i] for row in self.allocation]
                 count = str(column.count(j + 1))
                 writer.writerow(["Number of level {} agents that were "
-                                "choice #".format(i + 2) + str(j + 1) + ": " +
+                                 "choice #".format(i + 2) + str(j + 1) + ": " +
                                  count])
         profile.close()
 
@@ -67,15 +70,19 @@ class Allocation(object):
     def allocation(self):
         unnamed = self.graph.allocation
         split_point = self.number_of_levels
-        return [[agent.name for agent in row[:split_point]] +
-                row[split_point:] for row in unnamed]
+        rows = [[agent.name for agent in row[:split_point]] + row[split_point:]
+                for row in unnamed]
+        rows = sorted(rows,
+                      key=lambda r: r[0][len(r[0]) - r[0][::-1].index(" "):])
+        return rows
 
 
 # Now one can run the program using custom cost functions.
 # Include the Student/Project/Academic ones in the following class.
 class Example(object):
     def __init__(self):
-        self.allocation = Allocation(*settings.LEVEL_PATHS)
+        self.allocation = Allocation(*settings.LEVEL_PATHS,
+                                     randomised={1: True})
         self.student_hierarchy = self.allocation.graph.hierarchies[0]
         self.project_hierarchy = self.allocation.graph.hierarchies[1]
         self.number_of_students = self.student_hierarchy.number_of_agents

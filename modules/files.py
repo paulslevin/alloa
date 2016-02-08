@@ -3,6 +3,7 @@ import codecs
 from agents import Agent, Hierarchy
 from graph import Block, AllocationGraph
 from copy import deepcopy
+from random import shuffle
 
 
 class Line(object):
@@ -19,9 +20,11 @@ class Line(object):
 
 
 class FileData(object):
-    def __init__(self, csv_file, delimiter=",", level=None,
+    def __init__(self, csv_file,
+                 delimiter=",", level=None, randomise=False,
                  quoting=csv.QUOTE_NONE, first_line=True,
                  higher_agent=None, agents_to_id=None):
+        self.randomise = randomise
         self.delimiter = delimiter
         self.quoting = quoting
         self.level = level
@@ -69,6 +72,8 @@ class FileData(object):
 
     def set_agents_and_ids(self):
         results_copy = deepcopy(self.results())
+        if self.randomise:
+            shuffle(results_copy)
         preferences = None
         for i, line in enumerate(results_copy):
             if line.raw_preferences:
