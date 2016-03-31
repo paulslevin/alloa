@@ -15,6 +15,7 @@ class AllocationGraph(nx.DiGraph):
     def __init__(self, block_list):
         super(AllocationGraph, self).__init__()
         self.blocks = block_list
+        # should be enums
         self.source = "SOURCE"
         self.sink = "SINK"
         self.first_block = block_list[0]
