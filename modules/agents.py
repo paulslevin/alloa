@@ -40,12 +40,16 @@ class Agent(object):
 
 class Hierarchy(object):
     def __init__(self, level, agents=None, names=None):
+
         self.level = level
+
+        if agents is None:
+            agents = []
         self.agents = agents
-        if names:
-            self.agent_to_name = names
-        else:
-            self.agent_to_name = {}
+
+        if names is None:
+            names = {}
+        self.agent_to_name = names
 
     def __str__(self):
         return str(self.level)
@@ -54,17 +58,17 @@ class Hierarchy(object):
         return "HIERARCHY_{}".format(self.level)
 
     def add_agent(self, agent):
-        if self.agents:
-            self.agents.append(agent)
-        else:
-            self.agents = [agent]
+        '''Add agent to list and update agent name dictionary.'''
+        self.agents.append(agent)
         self.agent_to_name[agent] = agent.name
+
+    def add_agents(self, *agents):
+        for agent in agents:
+            self.add_agent(agent)
 
     @property
     def number_of_agents(self):
-        if self.agents:
-            return len(self.agents)
-        return 0
+        return len(self.agents)
 
     def preferred(self, agent_subset):
         preferred_set = set(itertools.chain.from_iterable(
