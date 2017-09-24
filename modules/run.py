@@ -20,10 +20,13 @@ class Allocation(object):
         print '''
 ################################################################
 #                                                              #
-# This is alloa by Mante Zelvyte, Uli Kraehmer and Paul Slevin #
-#                                                              #
-#    ulrich.kraehmer@glasgow.ac.uk                             #
-#    paul.slevin@cantab.net                                    #
+# This is alloa by:                                            #
+#   Mante Zelvyte                                              #
+#   Uli Kraehmer                                               #
+#       ulrich.kraehmer@tu-dresden.de                          #
+#       https://tu-dresden.de/mn/math/geometrie/kraehmer       #
+#   Paul Slevin                                                #
+#       pt.slevin@gmail.com                                    # 
 #                                                              #
 # Runtime with 100 agents at each hierarchy is a few ms        #
 #                                                              #
