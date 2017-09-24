@@ -25,8 +25,6 @@ class Agent(object):
     def upper_capacity(self):
         if self.capacities:
             return self.capacities[1]
-        else:
-            return None
 
     def preference_position(self, higher_agent):
         return self.preferences.index(higher_agent) + 1
@@ -34,8 +32,6 @@ class Agent(object):
     def lower_capacity(self):
         if self.capacities:
             return self.capacities[0]
-        else:
-            return None
 
     def capacity_difference(self):
         if self.capacities:
@@ -68,8 +64,7 @@ class Hierarchy(object):
     def number_of_agents(self):
         if self.agents:
             return len(self.agents)
-        else:
-            return 0
+        return 0
 
     def preferred(self, agent_subset):
         preferred_set = set(itertools.chain.from_iterable(
@@ -87,7 +82,7 @@ class Hierarchy(object):
     @property
     def name_to_agent(self):
         if self.agent_to_name:
-            return dict((v, k) for k, v in self.agent_to_name.iteritems())
+            return {v: k for k, v in self.agent_to_name.iteritems()}
 
     def add_names(self, names):
         if not self.agents:
