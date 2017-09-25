@@ -40,17 +40,13 @@ class Agent(object):
 
 
 class Hierarchy(object):
-    def __init__(self, level, agents=None, names=None):
+    def __init__(self, level, agent_to_name_map=None):
 
         self.level = level
 
-        if agents is None:
-            agents = []
-        self.agents = agents
-
-        if names is None:
-            names = {}
-        self.agent_to_name = names
+        if agent_to_name_map is None:
+            agent_to_name_map = {}
+        self.agent_to_name_map = agent_to_name_map
 
     def __str__(self):
         return str(self.level)
@@ -60,10 +56,13 @@ class Hierarchy(object):
 
     def add_agent(self, agent):
         '''Add agent to list and update agent name dictionary.'''
-        if agent not in self.agents:
-            self.agents.append(agent)
-            self.agent_to_name[agent] = agent.name
+        if agent not in self.agent_to_name_map:
+            self.agent_to_name_map[agent] = agent.name
 
+    @property
+    def agents(self):
+        return self.agent_to_name_map().keys()
+    
     @property
     def number_of_agents(self):
         return len(self.agents)
@@ -77,27 +76,18 @@ class Hierarchy(object):
     def all_preferred(self):
         return self.preferred(self.agents)
 
-    def set_name(self, agent, name):
+    def add_or_set_name(self, agent, name):
+        '''
+        Set the name attribute of the supplied agent to input name variable. Overwrites the agent: name
+        mapping in the agent_to_name_map if it exists, otherwise adds the key value pair to the mapping.
+        '''
         agent.name = name
-        self.agent_to_name[agent] = name
+        self.agent_to_name_map[agent] = name
 
     @property
     def name_to_agent(self):
-        if self.agent_to_name:
-            return {v: k for k, v in self.agent_to_name.iteritems()}
-
-    def add_names(self, names):
-        if not self.agents:
-            raise (ValueError, "Not enough agents")
-        if len(names) != self.number_of_agents:
-            raise (ValueError, "Incorrect number of names provided")
-        self.agent_to_name = names
-
-    def give_names(self):
-        if not self.agent_to_name:
-            raise (ValueError, "No name dictionary has been provided")
-        for agent in self.agents:
-            agent.give_name(self.agent_to_name[agent.id])
+        if self.agent_to_name_map:
+            return {v: k for k, v in self.agent_to_name_map.iteritems()}
 
     @property
     def max_preferences_length(self):
