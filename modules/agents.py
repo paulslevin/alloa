@@ -11,9 +11,8 @@ class Agent(object):
         self.abilities = abilities
         self.name = name
         self.hierarchy = hierarchy
+        self.hierarchy.add_agent(self)
         self.level = self.hierarchy.level
-        if self.hierarchy:
-            self.hierarchy.add_agent(self)
 
     def __str__(self):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)
@@ -61,12 +60,9 @@ class Hierarchy(object):
 
     def add_agent(self, agent):
         '''Add agent to list and update agent name dictionary.'''
-        self.agents.append(agent)
-        self.agent_to_name[agent] = agent.name
-
-    def add_agents(self, *agents):
-        for agent in agents:
-            self.add_agent(agent)
+        if agent not in self.agents:
+            self.agents.append(agent)
+            self.agent_to_name[agent] = agent.name
 
     @property
     def number_of_agents(self):
