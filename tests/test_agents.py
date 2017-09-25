@@ -75,3 +75,22 @@ class TestHierarchy(unittest.TestCase):
             self.hierarchy.all_preferred, 
             [agent_2_4, agent_2_5, agent_2_6, agent_2_7, agent_2_8]
         )
+
+    # TODO: Remove once test coverage increases.
+    def test_set_name(self):
+        agent = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent')
+        self.assertEqual(agent.name, 'Agent')
+        self.hierarchy.set_name(agent, 'Bgent')
+        agent.name = 'Bgent'
+        self.assertEqual(agent.name, 'Bgent')
+        self.assertEqual(self.hierarchy.agent_to_name, {agent: 'Bgent'})
+        self.assertEqual(self.hierarchy.name_to_agent, {'Bgent': agent})
+
+    def test_set_agent_name(self):
+        '''Test setting the agent name updates the hierarchy.'''
+        agent = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent')
+        self.assertEqual(agent.name, 'Agent')
+        agent.name = 'Bgent'
+        self.assertEqual(agent.name, 'Bgent')
+        self.assertEqual(self.hierarchy.agent_to_name, {agent: 'Bgent'})
+        self.assertEqual(self.hierarchy.name_to_agent, {'Bgent': agent})

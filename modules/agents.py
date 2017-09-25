@@ -9,9 +9,9 @@ class Agent(object):
         self.capacities = capacities
         self.preferences = preferences
         self.abilities = abilities
-        self.name = name
         self.hierarchy = hierarchy
         self.hierarchy.add_agent(self)
+        self.name = name
         self.level = self.hierarchy.level
 
     def __str__(self):
@@ -19,6 +19,16 @@ class Agent(object):
 
     def __repr__(self):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)
+
+    @property
+    def name(self):
+        return self.__name
+
+    @name.setter
+    def name(self, new_name):
+        '''Update the name dict on the hierarchy.'''
+        self.__name = new_name
+        self.hierarchy.agent_to_name[self] = new_name
 
     def give_name(self, name):
         self.name = name
@@ -62,7 +72,6 @@ class Hierarchy(object):
         '''Add agent to list and update agent name dictionary.'''
         if agent not in self.agents:
             self.agents.append(agent)
-            self.agent_to_name[agent] = agent.name
 
     @property
     def number_of_agents(self):
@@ -77,6 +86,7 @@ class Hierarchy(object):
     def all_preferred(self):
         return self.preferred(self.agents)
 
+    # TODO: Remove once test coverage increases.
     def set_name(self, agent, name):
         agent.name = name
         self.agent_to_name[agent] = name
