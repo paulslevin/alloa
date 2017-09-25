@@ -5,13 +5,15 @@ class Agent(object):
     def __init__(self, id_number, hierarchy,
                  capacities=None, preferences=None, abilities=None,
                  name=None):
-        self.hierarchy = hierarchy
         self.id = id_number
         self.capacities = capacities
         self.preferences = preferences
         self.abilities = abilities
         self.name = name
+        self.hierarchy = hierarchy
         self.level = self.hierarchy.level
+        if self.hierarchy:
+            self.hierarchy.add_agent(self)
 
     def __str__(self):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)

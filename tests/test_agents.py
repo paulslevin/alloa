@@ -81,3 +81,8 @@ class TestHierarchy(unittest.TestCase):
 
         for agent_subset, expected in test_cases:
             self.assertEqual(self.hierarchy.preferred(agent_subset), expected)
+
+        self.assertEqual(
+            self.hierarchy.all_preferred, 
+            [agent_2_4, agent_2_5, agent_2_6, agent_2_7, agent_2_8]
+        )
