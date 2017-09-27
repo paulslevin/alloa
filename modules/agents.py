@@ -33,17 +33,19 @@ class Agent(object):
     def upper_capacity(self):
         if self.capacities:
             return self.capacities[1]
-
-    def preference_position(self, higher_agent):
-        return self.preferences.index(higher_agent) + 1
-
+    
+    @property
     def lower_capacity(self):
         if self.capacities:
             return self.capacities[0]
 
+    @property
     def capacity_difference(self):
         if self.capacities:
-            return self.upper_capacity() - self.lower_capacity()
+            return self.upper_capacity - self.lower_capacity
+
+    def preference_position(self, higher_agent):
+        return self.preferences.index(higher_agent) + 1
 
 
 class Hierarchy(object):

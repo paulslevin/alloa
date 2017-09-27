@@ -19,6 +19,15 @@ class TestAgent(unittest.TestCase):
         self.agent.capacities = [0, 1]
         self.assertEqual(self.agent.upper_capacity, 1)
 
+    def test_lower_capacity(self):
+        self.agent.capacities = [0, 1]
+        self.assertEqual(self.agent.lower_capacity, 0)
+
+    def test_capacity_difference(self):
+        self.agent.capacities = [0, 1]
+        self.assertEqual(self.agent.capacity_difference, 1)
+
+
 class TestHierarchy(unittest.TestCase):
     
     def setUp(self):
