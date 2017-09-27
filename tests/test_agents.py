@@ -94,3 +94,9 @@ class TestHierarchy(unittest.TestCase):
         self.assertEqual(agent.name, 'Bgent')
         self.assertEqual(self.hierarchy.agent_to_name, {agent: 'Bgent'})
         self.assertEqual(self.hierarchy.name_to_agent, {'Bgent': agent})
+
+    def test_name_to_agent(self):
+        agent_1_1 = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent')
+        agent_1_2 = Agent(id_number=2, hierarchy=self.hierarchy, name='Bgent')
+        self.assertEqual(self.hierarchy.name_to_agent, {'Agent': agent_1_1,
+                                                        'Bgent': agent_1_2, } )
