@@ -41,31 +41,31 @@ class TestHierarchy(unittest.TestCase):
 
         # Level 2 agents.
         hierarchy2 = Hierarchy(level=2)
+        agent_2_1 = Agent(id_number=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id_number=2, hierarchy=hierarchy2)
+        agent_2_3 = Agent(id_number=3, hierarchy=hierarchy2)
         agent_2_4 = Agent(id_number=4, hierarchy=hierarchy2)
         agent_2_5 = Agent(id_number=5, hierarchy=hierarchy2)
-        agent_2_6 = Agent(id_number=6, hierarchy=hierarchy2)
-        agent_2_7 = Agent(id_number=7, hierarchy=hierarchy2)
-        agent_2_8 = Agent(id_number=8, hierarchy=hierarchy2)
 
-        agent_1_1.preferences = [agent_2_4, agent_2_5, agent_2_6]
-        agent_1_2.preferences = [agent_2_5, agent_2_6, agent_2_7]
-        agent_1_3.preferences = [agent_2_8]
+        agent_1_1.preferences = [agent_2_1, agent_2_2, agent_2_3]
+        agent_1_2.preferences = [agent_2_2, agent_2_3, agent_2_4]
+        agent_1_3.preferences = [agent_2_5]
 
         test_cases = [
 
             # Size 1 subsets.
-            ({agent_1_1}, [agent_2_4, agent_2_5, agent_2_6]),
-            ({agent_1_2}, [agent_2_5, agent_2_6, agent_2_7]),
-            ({agent_1_3}, [agent_2_8]),
+            ({agent_1_1}, [agent_2_1, agent_2_2, agent_2_3]),
+            ({agent_1_2}, [agent_2_2, agent_2_3, agent_2_4]),
+            ({agent_1_3}, [agent_2_5]),
 
             # Size 2 subsets.
-            ({agent_1_1, agent_1_2}, [agent_2_4, agent_2_5, agent_2_6, agent_2_7]),
-            ({agent_1_1, agent_1_3}, [agent_2_4, agent_2_5, agent_2_6, agent_2_8]),
-            ({agent_1_2, agent_1_3}, [agent_2_5, agent_2_6, agent_2_7, agent_2_8]),
+            ({agent_1_1, agent_1_2}, [agent_2_1, agent_2_2, agent_2_3, agent_2_4]),
+            ({agent_1_1, agent_1_3}, [agent_2_1, agent_2_2, agent_2_3, agent_2_5]),
+            ({agent_1_2, agent_1_3}, [agent_2_2, agent_2_3, agent_2_4, agent_2_5]),
 
             # Size 3 subset.
             ({agent_1_1, agent_1_2, agent_1_3}, 
-             [agent_2_4, agent_2_5, agent_2_6, agent_2_7, agent_2_8]),
+             [agent_2_1, agent_2_2, agent_2_3, agent_2_4, agent_2_5]),
         ]
 
         for agent_subset, expected in test_cases:
@@ -73,7 +73,7 @@ class TestHierarchy(unittest.TestCase):
 
         self.assertEqual(
             self.hierarchy.all_preferred, 
-            [agent_2_4, agent_2_5, agent_2_6, agent_2_7, agent_2_8]
+            [agent_2_1, agent_2_2, agent_2_3, agent_2_4, agent_2_5],
         )
 
     # TODO: Remove once test coverage increases.
