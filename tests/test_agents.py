@@ -3,6 +3,19 @@ import unittest
 from modules.agents import Agent, Hierarchy
 
 
+class TestAgent(unittest.TestCase):
+    
+    def setUp(self):
+        self.hierarchy = Hierarchy(level=1)
+        self.agent = Agent(id_number=1, hierarchy=self.hierarchy)
+
+    def test___str__(self):
+        self.assertEqual(str(self.agent), 'AGENT_1_1')
+
+    def test___repr__(self):
+        self.assertEqual(self.agent.__repr__(), 'AGENT_1_1')
+
+
 class TestHierarchy(unittest.TestCase):
     
     def setUp(self):
