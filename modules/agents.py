@@ -29,9 +29,6 @@ class Agent(object):
         self.__name = new_name
         self.hierarchy.agent_to_name[self] = new_name
 
-    def give_name(self, name):
-        self.name = name
-
     def upper_capacity(self):
         if self.capacities:
             return self.capacities[1]
