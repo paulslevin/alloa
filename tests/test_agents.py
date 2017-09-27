@@ -27,6 +27,18 @@ class TestAgent(unittest.TestCase):
         self.agent.capacities = [0, 1]
         self.assertEqual(self.agent.capacity_difference, 1)
 
+    def test_preference_position(self):
+        hierarchy2 = Hierarchy(level=2)
+        agent_2_1 = Agent(id_number=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id_number=2, hierarchy=hierarchy2)
+        agent_2_3 = Agent(id_number=3, hierarchy=hierarchy2)
+
+        self.agent.preferences = [agent_2_1, agent_2_2, agent_2_3]
+
+        self.assertEqual(self.agent.preference_position(agent_2_1), 1)
+        self.assertEqual(self.agent.preference_position(agent_2_2), 2)
+        self.assertEqual(self.agent.preference_position(agent_2_3), 3)
+
 
 class TestHierarchy(unittest.TestCase):
     
