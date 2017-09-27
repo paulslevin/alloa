@@ -100,3 +100,25 @@ class TestHierarchy(unittest.TestCase):
         agent_1_2 = Agent(id_number=2, hierarchy=self.hierarchy, name='Bgent')
         self.assertEqual(self.hierarchy.name_to_agent, {'Agent': agent_1_1,
                                                         'Bgent': agent_1_2, } )
+
+    def test_max_preference_length(self):
+
+        # Level 1 Agents.
+        agent_1_1 = Agent(id_number=1, hierarchy=self.hierarchy)
+        agent_1_2 = Agent(id_number=2, hierarchy=self.hierarchy)
+        agent_1_3 = Agent(id_number=3, hierarchy=self.hierarchy)
+
+        # Level 2 Agents.
+        hierarchy2 = Hierarchy(level=2)
+        agent_2_1 = Agent(id_number=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id_number=2, hierarchy=hierarchy2)
+        agent_2_3 = Agent(id_number=3, hierarchy=hierarchy2)
+        agent_2_4 = Agent(id_number=4, hierarchy=hierarchy2)
+        agent_2_5 = Agent(id_number=5, hierarchy=hierarchy2)
+
+        agent_1_1.preferences = [agent_2_1, agent_2_2]
+        agent_1_2.preferences = [agent_2_3, agent_2_4]
+        agent_1_3.preferences = [agent_2_1, agent_2_3, agent_2_5]
+
+        self.assertEqual(self.hierarchy.max_preferences_length, 3)
+        
