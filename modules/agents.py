@@ -96,19 +96,6 @@ class Hierarchy(object):
         if self.agent_to_name:
             return {v: k for k, v in self.agent_to_name.iteritems()}
 
-    def add_names(self, names):
-        if not self.agents:
-            raise (ValueError, "Not enough agents")
-        if len(names) != self.number_of_agents:
-            raise (ValueError, "Incorrect number of names provided")
-        self.agent_to_name = names
-
-    def give_names(self):
-        if not self.agent_to_name:
-            raise (ValueError, "No name dictionary has been provided")
-        for agent in self.agents:
-            agent.give_name(self.agent_to_name[agent.id])
-
     @property
     def max_preferences_length(self):
         return max(len(agent.preferences) for agent in self.agents)
