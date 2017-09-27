@@ -3,12 +3,11 @@ import itertools
 
 class Agent(object):
     def __init__(self, id_number, hierarchy,
-                 capacities=None, preferences=None, abilities=None,
+                 capacities=None, preferences=None,
                  name=None):
         self.id = id_number
         self.capacities = capacities
         self.preferences = preferences
-        self.abilities = abilities
         self.hierarchy = hierarchy
         self.hierarchy.add_agent(self)
         self.name = name
@@ -99,7 +98,3 @@ class Hierarchy(object):
     @property
     def max_preferences_length(self):
         return max(len(agent.preferences) for agent in self.agents)
-
-    @property
-    def max_abilities_length(self):
-        return max(len(agent.abilities) for agent in self.agents)
