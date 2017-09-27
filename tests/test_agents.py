@@ -15,6 +15,9 @@ class TestAgent(unittest.TestCase):
     def test___repr__(self):
         self.assertEqual(self.agent.__repr__(), 'AGENT_1_1')
 
+    def test_upper_capacity(self):
+        self.agent.capacities = [0, 1]
+        self.assertEqual(self.agent.upper_capacity, 1)
 
 class TestHierarchy(unittest.TestCase):
     
