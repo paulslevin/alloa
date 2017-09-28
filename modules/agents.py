@@ -20,16 +20,6 @@ class Agent(object):
         return "AGENT_{}_{}".format(self.hierarchy, self.id)
 
     @property
-    def name(self):
-        return self.__name
-
-    @name.setter
-    def name(self, new_name):
-        '''Update the name dict on the hierarchy.'''
-        self.__name = new_name
-        self.hierarchy._agent_name_map[self] = new_name
-
-    @property
     def upper_capacity(self):
         if self.capacities:
             return self.capacities[1]
