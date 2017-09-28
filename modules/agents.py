@@ -72,9 +72,12 @@ class Hierarchy(object):
         return len(self.agents)
 
     def preferred(self, agent_subset):
-        preferred_set = set(itertools.chain.from_iterable(
-                agent.preferences for agent in agent_subset))
-        return sorted(preferred_set, key=lambda x: x.id)
+        '''Return list of unique agents, sorted by id_number, that the agents
+        in the given subset prefer at the next hierarchy level.'''
+        all = [agent.preferences for agent in agent_subset]
+        all_flattened = itertools.chain(*all)
+        all_flattened_unique = set(all_flattened)
+        return sorted(all_flattened_unique, key=lambda agent: agent.id)
 
     @property
     def all_preferred(self):
