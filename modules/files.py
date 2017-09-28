@@ -104,8 +104,8 @@ class DataSequence(object):
         for i, file_data in enumerate(backwards[1:]):
             last_level = backwards[i]
             last_hierarchy = last_level.hierarchy
-            name_to_agent = last_hierarchy.name_to_agent
-            file_data.set_higher_agent(name_to_agent)
+            name_agent_map = last_hierarchy.name_agent_map
+            file_data.set_higher_agent(name_agent_map)
             file_data.set_agents_and_ids()
             self.hierarchies.append(last_hierarchy)
         self.hierarchies.append(self.sequence[0].hierarchy)

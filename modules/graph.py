@@ -142,10 +142,10 @@ class Block(nx.DiGraph):
     def generate_agent_nodes(self):
         self.agents_to_nodes()
         for agent in self.preferred_agents:
-            demand = agent.upper_capacity()
+            demand = agent.upper_capacity
             out_node = self.agent_to_positive_node(agent)
             in_node = self.agent_to_negative_node(agent)
-            capacity = agent.capacity_difference()
+            capacity = agent.capacity_difference
             self.add_node(out_node, demand=demand)
             self.add_node(in_node, demand=-demand)
             self.add_edge(out_node,

@@ -59,7 +59,7 @@ class Hierarchy(object):
         return {agent: agent.name for agent in self.agents}
 
     @property
-    def name_to_agent(self):
+    def name_agent_map(self):
         if self._agent_name_map:
             return {v: k for k, v in self._agent_name_map.iteritems()}
 

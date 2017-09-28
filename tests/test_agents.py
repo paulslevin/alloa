@@ -120,13 +120,13 @@ class TestHierarchy(unittest.TestCase):
         agent.name = 'Bgent'
         self.assertEqual(agent.name, 'Bgent')
         self.assertEqual(self.hierarchy._agent_name_map, {agent: 'Bgent'})
-        self.assertEqual(self.hierarchy.name_to_agent, {'Bgent': agent})
+        self.assertEqual(self.hierarchy.name_agent_map, {'Bgent': agent})
 
-    def test_name_to_agent(self):
+    def test_name_agent_map(self):
         agent_1_1 = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent')
         agent_1_2 = Agent(id_number=2, hierarchy=self.hierarchy, name='Bgent')
-        self.assertEqual(self.hierarchy.name_to_agent, {'Agent': agent_1_1,
-                                                        'Bgent': agent_1_2, } )
+        self.assertEqual(self.hierarchy.name_agent_map, 
+                         {'Agent': agent_1_1, 'Bgent': agent_1_2} )
 
     def test_max_preference_length(self):
 
