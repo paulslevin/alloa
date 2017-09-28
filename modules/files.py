@@ -47,7 +47,7 @@ class FileData(object):
         return "LEVEL_{}_Data".format(self.level)
 
     def id_to_agents(self):
-        return {id_number: agent for agent, id_number in
+        return {id: agent for agent, id in
                 self.agents_to_id.iteritems()}
 
     def set_higher_agent(self, higher_agent):

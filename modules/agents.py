@@ -1,23 +1,36 @@
 import itertools
+from   utils.parsers import ReprParser
 
 
 class Agent(object):
-    def __init__(self, id_number, hierarchy,
+    def __init__(self, id, hierarchy,
                  capacities=None, preferences=None,
                  name=None):
-        self.id = id_number
+        self.id = id
         self.capacities = capacities
         self.preferences = preferences
         self.hierarchy = hierarchy
         self.hierarchy.add_agent(self)
         self.name = name
         self.level = self.hierarchy.level
+        
+        # Experiment with composition.
+        self.repr_parser = ReprParser(self)
 
     def __str__(self):
-        return "AGENT_{}_{}".format(self.hierarchy, self.id)
+        return "AGENT_{}_{}".format(self.level, self.id)
 
     def __repr__(self):
-        return "AGENT_{}_{}".format(self.hierarchy, self.id)
+        str_kwargs = ['id={}'.format(self.id),
+                      'hierarchy={}'.format(self.hierarchy)]
+        if self.capacities:
+            str_kwargs.append('capacities={}'.format(self.capacities))
+        if self.preferences:
+            str_kwargs.append('preferences={}'.format(self.preferences))
+        if self.name:
+            str_kwargs.append('name={}'.format(self.name))
+
+        return self.repr_parser.parse(str_kwargs)
 
     @property
     def upper_capacity(self):
@@ -48,11 +61,18 @@ class Hierarchy(object):
             agents = []
         self.agents = agents
 
+        # Experiment with composition.
+        self.repr_parser = ReprParser(self)
+
     def __str__(self):
-        return str(self.level)
+        return 'HIERARCHY_{}'.format(str(self.level))
 
     def __repr__(self):
-        return "HIERARCHY_{}".format(self.level)
+        str_kwargs = ['level={}'.format(self.level)]
+        if self.agents:
+            agent_strs = [str(agent) for agent in self.agents]
+            str_kwargs.append('agents={}'.format(agent_strs).replace("'",'') )
+        return self.repr_parser.parse(str_kwargs)
 
     @property
     def _agent_name_map(self):
@@ -72,7 +92,7 @@ class Hierarchy(object):
         return len(self.agents)
 
     def preferred(self, agent_subset):
-        '''Return list of unique agents, sorted by id_number, that the agents
+        '''Return list of unique agents, sorted by id, that the agents
         in the given subset prefer at the next hierarchy level.'''
         all = [agent.preferences for agent in agent_subset]
         all_flattened = itertools.chain(*all)

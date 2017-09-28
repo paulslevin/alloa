@@ -7,13 +7,14 @@ class TestAgent(unittest.TestCase):
     
     def setUp(self):
         self.hierarchy = Hierarchy(level=1)
-        self.agent = Agent(id_number=1, hierarchy=self.hierarchy)
+        self.agent = Agent(id=1, hierarchy=self.hierarchy)
 
     def test___str__(self):
         self.assertEqual(str(self.agent), 'AGENT_1_1')
 
     def test___repr__(self):
-        self.assertEqual(self.agent.__repr__(), 'AGENT_1_1')
+        self.assertEqual(repr(self.agent),
+                         'Agent(id=1, hierarchy=HIERARCHY_1)')
 
     def test_upper_capacity(self):
         self.agent.capacities = [0, 1]
@@ -29,9 +30,9 @@ class TestAgent(unittest.TestCase):
 
     def test_preference_position(self):
         hierarchy2 = Hierarchy(level=2)
-        agent_2_1 = Agent(id_number=1, hierarchy=hierarchy2)
-        agent_2_2 = Agent(id_number=2, hierarchy=hierarchy2)
-        agent_2_3 = Agent(id_number=3, hierarchy=hierarchy2)
+        agent_2_1 = Agent(id=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id=2, hierarchy=hierarchy2)
+        agent_2_3 = Agent(id=3, hierarchy=hierarchy2)
 
         self.agent.preferences = [agent_2_1, agent_2_2, agent_2_3]
 
@@ -46,43 +47,46 @@ class TestHierarchy(unittest.TestCase):
         self.hierarchy = Hierarchy(level=1)
 
     def test___str__(self):
-        self.assertEqual(str(self.hierarchy), '1')
+        self.assertEqual(str(self.hierarchy), 'HIERARCHY_1')
 
     def test___repr__(self):
-        self.assertEqual(self.hierarchy.__repr__(), 'HIERARCHY_1')
+        agent_1_1 = Agent(id=1, hierarchy=self.hierarchy, name='Agent')
+        agent_1_2 = Agent(id=2, hierarchy=self.hierarchy, name='Agent')
+        self.assertEqual(repr(self.hierarchy),
+                         "Hierarchy(level=1, agents=[AGENT_1_1, AGENT_1_2])")
 
     def test_add_1_agent(self):
-        agent = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent')
+        agent = Agent(id=1, hierarchy=self.hierarchy, name='Agent')
         self.assertEqual(self.hierarchy.agents, [agent])
         self.assertEqual(self.hierarchy._agent_name_map, {agent: 'Agent'})
 
     def test_add_2_agents(self):
-        agent1 = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent 1')
-        agent2 = Agent(id_number=2, hierarchy=self.hierarchy, name='Agent 2')
+        agent1 = Agent(id=1, hierarchy=self.hierarchy, name='Agent 1')
+        agent2 = Agent(id=2, hierarchy=self.hierarchy, name='Agent 2')
         self.assertEqual(self.hierarchy.agents, [agent1, agent2])
         self.assertEqual(self.hierarchy._agent_name_map,
                          {agent1: 'Agent 1', agent2: 'Agent 2'})
 
     def test_number_of_agents(self):
         self.assertEqual(self.hierarchy.number_of_agents, 0)
-        agent1 = Agent(id_number=1, hierarchy=self.hierarchy)
+        agent1 = Agent(id=1, hierarchy=self.hierarchy)
         self.hierarchy.add_agent(agent1)
         self.assertEqual(self.hierarchy.number_of_agents, 1)
 
     def test_preferred(self):
 
         # Level 1 agents.
-        agent_1_1 = Agent(id_number=1, hierarchy=self.hierarchy)
-        agent_1_2 = Agent(id_number=2, hierarchy=self.hierarchy)
-        agent_1_3 = Agent(id_number=3, hierarchy=self.hierarchy)
+        agent_1_1 = Agent(id=1, hierarchy=self.hierarchy)
+        agent_1_2 = Agent(id=2, hierarchy=self.hierarchy)
+        agent_1_3 = Agent(id=3, hierarchy=self.hierarchy)
 
         # Level 2 agents.
         hierarchy2 = Hierarchy(level=2)
-        agent_2_1 = Agent(id_number=1, hierarchy=hierarchy2)
-        agent_2_2 = Agent(id_number=2, hierarchy=hierarchy2)
-        agent_2_3 = Agent(id_number=3, hierarchy=hierarchy2)
-        agent_2_4 = Agent(id_number=4, hierarchy=hierarchy2)
-        agent_2_5 = Agent(id_number=5, hierarchy=hierarchy2)
+        agent_2_1 = Agent(id=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id=2, hierarchy=hierarchy2)
+        agent_2_3 = Agent(id=3, hierarchy=hierarchy2)
+        agent_2_4 = Agent(id=4, hierarchy=hierarchy2)
+        agent_2_5 = Agent(id=5, hierarchy=hierarchy2)
 
         agent_1_1.preferences = [agent_2_1, agent_2_2, agent_2_3]
         agent_1_2.preferences = [agent_2_2, agent_2_3, agent_2_4]
@@ -115,7 +119,7 @@ class TestHierarchy(unittest.TestCase):
 
     def test_set_agent_name(self):
         '''Test setting the agent name updates the hierarchy.'''
-        agent = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent')
+        agent = Agent(id=1, hierarchy=self.hierarchy, name='Agent')
         self.assertEqual(agent.name, 'Agent')
         agent.name = 'Bgent'
         self.assertEqual(agent.name, 'Bgent')
@@ -123,25 +127,25 @@ class TestHierarchy(unittest.TestCase):
         self.assertEqual(self.hierarchy.name_agent_map, {'Bgent': agent})
 
     def test_name_agent_map(self):
-        agent_1_1 = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent')
-        agent_1_2 = Agent(id_number=2, hierarchy=self.hierarchy, name='Bgent')
+        agent_1_1 = Agent(id=1, hierarchy=self.hierarchy, name='Agent')
+        agent_1_2 = Agent(id=2, hierarchy=self.hierarchy, name='Bgent')
         self.assertEqual(self.hierarchy.name_agent_map, 
                          {'Agent': agent_1_1, 'Bgent': agent_1_2} )
 
     def test_max_preference_length(self):
 
         # Level 1 Agents.
-        agent_1_1 = Agent(id_number=1, hierarchy=self.hierarchy)
-        agent_1_2 = Agent(id_number=2, hierarchy=self.hierarchy)
-        agent_1_3 = Agent(id_number=3, hierarchy=self.hierarchy)
+        agent_1_1 = Agent(id=1, hierarchy=self.hierarchy)
+        agent_1_2 = Agent(id=2, hierarchy=self.hierarchy)
+        agent_1_3 = Agent(id=3, hierarchy=self.hierarchy)
 
         # Level 2 Agents.
         hierarchy2 = Hierarchy(level=2)
-        agent_2_1 = Agent(id_number=1, hierarchy=hierarchy2)
-        agent_2_2 = Agent(id_number=2, hierarchy=hierarchy2)
-        agent_2_3 = Agent(id_number=3, hierarchy=hierarchy2)
-        agent_2_4 = Agent(id_number=4, hierarchy=hierarchy2)
-        agent_2_5 = Agent(id_number=5, hierarchy=hierarchy2)
+        agent_2_1 = Agent(id=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id=2, hierarchy=hierarchy2)
+        agent_2_3 = Agent(id=3, hierarchy=hierarchy2)
+        agent_2_4 = Agent(id=4, hierarchy=hierarchy2)
+        agent_2_5 = Agent(id=5, hierarchy=hierarchy2)
 
         agent_1_1.preferences = [agent_2_1, agent_2_2]
         agent_1_2.preferences = [agent_2_3, agent_2_4]
