@@ -85,11 +85,6 @@ class Hierarchy(object):
     def all_preferred(self):
         return self.preferred(self.agents)
 
-    # TODO: Remove once test coverage increases.
-    def set_name(self, agent, name):
-        agent.name = name
-        self.agent_to_name[agent] = name
-
     @property
     def name_to_agent(self):
         if self.agent_to_name:
