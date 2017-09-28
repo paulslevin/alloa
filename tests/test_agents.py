@@ -54,13 +54,13 @@ class TestHierarchy(unittest.TestCase):
     def test_add_1_agent(self):
         agent = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent')
         self.assertEqual(self.hierarchy.agents, [agent])
-        self.assertEqual(self.hierarchy.agent_to_name, {agent: 'Agent'})
+        self.assertEqual(self.hierarchy._agent_name_map, {agent: 'Agent'})
 
     def test_add_2_agents(self):
         agent1 = Agent(id_number=1, hierarchy=self.hierarchy, name='Agent 1')
         agent2 = Agent(id_number=2, hierarchy=self.hierarchy, name='Agent 2')
         self.assertEqual(self.hierarchy.agents, [agent1, agent2])
-        self.assertEqual(self.hierarchy.agent_to_name,
+        self.assertEqual(self.hierarchy._agent_name_map,
                          {agent1: 'Agent 1', agent2: 'Agent 2'})
 
     def test_number_of_agents(self):
@@ -119,7 +119,7 @@ class TestHierarchy(unittest.TestCase):
         self.assertEqual(agent.name, 'Agent')
         agent.name = 'Bgent'
         self.assertEqual(agent.name, 'Bgent')
-        self.assertEqual(self.hierarchy.agent_to_name, {agent: 'Bgent'})
+        self.assertEqual(self.hierarchy._agent_name_map, {agent: 'Bgent'})
         self.assertEqual(self.hierarchy.name_to_agent, {'Bgent': agent})
 
     def test_name_to_agent(self):

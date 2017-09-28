@@ -27,7 +27,7 @@ class Agent(object):
     def name(self, new_name):
         '''Update the name dict on the hierarchy.'''
         self.__name = new_name
-        self.hierarchy.agent_to_name[self] = new_name
+        self.hierarchy._agent_name_map[self] = new_name
 
     @property
     def upper_capacity(self):
@@ -49,7 +49,8 @@ class Agent(object):
 
 
 class Hierarchy(object):
-    def __init__(self, level, agents=None, names=None):
+    def __init__(self, level, agents=None):
+        '''Represent a bucket of agents.'''
 
         self.level = level
 
@@ -57,18 +58,22 @@ class Hierarchy(object):
             agents = []
         self.agents = agents
 
-        if names is None:
-            names = {}
-        self.agent_to_name = names
-
     def __str__(self):
         return str(self.level)
 
     def __repr__(self):
         return "HIERARCHY_{}".format(self.level)
 
+    @property
+    def _agent_name_map(self):
+        return {agent: agent.name for agent in self.agents}
+
+    @property
+    def name_to_agent(self):
+        if self._agent_name_map:
+            return {v: k for k, v in self._agent_name_map.iteritems()}
+
     def add_agent(self, agent):
-        '''Add agent to list and update agent name dictionary.'''
         if agent not in self.agents:
             self.agents.append(agent)
 
@@ -84,11 +89,6 @@ class Hierarchy(object):
     @property
     def all_preferred(self):
         return self.preferred(self.agents)
-
-    @property
-    def name_to_agent(self):
-        if self.agent_to_name:
-            return {v: k for k, v in self.agent_to_name.iteritems()}
 
     @property
     def max_preferences_length(self):
