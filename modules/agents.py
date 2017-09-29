@@ -87,6 +87,12 @@ class Hierarchy(object):
         if agent not in self.agents:
             self.agents.append(agent)
 
+    def has_agent_with_id(self, id):
+        for agent in self.agents:
+            if agent.id == id:
+                return True
+        return False
+
     @property
     def number_of_agents(self):
         return len(self.agents)

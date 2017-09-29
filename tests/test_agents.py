@@ -152,4 +152,10 @@ class TestHierarchy(unittest.TestCase):
         agent_1_3.preferences = [agent_2_1, agent_2_3, agent_2_5]
 
         self.assertEqual(self.hierarchy.max_preferences_length, 3)
+
+    def test_has_agent_with_id(self):
+        agent = Agent(id=1, hierarchy=self.hierarchy)
+        self.assertEqual(self.hierarchy.has_agent_with_id(1), True)
+        self.assertEqual(self.hierarchy.has_agent_with_id(2), False)            
         
+                                                                               
