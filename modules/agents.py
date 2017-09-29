@@ -1,21 +1,27 @@
 import itertools
 from   utils.parsers import ReprParser
+from   utils.exceptions import AgentExistsError
 
 
 class Agent(object):
     def __init__(self, id, hierarchy,
                  capacities=None, preferences=None,
                  name=None):
+
         self.id = id
-        self.capacities = capacities
-        self.preferences = preferences
         self.hierarchy = hierarchy
+        if self.hierarchy.has_agent_with_id(self.id):
+            raise AgentExistsError(self.hierarchy, self.id)
+
         self.hierarchy.add_agent(self)
         self.name = name
         self.level = self.hierarchy.level
         
         # Experiment with composition.
         self.repr_parser = ReprParser(self)
+
+        self.capacities = capacities
+        self.preferences = preferences
 
     def __str__(self):
         return "AGENT_{}_{}".format(self.level, self.id)
@@ -52,8 +58,9 @@ class Agent(object):
 
 
 class Hierarchy(object):
+    '''Represent a bucket of agents.'''
+
     def __init__(self, level, agents=None):
-        '''Represent a bucket of agents.'''
 
         self.level = level
 

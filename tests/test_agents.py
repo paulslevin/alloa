@@ -1,6 +1,6 @@
 from itertools import izip
 import unittest
-from modules.agents import Agent, Hierarchy
+from modules.agents import Agent, AgentExistsError, Hierarchy
 
 
 class TestAgent(unittest.TestCase):
@@ -40,6 +40,13 @@ class TestAgent(unittest.TestCase):
         self.assertEqual(self.agent.preference_position(agent_2_2), 2)
         self.assertEqual(self.agent.preference_position(agent_2_3), 3)
 
+    def test_AgentExistsError(self):
+        '''Test creating an additional agent with the same id raises an Exception.'''
+        with self.assertRaises(AgentExistsError) as context:
+            double_agent = Agent(id=1, hierarchy=self.hierarchy)
+        self.assertEqual(context.exception.message,
+                         'HIERARCHY_1 already has an agent with id 1.')
+                  
 
 class TestHierarchy(unittest.TestCase):
     
@@ -156,6 +163,5 @@ class TestHierarchy(unittest.TestCase):
     def test_has_agent_with_id(self):
         agent = Agent(id=1, hierarchy=self.hierarchy)
         self.assertEqual(self.hierarchy.has_agent_with_id(1), True)
-        self.assertEqual(self.hierarchy.has_agent_with_id(2), False)            
-        
-                                                                               
+        self.assertEqual(self.hierarchy.has_agent_with_id(2), False)   
+                                                             
