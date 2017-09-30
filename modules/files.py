@@ -1,7 +1,7 @@
 import csv
 import codecs
 from agents import Agent, Hierarchy
-from graph import Block, AllocationGraph
+from graph import HierarchyGraph, AllocationGraph
 from copy import deepcopy
 from random import shuffle
 
@@ -117,13 +117,13 @@ class DataSequence(object):
             self.block_list = []
         for i, hierarchy in enumerate(self.hierarchies):
             if i == 0:
-                first_block = Block(hierarchy, hierarchy.agents)
+                first_block = HierarchyGraph(hierarchy, hierarchy.agents)
                 first_block.generate_agent_nodes()
                 self.block_list.append(first_block)
                 continue
             previous_block = self.block_list[i - 1]
             previous_preferred_agents = previous_block.preferred_agents
-            next_block = Block(hierarchy,
+            next_block = HierarchyGraph(hierarchy,
                                hierarchy.preferred(previous_preferred_agents))
             next_block.generate_agent_nodes()
             self.block_list.append(next_block)

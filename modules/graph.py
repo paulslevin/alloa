@@ -1,6 +1,6 @@
 import networkx as nx
 import sys
-from   utils.enums import Polarity
+from   utils.enums import GraphElement, Polarity
 from   utils.parsers import ReprParser
 
 
@@ -21,6 +21,64 @@ class AgentNode(object):
         str_kwargs = ['agent={}'.format(str(self.agent)),
                       'polarity={}'.format(self.polarity) ]
         return self.parser.parse(str_kwargs)
+
+
+class HierarchyGraph(nx.DiGraph):
+    '''Represent a hierarchy as a directed graph (network). Each agent is split 
+    into one negative and one positive agent node, with one edge flowing from 
+    negative to positive. The capacity of the edge (as an edge of the network)
+    is the capacity of the agent. These are glued together to form the full 
+    allocation graph.
+    '''
+    def __init__(self, hierarchy, preferred_agents):
+        super(HierarchyGraph, self).__init__()
+        self.hierarchy = hierarchy
+        self.level = hierarchy.level
+        self.in_nodes = []
+        self.out_nodes = []
+        self.preferred_agents = preferred_agents
+        self.positive_dict = {}
+        self.negative_dict = {}
+
+    def __repr__(self):
+        return "HIERARCHY_GRAPH_{}".format(self.level)
+
+    def __str__(self):
+        return "HIERARCHY_GRAPH_{}".format(self.level)
+
+    def agents_to_nodes(self):
+        for agent in self.preferred_agents:
+            positive_node = AgentNode(agent, POSITIVE)
+            negative_node = AgentNode(agent, NEGATIVE)
+            self.positive_dict[agent] = positive_node
+            self.negative_dict[agent] = negative_node
+
+    def generate_agent_nodes(self):
+        self.agents_to_nodes()
+        for agent in self.preferred_agents:
+            demand = agent.upper_capacity
+            out_node = self.agent_to_positive_node(agent)
+            in_node = self.agent_to_negative_node(agent)
+            capacity = agent.capacity_difference
+            self.add_node(out_node, demand=demand)
+            self.add_node(in_node, demand=-demand)
+            self.add_edge(out_node,
+                          in_node,
+                          capacity=capacity,
+                          weight=0)
+
+    def agent_to_positive_node(self, agent):
+        return self.positive_dict[agent]
+
+    def positive_agent_nodes(self):
+        # Keep these in order
+        return [self.positive_dict[agent] for agent in self.preferred_agents]
+
+    def agent_to_negative_node(self, agent):
+        return self.negative_dict[agent]
+
+    def negative_agent_nodes(self):
+        return [self.negative_dict[agent] for agent in self.preferred_agents]
 
 
 class AllocationGraph(nx.DiGraph):
@@ -127,53 +185,4 @@ class AllocationGraph(nx.DiGraph):
         self.allocation = matrix
 
 
-class Block(nx.DiGraph):
-    def __init__(self, hierarchy, preferred_agents):
-        super(Block, self).__init__()
-        self.hierarchy = hierarchy
-        self.level = hierarchy.level
-        self.in_nodes = []
-        self.out_nodes = []
-        self.preferred_agents = preferred_agents
-        self.positive_dict = {}
-        self.negative_dict = {}
 
-    def __repr__(self):
-        return "BLOCK_{}".format(self.level)
-
-    def __str__(self):
-        return "BLOCK_{}".format(self.level)
-
-    def agents_to_nodes(self):
-        for agent in self.preferred_agents:
-            positive_node = AgentNode(agent, POSITIVE)
-            negative_node = AgentNode(agent, NEGATIVE)
-            self.positive_dict[agent] = positive_node
-            self.negative_dict[agent] = negative_node
-
-    def generate_agent_nodes(self):
-        self.agents_to_nodes()
-        for agent in self.preferred_agents:
-            demand = agent.upper_capacity
-            out_node = self.agent_to_positive_node(agent)
-            in_node = self.agent_to_negative_node(agent)
-            capacity = agent.capacity_difference
-            self.add_node(out_node, demand=demand)
-            self.add_node(in_node, demand=-demand)
-            self.add_edge(out_node,
-                          in_node,
-                          capacity=capacity,
-                          weight=0)
-
-    def agent_to_positive_node(self, agent):
-        return self.positive_dict[agent]
-
-    def positive_agent_nodes(self):
-        # Keep these in order
-        return [self.positive_dict[agent] for agent in self.preferred_agents]
-
-    def agent_to_negative_node(self, agent):
-        return self.negative_dict[agent]
-
-    def negative_agent_nodes(self):
-        return [self.negative_dict[agent] for agent in self.preferred_agents]
