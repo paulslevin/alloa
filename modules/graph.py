@@ -1,7 +1,7 @@
 import networkx as nx
 import sys
 from   utils.enums import GraphElement, Polarity
-from   utils.parsers import ReprParser
+from   utils.parsers import parse_repr
 
 
 POSITIVE=Polarity.POSITIVE
@@ -12,7 +12,6 @@ class AgentNode(object):
     def __init__(self, agent, polarity):
         self.agent = agent
         self.polarity = polarity
-        self.repr_parser = ReprParser(self)
 
     def __str__(self):
         return '{}({})'.format(self.agent, self.polarity)
@@ -20,7 +19,18 @@ class AgentNode(object):
     def __repr__(self):
         str_kwargs = ['agent={}'.format(str(self.agent)),
                       'polarity={}'.format(self.polarity) ]
-        return self.repr_parser.parse(str_kwargs)
+        return parse_repr(self, str_kwargs)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.agent == other.agent and self.polarity == other.polarity
+
+    def __neq__(self, other):
+        if not isinstance(other, self.__class__):
+            return True
+        return not(self.agent == other.agent and self.polarity == other.polarity)
+
 
 
 class HierarchyGraph(nx.DiGraph):
@@ -52,8 +62,6 @@ class HierarchyGraph(nx.DiGraph):
         self.positive_dict = {}
         self.negative_dict = {}
 
-        self.repr_parser = ReprParser(self)
-
     def __str__(self):
         return "HIERARCHY_GRAPH_{}".format(self.level)
 
@@ -62,7 +70,7 @@ class HierarchyGraph(nx.DiGraph):
         if self.agents:
             agent_strs = [str(agent) for agent in self.agents]
             str_kwargs.append('agents={}'.format(agent_strs).replace("'",'') )
-        return self.repr_parser.parse(str_kwargs)
+        return parse_repr(self, str_kwargs)
 
     def agents_to_nodes(self):
         for agent in self.agents:
