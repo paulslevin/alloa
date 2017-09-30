@@ -7,21 +7,15 @@ class Agent(object):
     def __init__(self, id, hierarchy,
                  capacities=None, preferences=None,
                  name=None):
-
         self.id = id
         self.hierarchy = hierarchy
-        if self.hierarchy.has_agent_with_id(self.id):
-            raise AgentExistsError(self.hierarchy, self.id)
-
-        self.hierarchy.add_agent(self)
         self.name = name
         self.level = self.hierarchy.level
-        
-        # Experiment with composition.
-        self.repr_parser = ReprParser(self)
-
         self.capacities = capacities
         self.preferences = preferences
+
+        # Experiment with composition.
+        self.repr_parser = ReprParser(self)
 
     def __str__(self):
         return "AGENT_{}_{}".format(self.level, self.id)
@@ -37,6 +31,15 @@ class Agent(object):
             str_kwargs.append('name={}'.format(self.name))
 
         return self.repr_parser.parse(str_kwargs)
+
+    @property
+    def hierarchy(self):
+        return self._hierarchy
+
+    @hierarchy.setter
+    def hierarchy(self, value):
+        self._hierarchy = value
+        self._hierarchy.add_agent(self)
 
     @property
     def upper_capacity(self):
@@ -63,9 +66,6 @@ class Hierarchy(object):
     def __init__(self, level, agents=None):
 
         self.level = level
-
-        if agents is None:
-            agents = []
         self.agents = agents
 
         # Experiment with composition.
@@ -82,6 +82,17 @@ class Hierarchy(object):
         return self.repr_parser.parse(str_kwargs)
 
     @property
+    def agents(self):
+        return self._agents
+
+    @agents.setter
+    def agents(self, value):
+        if value is None:
+            self._agents = []
+        else:
+            self._agents = value
+
+    @property
     def _agent_name_map(self):
         return {agent: agent.name for agent in self.agents}
 
@@ -91,8 +102,9 @@ class Hierarchy(object):
             return {v: k for k, v in self._agent_name_map.iteritems()}
 
     def add_agent(self, agent):
-        if agent not in self.agents:
-            self.agents.append(agent)
+        if self.has_agent_with_id(agent.id):
+            raise AgentExistsError(self, agent.id)
+        self.agents.append(agent)
 
     def has_agent_with_id(self, id):
         for agent in self.agents:

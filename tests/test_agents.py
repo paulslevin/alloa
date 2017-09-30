@@ -77,7 +77,6 @@ class TestHierarchy(unittest.TestCase):
     def test_number_of_agents(self):
         self.assertEqual(self.hierarchy.number_of_agents, 0)
         agent1 = Agent(id=1, hierarchy=self.hierarchy)
-        self.hierarchy.add_agent(agent1)
         self.assertEqual(self.hierarchy.number_of_agents, 1)
 
     def test_preferred(self):

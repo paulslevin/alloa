@@ -84,7 +84,6 @@ class FileData(object):
                           capacities=line.capacities,
                           preferences=preferences,
                           name=line.raw_name)
-            self.hierarchy.add_agent(agent)
             self.agents_to_id[agent] = agent.id
 
 
