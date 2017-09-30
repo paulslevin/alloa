@@ -1,12 +1,48 @@
+'''Module containing Agent and Hierarchy classes. Agents represent nodes on the
+graph and are bucketed into a hierarchy of multiple agents, with a given level.
+Each agent has an (ordered) list of preferences of agents at the next level.
+
+Example
+-------
+Three students Paul, Michael and Patricia each have a list of three projects
+they'd like to work on, ordered by preference
+Paul:     [Spheres, Circles, Lines]
+Michael:  [Circles, Algebra, Cones]
+Patricia: [Triangles, Mechanics, Algebra]
+Then 
+[Paul, Michael, Patricia] would be represented by three agent objects at a
+level 1 hierarchy, and the projects 
+[Spheres, Circles, Lines, Algebra, Cones, Triangles, Mechanics, Algebra]
+would be represented by eight agent objects at a level 2 hierachy.
+'''
+
 import itertools
 from   utils.parsers import ReprParser
-from   utils.exceptions import AgentExistsError
+from   utils.exceptions import AgentExistsError, AgentNotInPreferencesError
 
 
 class Agent(object):
+    '''Represent an individual agent e.g. student/project/supervisor.'''
     def __init__(self, id, hierarchy,
                  capacities=None, preferences=None,
                  name=None):
+        '''
+        Parameters
+        ----------
+        id: int
+            Unique number identifying the agent at each hierarchy.
+        hierarchy: Hierarchy object
+        name: str
+            Name of agent e.g. Paul. This is not unique.
+        capacities: tuple of int
+            The minimum and maximum amount this agent can take on, e.g.
+            a project supervisor with capacities (1, 3) would mean she must
+            supervise one project as a minimum, but can supervise up to three
+            in total.
+        preferences: list of Agent
+            The agents at the next hierarchy level that this agent prefers.
+        '''
+
         self.id = id
         self.hierarchy = hierarchy
         self.name = name
@@ -52,8 +88,12 @@ class Agent(object):
         if self.capacities:
             return self.upper_capacity - self.lower_capacity
 
-    def preference_position(self, higher_agent):
-        return self.preferences.index(higher_agent) + 1
+    def preference_position(self, other):
+        '''Position of another agent in the preference list.'''
+        if self.preferences:
+            if other in self.preferences:
+                return self.preferences.index(other) + 1
+        raise AgentNotInPreferencesError(self, other)
 
 
 class Hierarchy(object):
