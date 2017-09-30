@@ -1,14 +1,26 @@
 import networkx as nx
 import sys
+from   utils.enums import Polarity
+from   utils.parsers import ReprParser
+
+
+POSITIVE=Polarity.POSITIVE
+NEGATIVE=Polarity.NEGATIVE
 
 
 class AgentNode(object):
     def __init__(self, agent, polarity):
         self.agent = agent
         self.polarity = polarity
+        self.parser = ReprParser(self)
+
+    def __str__(self):
+        return '{}({})'.format(self.agent, self.polarity)
 
     def __repr__(self):
-        return str(self.agent) + "(" + self.polarity + ")"
+        str_kwargs = ['agent={}'.format(str(self.agent)),
+                      'polarity={}'.format(self.polarity) ]
+        return self.parser.parse(str_kwargs)
 
 
 class AllocationGraph(nx.DiGraph):
@@ -90,7 +102,7 @@ class AllocationGraph(nx.DiGraph):
 
     def simplify_flow(self):
         positives = {k.agent: v for k, v in self.flow.items() if
-                     isinstance(k, AgentNode) and k.polarity == "-"}
+                     isinstance(k, AgentNode) and k.polarity == NEGATIVE}
         for k in positives:
             positives[k] = {k.agent: v for k, v in positives[k].items() if
                             isinstance(k, AgentNode) and v}
@@ -134,8 +146,8 @@ class Block(nx.DiGraph):
 
     def agents_to_nodes(self):
         for agent in self.preferred_agents:
-            positive_node = AgentNode(agent, "+")
-            negative_node = AgentNode(agent, "-")
+            positive_node = AgentNode(agent, POSITIVE)
+            negative_node = AgentNode(agent, NEGATIVE)
             self.positive_dict[agent] = positive_node
             self.negative_dict[agent] = negative_node
 
