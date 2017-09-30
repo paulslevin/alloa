@@ -21,15 +21,11 @@ class Agent(object):
         return "AGENT_{}_{}".format(self.level, self.id)
 
     def __repr__(self):
-        str_kwargs = ['id={}'.format(self.id),
-                      'hierarchy={}'.format(self.hierarchy)]
-        if self.capacities:
-            str_kwargs.append('capacities={}'.format(self.capacities))
-        if self.preferences:
-            str_kwargs.append('preferences={}'.format(self.preferences))
-        if self.name:
-            str_kwargs.append('name={}'.format(self.name))
-
+        str_kwargs = []
+        for attr in [ 'id', 'hierarchy', 'capacities', 'preferences', 'name']:
+            value = getattr(self, attr)
+            if value is not None:
+                str_kwargs.append('{}={}'.format(attr, value))
         return self.repr_parser.parse(str_kwargs)
 
     @property
