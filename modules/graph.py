@@ -12,7 +12,7 @@ class AgentNode(object):
     def __init__(self, agent, polarity):
         self.agent = agent
         self.polarity = polarity
-        self.parser = ReprParser(self)
+        self.repr_parser = ReprParser(self)
 
     def __str__(self):
         return '{}({})'.format(self.agent, self.polarity)
@@ -20,7 +20,7 @@ class AgentNode(object):
     def __repr__(self):
         str_kwargs = ['agent={}'.format(str(self.agent)),
                       'polarity={}'.format(self.polarity) ]
-        return self.parser.parse(str_kwargs)
+        return self.repr_parser.parse(str_kwargs)
 
 
 class HierarchyGraph(nx.DiGraph):
@@ -30,24 +30,42 @@ class HierarchyGraph(nx.DiGraph):
     is the capacity of the agent. These are glued together to form the full 
     allocation graph.
     '''
-    def __init__(self, hierarchy, preferred_agents):
+    def __init__(self, hierarchy, agents):
+        '''
+        Parameters
+        ----------
+        hierarchy: Hierarchy
+            The hierarchy we are modelling as a graph.
+        agents: list of Agent
+            Agents used to populate the graph. These don't necessarily have to
+            be the same agents as those on the hierarchy -- there's no need to
+            include agents that aren't preferred by anyone on the level beneath,
+            for example.
+        '''
         super(HierarchyGraph, self).__init__()
         self.hierarchy = hierarchy
         self.level = hierarchy.level
+        self.agents = agents
+
         self.in_nodes = []
         self.out_nodes = []
-        self.preferred_agents = preferred_agents
         self.positive_dict = {}
         self.negative_dict = {}
 
-    def __repr__(self):
-        return "HIERARCHY_GRAPH_{}".format(self.level)
+        self.repr_parser = ReprParser(self)
 
     def __str__(self):
         return "HIERARCHY_GRAPH_{}".format(self.level)
 
+    def __repr__(self):
+        str_kwargs = ['hierarchy={}'.format(self.hierarchy)]
+        if self.agents:
+            agent_strs = [str(agent) for agent in self.agents]
+            str_kwargs.append('agents={}'.format(agent_strs).replace("'",'') )
+        return self.repr_parser.parse(str_kwargs)
+
     def agents_to_nodes(self):
-        for agent in self.preferred_agents:
+        for agent in self.agents:
             positive_node = AgentNode(agent, POSITIVE)
             negative_node = AgentNode(agent, NEGATIVE)
             self.positive_dict[agent] = positive_node
@@ -55,7 +73,7 @@ class HierarchyGraph(nx.DiGraph):
 
     def generate_agent_nodes(self):
         self.agents_to_nodes()
-        for agent in self.preferred_agents:
+        for agent in self.agents:
             demand = agent.upper_capacity
             out_node = self.agent_to_positive_node(agent)
             in_node = self.agent_to_negative_node(agent)
@@ -72,13 +90,13 @@ class HierarchyGraph(nx.DiGraph):
 
     def positive_agent_nodes(self):
         # Keep these in order
-        return [self.positive_dict[agent] for agent in self.preferred_agents]
+        return [self.positive_dict[agent] for agent in self.agents]
 
     def agent_to_negative_node(self, agent):
         return self.negative_dict[agent]
 
     def negative_agent_nodes(self):
-        return [self.negative_dict[agent] for agent in self.preferred_agents]
+        return [self.negative_dict[agent] for agent in self.agents]
 
 
 class AllocationGraph(nx.DiGraph):
@@ -121,7 +139,7 @@ class AllocationGraph(nx.DiGraph):
             self.add_edge(node, self.sink, weight=0)
 
     def glue_blocks(self, block1, block2, cost_function):
-        for agent in block1.preferred_agents:
+        for agent in block1.agents:
             for preference in agent.preferences:
                 out_node = block1.agent_to_negative_node(agent)
                 in_node = block2.agent_to_positive_node(preference)

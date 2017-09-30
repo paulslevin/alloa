@@ -122,9 +122,9 @@ class DataSequence(object):
                 self.block_list.append(first_block)
                 continue
             previous_block = self.block_list[i - 1]
-            previous_preferred_agents = previous_block.preferred_agents
+            previous_agents = previous_block.agents
             next_block = HierarchyGraph(hierarchy,
-                               hierarchy.preferred(previous_preferred_agents))
+                               hierarchy.preferred(previous_agents))
             next_block.generate_agent_nodes()
             self.block_list.append(next_block)
 

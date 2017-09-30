@@ -1,5 +1,5 @@
 from   modules.agents import Agent, Hierarchy
-from   modules.graph import AgentNode
+from   modules.graph import AgentNode, HierarchyGraph
 import unittest
 from   utils.enums import Polarity
 
@@ -24,3 +24,24 @@ class TestAgentNode(unittest.TestCase):
                          'AgentNode(agent=AGENT_1_1, polarity=+)')
         self.assertEqual(repr(self.negative_node),
                          'AgentNode(agent=AGENT_1_1, polarity=-)')
+
+
+class TestHierarchyGraph(unittest.TestCase):
+    def setUp(self):
+        hierarchy = Hierarchy(level=2)
+        agent_2_1 = Agent(id=1, hierarchy=hierarchy)
+        agent_2_2 = Agent(id=2, hierarchy=hierarchy)
+        agent_2_3 = Agent(id=3, hierarchy=hierarchy)
+        # Suppose that only agents 1 and 3 are preferred by the level 1 agents,
+        # so don't need put agent 2 on.
+        self.graph = HierarchyGraph(hierarchy=hierarchy,
+                                    agents=[agent_2_1, agent_2_3])
+
+    def test___str__(self):
+        self.assertEqual(str(self.graph), 'HIERARCHY_GRAPH_2')
+
+    def test___repr__(self):
+        self.assertEqual(
+            repr(self.graph),
+            'HierarchyGraph(hierarchy=HIERARCHY_2, agents=[AGENT_2_1, AGENT_2_3])',
+        )
