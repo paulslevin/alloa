@@ -37,7 +37,36 @@ NEGATIVE=Polarity.NEGATIVE
 
 
 class AgentNode(object):
+    '''Each agent is split into one negative and one positive AgentNode.
+    
+    Unfortunately, networkx digraphs do not allow for node capacities, only edge 
+    capacities. To handle this, a pair of AgentNodes with an edge (with capacities)
+    between them, plays the role of an individual graph node.
+   
+    Example
+    -------
+    Suppose project 'Spheres' allows two students to work on it simultaenously,
+    so it could have either 0, 1 or 2 students assigned to it. The agent would
+    have lower capacity 0, upper capacity 1.
+            _________
+           |Paul node|
+           |_________|___________________________
+           |          upper_capacity=2           |
+    ...--->| Paul(-) ------------------> Paul(+) |--->...
+           |          lower_capacity=0           |
+            -------------------------------------
+    '''
+
     def __init__(self, agent, polarity):
+        '''
+        Parameters
+        ----------
+        agent: Agent
+            Single Agent that this node represents (together with its opposite
+            polarity pair).
+        polarity: Polarity
+            Either POSITIVE(+) or NEGATIVE(-).
+        '''
         self.agent = agent
         self.polarity = polarity
 
@@ -65,11 +94,14 @@ class AgentNode(object):
 
 
 class HierarchyGraph(nx.DiGraph):
-    '''Represent a hierarchy as a directed graph (network). Each agent is split 
-    into one negative and one positive agent node, with one edge flowing from 
+    '''Represent a hierarchy as a directed graph (network).
+   
+    with one edge flowing from 
     negative to positive. The capacity of the edge (as an edge of the network)
-    is the capacity of the agent. These are glued together to form the full 
-    allocation graph.
+    is the capacity of the agent.
+
+    These are glued
+    together with edges to form the full allocation graph.
     '''
     def __init__(self, hierarchy, agents):
         '''
