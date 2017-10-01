@@ -38,13 +38,17 @@ class TestAgentNode(unittest.TestCase):
 class TestHierarchyGraph(unittest.TestCase):
     def setUp(self):
         hierarchy = Hierarchy(level=2)
-        self.agent_2_1 = Agent(id=1, hierarchy=hierarchy)
-        self.agent_2_2 = Agent(id=2, hierarchy=hierarchy)
-        self.agent_2_3 = Agent(id=3, hierarchy=hierarchy)
+        self.agent_2_1 = Agent(id=1, hierarchy=hierarchy, capacities=(2,5))
+        self.agent_2_2 = Agent(id=2, hierarchy=hierarchy, capacities=(0,1))
+        self.agent_2_3 = Agent(id=3, hierarchy=hierarchy, capacities=(1,1))
         # Suppose that only agents 1 and 3 are preferred by the level 1 agents,
         # so don't need put agent 2 on.
         self.graph = HierarchyGraph(hierarchy=hierarchy,
                                     agents=[self.agent_2_1, self.agent_2_3])
+        self.agent_node_2_1_p = AgentNode(self.agent_2_1, POSITIVE)
+        self.agent_node_2_1_n = AgentNode(self.agent_2_1, NEGATIVE)
+        self.agent_node_2_3_p = AgentNode(self.agent_2_3, POSITIVE)
+        self.agent_node_2_3_n = AgentNode(self.agent_2_3, NEGATIVE)
 
     def test___str__(self):
         self.assertEqual(str(self.graph), 'HIERARCHY_GRAPH_2')
@@ -58,8 +62,31 @@ class TestHierarchyGraph(unittest.TestCase):
     def test_agents_to_nodes(self):
         self.graph.agents_to_nodes()
         self.assertEqual(self.graph.positive_dict,
-                         {self.agent_2_1: AgentNode(self.agent_2_1, POSITIVE),
-                          self.agent_2_3: AgentNode(self.agent_2_3, POSITIVE),})
+                         {self.agent_2_1: self.agent_node_2_1_p,
+                          self.agent_2_3: self.agent_node_2_3_p,})
         self.assertEqual(self.graph.negative_dict,
-                         {self.agent_2_1: AgentNode(self.agent_2_1, NEGATIVE),
-                          self.agent_2_3: AgentNode(self.agent_2_3, NEGATIVE),})
+                         {self.agent_2_1: self.agent_node_2_1_n,
+                          self.agent_2_3: self.agent_node_2_3_n,})
+
+    def test_generate_agent_nodes(self):
+        self.graph.generate_agent_nodes()
+
+        # data=True will get the nodes with demand data.
+        nodes = self.graph.nodes(data=True)
+        expected_nodes = [
+            (self.agent_node_2_1_p, {'demand': 5}),
+            (self.agent_node_2_1_n, {'demand': -5}),
+            (self.agent_node_2_3_p, {'demand': 1}),
+            (self.agent_node_2_3_n, {'demand': -1}),
+        ]
+        self.assertItemsEqual(expected_nodes, nodes)
+
+        # data=True will get the edges with capacity and weight data.
+        edges = self.graph.edges(data=True)
+        expected_edges = [
+            (self.agent_node_2_1_p, self.agent_node_2_1_n, 
+             {'capacity': 3, 'weight': 0}),
+            (self.agent_node_2_3_p, self.agent_node_2_3_n,
+             {'capacity': 0, 'weight': 0}),
+        ]
+        self.assertItemsEqual(expected_edges, edges)

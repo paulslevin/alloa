@@ -37,24 +37,31 @@ NEGATIVE=Polarity.NEGATIVE
 
 
 class AgentNode(object):
-    '''Each agent is split into one negative and one positive AgentNode.
-    
+    '''The allocation will be calculated by making a network and calculating flow.
     Unfortunately, networkx digraphs do not allow for node capacities, only edge 
-    capacities. To handle this, a pair of AgentNodes with an edge (with capacities)
-    between them, plays the role of an individual graph node. The capacity of the
-    edge is the difference between the upper and lower capacities of the agent.
-   
+    capacities. Fix this by splitting agents up into a positive and negative
+    component and draw an edge between them.
+     
+      1) The capacity of the edge is the difference between the upper and 
+         lower capacities of the agent.
+      2) The demand of the positive AgentNode is the upper capacity of the agent.
+      3) The demand of the negative AgentNode is the (upper capacity of the agent)*(-1).
+
+    These rules mean we can treat the pair of nodes as an individual node in a 
+    network flow diagram (see paper for more).
+    
     Example
     -------
-    Suppose project 'Spheres' has upper capacity 2 and lower capacity 1, so it
-    must have 1 or 2 students working on it. Then the edge gets:
+    Suppose project 'Spheres' has upper capacity 2 and lower capacity 1, meaning
+    it must have either 1 or 2 students working on it. Then we have:
        capacity = upper_capacity - lower_capacity = 2 - 1 = 1.
-            ____________
-           |Spheres node|
-           |____________|_______________________
-           |             capacity=1             |
-    ...--->| Spheres(-) -----------> Spheres(+) |--->...
-            -------------------------------------
+       (+) demand = 2,  (-) demand = -2
+            ________________________________________
+           |  __________                __________  |
+    ...--->| |Spheres(+)| -----------> |Spheres(-)| | --->...
+           | | demand=2 |  capacity=1  | demand=-2| |
+           |  ----------               -----------  |
+            -----------------------------------------
     '''
 
     def __init__(self, agent, polarity):
