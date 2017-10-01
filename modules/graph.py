@@ -94,13 +94,7 @@ class AgentNode(object):
 
 
 class HierarchyGraph(nx.DiGraph):
-    '''Represent a hierarchy as a directed graph (network).
-   
-    with one edge flowing from 
-    negative to positive. The capacity of the edge (as an edge of the network)
-    is the capacity of the agent.
-
-    These are glued
+    '''Represent a hierarchy as a directed graph (network).These are glued
     together with edges to form the full allocation graph.
     '''
     def __init__(self, hierarchy, agents):
