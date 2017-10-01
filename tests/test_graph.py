@@ -25,6 +25,15 @@ class TestAgentNode(unittest.TestCase):
         self.assertEqual(repr(self.negative_node),
                          'AgentNode(agent=AGENT_1_1, polarity=-)')
 
+    def test___eq__(self):
+        self.positive_node2 = AgentNode(agent=self.agent, polarity=POSITIVE)
+        self.assertEquals(self.positive_node, self.positive_node2)
+        self.negative_node2 = AgentNode(agent=self.agent, polarity=NEGATIVE)
+        self.assertEquals(self.negative_node, self.negative_node2)
+
+    def test___neq__(self):
+        self.assertNotEqual(self.positive_node, self.negative_node)
+
 
 class TestHierarchyGraph(unittest.TestCase):
     def setUp(self):

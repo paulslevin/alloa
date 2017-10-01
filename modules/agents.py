@@ -17,7 +17,7 @@ would be represented by eight agent objects at a level 2 hierachy.
 '''
 
 import itertools
-from   utils.parsers import ReprParser
+from   utils.parsers import parse_repr
 from   utils.exceptions import AgentExistsError, AgentNotInPreferencesError
 
 
@@ -50,9 +50,6 @@ class Agent(object):
         self.capacities = capacities
         self.preferences = preferences
 
-        # Experiment with composition.
-        self.repr_parser = ReprParser(self)
-
     def __str__(self):
         return "AGENT_{}_{}".format(self.level, self.id)
 
@@ -62,7 +59,7 @@ class Agent(object):
             value = getattr(self, attr)
             if value is not None:
                 str_kwargs.append('{}={}'.format(attr, value))
-        return self.repr_parser.parse(str_kwargs)
+        return parse_repr(self, str_kwargs)
 
     @property
     def hierarchy(self):
@@ -100,12 +97,8 @@ class Hierarchy(object):
     '''Represent a bucket of agents.'''
 
     def __init__(self, level, agents=None):
-
         self.level = level
         self.agents = agents
-
-        # Experiment with composition.
-        self.repr_parser = ReprParser(self)
 
     def __str__(self):
         return 'HIERARCHY_{}'.format(str(self.level))
@@ -115,7 +108,7 @@ class Hierarchy(object):
         if self.agents:
             agent_strs = [str(agent) for agent in self.agents]
             str_kwargs.append('agents={}'.format(agent_strs).replace("'",'') )
-        return self.repr_parser.parse(str_kwargs)
+        return parse_repr(self, str_kwargs)
 
     @property
     def agents(self):

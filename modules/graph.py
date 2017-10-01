@@ -1,3 +1,31 @@
+'''Module for constructing a directed graph (network) to model the allocation.
+Hierarchies are converted into subgraphs (HierarchyGraph) of the main allocation
+graph (AllocationGraph). Edges between the subgraphs represent the preferences 
+of the agents between each hierarchy level.
+
+Example (cont. from agents.py)
+------------------------------
+Paul, Michael and Patricia are level 1 agents with preferences on level 2:
+Paul:     [Spheres, Circles, Lines]
+Michael:  [Circles, Algebra, Cones]
+Patricia: [Triangles, Mechanics, Algebra]
+Then the allocation graph looks like
+         _________                __________
+SOURCE--|Paul     |-------\------|Spheres   |--SINK
+   |    |---------|     ___\_____|----------|   |
+   \----|Michael  |----/    \----|Circles   |---/
+   |    |---------|    \     \   |----------|   |
+   \----|Patricia |-\   \     \--|Lines     |---/
+        |_________|  \   \_______|----------|   |
+                      \---\------|Algebra   |---/
+                       \   \     |----------|   |
+                        \   \----|Cones     |---/
+                         \       |----------|   |
+                          \------|Triangles |---/
+                           \     |----------|   |
+                            \----|Mechanics |---/
+                                 |__________|
+'''
 import networkx as nx
 import sys
 from   utils.enums import GraphElement, Polarity
@@ -22,6 +50,10 @@ class AgentNode(object):
         return parse_repr(self, str_kwargs)
 
     def __eq__(self, other):
+        '''These represent nodes on the allocation graph and are compared to
+        other objects in the networkx module, so makes sense to define rich
+        comparison operators. Also useful for testing.
+        '''
         if not isinstance(other, self.__class__):
             return False
         return self.agent == other.agent and self.polarity == other.polarity
@@ -30,7 +62,6 @@ class AgentNode(object):
         if not isinstance(other, self.__class__):
             return True
         return not(self.agent == other.agent and self.polarity == other.polarity)
-
 
 
 class HierarchyGraph(nx.DiGraph):
