@@ -10,21 +10,21 @@ Paul:     [Spheres, Circles, Lines]
 Michael:  [Circles, Algebra, Cones]
 Patricia: [Triangles, Mechanics, Algebra]
 Then the allocation graph looks like
-         _________                __________
-SOURCE--|Paul     |-------\------|Spheres   |--SINK
-   |    |---------|     ___\_____|----------|   |
-   \----|Michael  |----/    \----|Circles   |---/
-   |    |---------|    \     \   |----------|   |
-   \----|Patricia |-\   \     \--|Lines     |---/
-        |_________|  \   \_______|----------|   |
-                      \---\------|Algebra   |---/
-                       \   \     |----------|   |
-                        \   \----|Cones     |---/
-                         \       |----------|   |
-                          \------|Triangles |---/
-                           \     |----------|   |
-                            \----|Mechanics |---/
-                                 |__________|
+             _________                __________
+SOURCE------|Paul     |-------\------|Spheres   |------SINK
+   |        |---------|     ___\_____|----------|      /
+   \--------|Michael  |----/    \----|Circles   |-----/
+    \       |---------|    \     \   |----------|    /
+     \------|Patricia |-\   \     \--|Lines     |---/
+            |_________|  \   \_______|----------|   |
+                          \---\------|Algebra   |---/
+                           \   \     |----------|   |
+                            \   \----|Cones     |---/
+                             \       |----------|   |
+                              \------|Triangles |---/
+                               \     |----------|   |
+                                \----|Mechanics |---/
+                                     |__________|
 '''
 import networkx as nx
 import sys
