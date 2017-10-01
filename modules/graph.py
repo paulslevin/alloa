@@ -41,19 +41,19 @@ class AgentNode(object):
     
     Unfortunately, networkx digraphs do not allow for node capacities, only edge 
     capacities. To handle this, a pair of AgentNodes with an edge (with capacities)
-    between them, plays the role of an individual graph node.
+    between them, plays the role of an individual graph node. The capacity of the
+    edge is the difference between the upper and lower capacities of the agent.
    
     Example
     -------
-    Suppose project 'Spheres' allows two students to work on it simultaenously,
-    so it could have either 0, 1 or 2 students assigned to it. The agent would
-    have lower capacity 0, upper capacity 1.
-            _________
-           |Paul node|
-           |_________|___________________________
-           |          upper_capacity=2           |
-    ...--->| Paul(-) ------------------> Paul(+) |--->...
-           |          lower_capacity=0           |
+    Suppose project 'Spheres' has upper capacity 2 and lower capacity 1, so it
+    must have 1 or 2 students working on it. Then the edge gets:
+       capacity = upper_capacity - lower_capacity = 2 - 1 = 1.
+            ____________
+           |Spheres node|
+           |____________|_______________________
+           |             capacity=1             |
+    ...--->| Spheres(-) -----------> Spheres(+) |--->...
             -------------------------------------
     '''
 
@@ -130,6 +130,9 @@ class HierarchyGraph(nx.DiGraph):
         return parse_repr(self, str_kwargs)
 
     def agents_to_nodes(self):
+        '''Construct two AgentNode objects for each agent, and update
+        dictionary which keeps track of these.
+        '''
         for agent in self.agents:
             positive_node = AgentNode(agent, POSITIVE)
             negative_node = AgentNode(agent, NEGATIVE)
@@ -137,6 +140,10 @@ class HierarchyGraph(nx.DiGraph):
             self.negative_dict[agent] = negative_node
 
     def generate_agent_nodes(self):
+        '''Construct the AgentNodes for each edge and draw an edge between them.
+        Set the capacity of the edge to be the difference between the agent's
+        upper and lower capacity.
+        '''
         self.agents_to_nodes()
         for agent in self.agents:
             demand = agent.upper_capacity
