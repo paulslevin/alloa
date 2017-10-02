@@ -149,7 +149,7 @@ class HierarchyGraph(nx.DiGraph):
     def generate_agent_nodes(self):
         '''Construct the AgentNodes for each edge and draw an edge between them.
         Set the capacity of the edge to be the difference between the agent's
-        upper and lower capacity.
+        upper and lower capacity. Set demand to be sign(AgentNode)*upper_capacity.
         '''
         self.agents_to_nodes()
         for agent in self.agents:
@@ -165,16 +165,22 @@ class HierarchyGraph(nx.DiGraph):
                           weight=0)
 
     def agent_to_positive_node(self, agent):
+        '''Return positive node corresponding to the agent.'''
         return self.positive_dict[agent]
 
+    @property
     def positive_agent_nodes(self):
+        '''Return all positive agent nodes.'''
         # Keep these in order
         return [self.positive_dict[agent] for agent in self.agents]
 
     def agent_to_negative_node(self, agent):
+        '''Return negative node corresponding to the agent.'''
         return self.negative_dict[agent]
 
+    @property
     def negative_agent_nodes(self):
+        '''Return all negative agent nodes.'''
         return [self.negative_dict[agent] for agent in self.agents]
 
 
@@ -201,7 +207,7 @@ class AllocationGraph(nx.DiGraph):
         return "Graph with {} blocks".format(len(self.blocks))
 
     def populate_edges_from_source(self):
-        for node in self.first_block.positive_agent_nodes():
+        for node in self.first_block.positive_agent_nodes:
             self.add_edge(self.source, node, weight=0)
 
     def populate_internal_edges(self):
@@ -214,7 +220,7 @@ class AllocationGraph(nx.DiGraph):
                               capacity=capacity[edge])
 
     def populate_edges_to_sink(self):
-        for node in self.last_block.negative_agent_nodes():
+        for node in self.last_block.negative_agent_nodes:
             self.add_edge(node, self.sink, weight=0)
 
     def glue_blocks(self, block1, block2, cost_function):
