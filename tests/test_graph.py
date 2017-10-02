@@ -59,36 +59,36 @@ class TestHierarchyGraph(unittest.TestCase):
             'HierarchyGraph(hierarchy=HIERARCHY_2, agents=[AGENT_2_1, AGENT_2_3])',
         )
 
-    def test_agents_to_nodes(self):
-        self.graph.agents_to_nodes()
-        self.assertEqual(self.graph.positive_dict,
+    def test_assign_agents_to_nodes(self):
+        self.graph.assign_agents_to_nodes()
+        self.assertEqual(self.graph._agent_positive_node_map,
                          {self.agent_2_1: self.agent_node_2_1_p,
                           self.agent_2_3: self.agent_node_2_3_p,})
-        self.assertEqual(self.graph.negative_dict,
+        self.assertEqual(self.graph._agent_negative_node_map,
                          {self.agent_2_1: self.agent_node_2_1_n,
                           self.agent_2_3: self.agent_node_2_3_n,})
 
     def test_agent_to_positive_node(self):
-        self.graph.agents_to_nodes()
-        self.assertEqual(self.graph.agent_to_positive_node(self.agent_2_1),
+        self.graph.assign_agents_to_nodes()
+        self.assertEqual(self.graph.positive_node(self.agent_2_1),
                          self.agent_node_2_1_p)
-        self.assertEqual(self.graph.agent_to_positive_node(self.agent_2_3),
+        self.assertEqual(self.graph.positive_node(self.agent_2_3),
                          self.agent_node_2_3_p)
 
     def test_agent_to_negative_node(self):
-        self.graph.agents_to_nodes()
-        self.assertEqual(self.graph.agent_to_negative_node(self.agent_2_1),
+        self.graph.assign_agents_to_nodes()
+        self.assertEqual(self.graph.negative_node(self.agent_2_1),
                          self.agent_node_2_1_n)
-        self.assertEqual(self.graph.agent_to_negative_node(self.agent_2_3),
+        self.assertEqual(self.graph.negative_node(self.agent_2_3),
                          self.agent_node_2_3_n)
 
     def test_positive_agent_nodes(self):
-        self.graph.agents_to_nodes()
+        self.graph.assign_agents_to_nodes()
         self.assertEqual(self.graph.positive_agent_nodes,
                          [self.agent_node_2_1_p, self.agent_node_2_3_p])
 
     def test_negative_agent_nodes(self):
-        self.graph.agents_to_nodes()
+        self.graph.assign_agents_to_nodes()
         self.assertEqual(self.graph.negative_agent_nodes,
                          [self.agent_node_2_1_n, self.agent_node_2_3_n])
 
