@@ -68,6 +68,20 @@ class TestHierarchyGraph(unittest.TestCase):
                          {self.agent_2_1: self.agent_node_2_1_n,
                           self.agent_2_3: self.agent_node_2_3_n,})
 
+    def test_agent_to_positive_node(self):
+        self.graph.agents_to_nodes()
+        self.assertEqual(self.graph.agent_to_positive_node(self.agent_2_1),
+                         self.agent_node_2_1_p)
+        self.assertEqual(self.graph.agent_to_positive_node(self.agent_2_3),
+                         self.agent_node_2_3_p)
+
+    def test_agent_to_negative_node(self):
+        self.graph.agents_to_nodes()
+        self.assertEqual(self.graph.agent_to_negative_node(self.agent_2_1),
+                         self.agent_node_2_1_n)
+        self.assertEqual(self.graph.agent_to_negative_node(self.agent_2_3),
+                         self.agent_node_2_3_n)
+
     def test_generate_agent_nodes(self):
         self.graph.generate_agent_nodes()
 
