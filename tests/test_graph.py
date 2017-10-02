@@ -98,8 +98,8 @@ class TestHierarchyGraph(unittest.TestCase):
         # data=True will get the nodes with demand data.
         nodes = self.graph.nodes(data=True)
         expected_nodes = [
-            (self.agent_node_2_1_p, {'demand': 5}),
-            (self.agent_node_2_1_n, {'demand': -5}),
+            (self.agent_node_2_1_p, {'demand': 2}),
+            (self.agent_node_2_1_n, {'demand': -2}),
             (self.agent_node_2_3_p, {'demand': 1}),
             (self.agent_node_2_3_n, {'demand': -1}),
         ]

@@ -37,29 +37,25 @@ NEGATIVE=Polarity.NEGATIVE
 
 
 class AgentNode(object):
-    '''The allocation will be calculated by making a network and calculating flow.
-    Unfortunately, networkx digraphs do not allow for node capacities, only edge 
-    capacities. Fix this by splitting agents up into a positive and negative
-    component and draw an edge between them.
+    '''Agent nodes split into positive and negative components, with an edge
+    drawn between them. The capacity of this edge represents the capacity of the
+    agent. The rules are:
      
       1) The capacity of the edge is the difference between the upper and 
          lower capacities of the agent.
-      2) The demand of the positive AgentNode is the upper capacity of the agent.
-      3) The demand of the negative AgentNode is the (upper capacity of the agent)*(-1).
-
-    These rules mean we can treat the pair of nodes as an individual node in a 
-    network flow diagram (see paper for more).
-    
+      2) The demand of the positive node is the lower capacity of the agent.
+      3) The demand of the negative node is the (lower capacity of the agent)*(-1).
+      
     Example
     -------
     Suppose project 'Spheres' has upper capacity 2 and lower capacity 1, meaning
     it must have either 1 or 2 students working on it. Then we have:
        capacity = upper_capacity - lower_capacity = 2 - 1 = 1.
-       (+) demand = 2,  (-) demand = -2
+       (+) demand = 1,  (-) demand = -1
             ________________________________________
            |  __________                __________  |
     ...--->| |Spheres(+)| -----------> |Spheres(-)| | --->...
-           | | demand=2 |  capacity=1  | demand=-2| |
+           | | demand=1 |  capacity=1  | demand=-1| |
            |  ----------               -----------  |
             -----------------------------------------
     '''
@@ -149,11 +145,11 @@ class HierarchyGraph(nx.DiGraph):
     def generate_agent_nodes(self):
         '''Construct the AgentNodes for each edge and draw an edge between them.
         Set the capacity of the edge to be the difference between the agent's
-        upper and lower capacity. Set demand to be sign(AgentNode)*upper_capacity.
+        upper and lower capacity. Set demand to be (node polarity)*lower_capacity.
         '''
         self.assign_agents_to_nodes()
         for agent in self.agents:
-            demand = agent.upper_capacity
+            demand = agent.lower_capacity
             out_node = self.positive_node(agent)
             in_node = self.negative_node(agent)
             capacity = agent.capacity_difference
