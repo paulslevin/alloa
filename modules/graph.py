@@ -37,29 +37,9 @@ NEGATIVE=Polarity.NEGATIVE
 
 
 class AgentNode(object):
-    '''Agent nodes split into positive and negative components, with an edge
-    drawn between them. The capacity of this edge represents the capacity of the
-    agent. The rules are:
-     
-      1) The capacity of the edge is the difference between the upper and 
-         lower capacities of the agent.
-      2) The demand of the positive node is the lower capacity of the agent.
-      3) The demand of the negative node is the (lower capacity of the agent)*(-1).
-      
-    Example
-    -------
-    Suppose project 'Spheres' has upper capacity 2 and lower capacity 1, meaning
-    it must have either 1 or 2 students working on it. Then we have:
-       capacity = upper_capacity - lower_capacity = 2 - 1 = 1.
-       (+) demand = 1,  (-) demand = -1
-            ________________________________________
-           |  __________                __________  |
-    ...--->| |Spheres(+)| -----------> |Spheres(-)| | --->...
-           | | demand=1 |  capacity=1  | demand=-1| |
-           |  ----------               -----------  |
-            -----------------------------------------
+    '''Agent nodes split into positive and negative component nodes. An edge is
+    drawn between them when the graph is built. 
     '''
-
     def __init__(self, agent, polarity):
         '''
         Parameters
@@ -97,8 +77,28 @@ class AgentNode(object):
 
 
 class HierarchyGraph(nx.DiGraph):
-    '''Represent a hierarchy as a directed graph (network).These are glued
-    together with edges to form the full allocation graph.
+    '''Represent a hierarchy as a directed graph (network). The full alllocation
+    graph consists of these objects, glued together with edges. For each agent,
+    split them into positive and negative agent nodes and draw an edge between
+    these. The capacity of the edge represents the capacity of the agent. The
+    rules are:
+
+      1) edge capacity = agent upper capacity - agent lower capacity.
+      2) positive node demand = agent lower capacity.
+      3) negative node demand = agent lower capacity * (-1).
+      
+    Example
+    -------
+    Suppose project 'Spheres' has upper capacity 2 and lower capacity 1, meaning
+    it must have either 1 or 2 students working on it. Then:
+       capacity = upper_capacity - lower_capacity = 2 - 1 = 1.
+       (+) demand = 1,  (-) demand = -1
+            ________________________________________
+           |  __________                __________  |
+    ...--->| |Spheres(+)| -----------> |Spheres(-)| | --->...
+           | | demand=1 |  capacity=1  | demand=-1| |
+           |  ----------               -----------  |
+            -----------------------------------------
     '''
     def __init__(self, hierarchy, agents):
         '''
