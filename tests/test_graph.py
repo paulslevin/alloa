@@ -1,5 +1,6 @@
 from   modules.agents import Agent, Hierarchy
 from   modules.graph import AgentNode, HierarchyGraph
+import networkx as nx
 import unittest
 from   utils.enums import Polarity
 
@@ -37,14 +38,16 @@ class TestAgentNode(unittest.TestCase):
 
 class TestHierarchyGraph(unittest.TestCase):
     def setUp(self):
-        hierarchy = Hierarchy(level=2)
-        self.agent_2_1 = Agent(id=1, hierarchy=hierarchy, capacities=(2,5))
-        self.agent_2_2 = Agent(id=2, hierarchy=hierarchy, capacities=(0,1))
-        self.agent_2_3 = Agent(id=3, hierarchy=hierarchy, capacities=(1,1))
+        self.hierarchy = Hierarchy(level=2)
+        self.agent_2_1 = Agent(id=1, hierarchy=self.hierarchy, capacities=(2,5))
+        self.agent_2_2 = Agent(id=2, hierarchy=self.hierarchy, capacities=(0,1))
+        self.agent_2_3 = Agent(id=3, hierarchy=self.hierarchy, capacities=(1,1))
+
         # Suppose that only agents 1 and 3 are preferred by the level 1 agents,
         # so don't need put agent 2 on.
-        self.graph = HierarchyGraph(hierarchy=hierarchy,
-                                    agents=[self.agent_2_1, self.agent_2_3])
+        self.agents = [self.agent_2_1, self.agent_2_3]
+        self.graph = HierarchyGraph(self.hierarchy, self.agents)
+
         self.agent_node_2_1_p = AgentNode(self.agent_2_1, POSITIVE)
         self.agent_node_2_1_n = AgentNode(self.agent_2_1, NEGATIVE)
         self.agent_node_2_3_p = AgentNode(self.agent_2_3, POSITIVE)
@@ -58,6 +61,48 @@ class TestHierarchyGraph(unittest.TestCase):
             repr(self.graph),
             'HierarchyGraph(hierarchy=HIERARCHY_2, agents=[AGENT_2_1, AGENT_2_3])',
         )
+
+    def test___eq__(self):
+        '''Generating nodes and agents by hand results in an equivalent graph.'''
+        self.graph.assign_agents_to_nodes()
+        self.graph.generate_agent_nodes()
+
+        graph = HierarchyGraph(hierarchy=self.hierarchy, agents=[])
+        graph.add_nodes_from([
+            (self.agent_node_2_1_p, {'demand': 2}),
+            (self.agent_node_2_1_n, {'demand': -2}),
+            (self.agent_node_2_3_p, {'demand': 1}),
+            (self.agent_node_2_3_n, {'demand': -1}),
+        ])
+        graph.add_edges_from([(self.agent_node_2_1_p,
+                               self.agent_node_2_1_n,
+                               {'weight': 0, 'capacity': 3}),
+                              (self.agent_node_2_3_p,
+                               self.agent_node_2_3_n,
+                               {'weight': 0, 'capacity': 0}),])
+        graph.agents = self.agents
+        self.assertEqual(graph, self.graph)
+
+    def test___neq__(self):
+        self.graph.assign_agents_to_nodes()
+        self.graph.generate_agent_nodes()
+
+        graph = HierarchyGraph(hierarchy=self.hierarchy, agents=[])
+        graph.add_nodes_from([
+            (self.agent_node_2_1_p, {'demand': 3}), # Differs only here.
+            (self.agent_node_2_1_n, {'demand': -2}),
+            (self.agent_node_2_3_p, {'demand': 1}),
+            (self.agent_node_2_3_n, {'demand': -1}),
+        ])
+        graph.add_edges_from([(self.agent_node_2_1_p, 
+                               self.agent_node_2_1_n,
+                               {'weight': 0, 'capacity': 3}),
+                              (self.agent_node_2_3_p,
+                               self.agent_node_2_3_n,
+                               {'weight': 0, 'capacity': 0}),])
+        graph.agents = self.agents
+
+        self.assertNotEqual(graph, self.graph)
 
     def test_assign_agents_to_nodes(self):
         self.graph.assign_agents_to_nodes()
@@ -93,6 +138,7 @@ class TestHierarchyGraph(unittest.TestCase):
                          [self.agent_node_2_1_n, self.agent_node_2_3_n])
 
     def test_generate_agent_nodes(self):
+        self.graph.assign_agents_to_nodes()
         self.graph.generate_agent_nodes()
 
         # data=True will get the nodes with demand data.
@@ -114,3 +160,9 @@ class TestHierarchyGraph(unittest.TestCase):
              {'capacity': 0, 'weight': 0}),
         ]
         self.assertItemsEqual(expected_edges, edges)
+
+    def test_full_subgraph(self):
+        full_graph = HierarchyGraph.full_subgraph(self.hierarchy, self.agents)
+        self.graph.assign_agents_to_nodes()
+        self.graph.generate_agent_nodes()
+        self.assertEqual(full_graph, self.graph)

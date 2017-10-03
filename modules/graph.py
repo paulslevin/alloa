@@ -132,6 +132,24 @@ class HierarchyGraph(nx.DiGraph):
             str_kwargs.append('agents={}'.format(agent_strs).replace("'",'') )
         return parse_repr(self, str_kwargs)
 
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return all([
+            list(self.edges(data=True)) == list(other.edges(data=True)),
+            self.hierarchy == other.hierarchy,
+            self.agents == other.agents
+        ])
+
+    def __neq__(self, other):
+        if not isinstance(other, self.__class__):
+            return True
+        return not all([
+            list(self.edges(data=True)) == list(other.edges(data=True)),
+            self.hierarchy == other.hierarchy,
+            self.agents == other.agents
+        ])
+
     def assign_agents_to_nodes(self):
         '''Construct two AgentNode objects for each agent, and update
         dictionary which keeps track of these.
@@ -147,7 +165,6 @@ class HierarchyGraph(nx.DiGraph):
         Set the capacity of the edge to be the difference between the agent's
         upper and lower capacity. Set demand to be (node polarity)*lower_capacity.
         '''
-        self.assign_agents_to_nodes()
         for agent in self.agents:
             demand = agent.lower_capacity
             out_node = self.positive_node(agent)
@@ -155,10 +172,15 @@ class HierarchyGraph(nx.DiGraph):
             capacity = agent.capacity_difference
             self.add_node(out_node, demand=demand)
             self.add_node(in_node, demand=-demand)
-            self.add_edge(out_node,
-                          in_node,
-                          capacity=capacity,
-                          weight=0)
+            self.add_edge(out_node, in_node, capacity=capacity, weight=0)
+
+    @classmethod
+    def full_subgraph(cls, hierarchy, agents):
+        '''Create graph with all agent nodes and edges set up.'''
+        graph = cls(hierarchy, agents)
+        graph.assign_agents_to_nodes()
+        graph.generate_agent_nodes()
+        return graph
 
     def positive_node(self, agent):
         '''Return positive node corresponding to the agent.'''
