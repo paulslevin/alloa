@@ -207,8 +207,8 @@ class AllocationGraph(nx.DiGraph):
         super(AllocationGraph, self).__init__()
         self.blocks = block_list
         # should be enums
-        self.source = "SOURCE"
-        self.sink = "SINK"
+        self.source = GraphElement.SOURCE
+        self.sink = GraphElement.SINK
         self.first_block = block_list[0]
         self.last_block = block_list[-1]
         self.hierarchies = [block.hierarchy for block in self.blocks]
