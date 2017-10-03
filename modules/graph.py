@@ -221,13 +221,6 @@ class AllocationGraph(nx.DiGraph):
         self.simple_flow = None
         self.allocation = []
 
-        self.first_subgraph = self.subgraphs[0]
-        self.last_subgraph = self.subgraphs[-1]
-        self.hierarchies = [subgraph.hierarchy for subgraph in self.subgraphs]
-        self.first_level_agents = self.hierarchies[0].agents
-        self.first_level = self.hierarchies[0].level
-        self.last_level = self.hierarchies[-1].level
-
     def __str__(self):
         return 'ALLOCATION_GRAPH({})'.format(len(self.subgraphs))
    
@@ -237,6 +230,32 @@ class AllocationGraph(nx.DiGraph):
             subgraph_strs = [str(subgraph) for subgraph in self.subgraphs]
             str_kwargs.append('subgraphs={}'.format(subgraph_strs).replace("'",'') )
         return parse_repr(self, str_kwargs)
+
+    @property
+    def first_subgraph(self):
+        if self.subgraphs:
+            return self.subgraphs[0]
+        
+    @property
+    def last_subgraph(self):
+        if self.subgraphs:
+            return self.subgraphs[-1]
+
+    @property
+    def hierarchies(self):
+        return [subgraph.hierarchy for subgraph in self.subgraphs]
+
+    @property
+    def first_level_agents(self):
+        return self.hierarchies[0].agents
+
+    @property
+    def first_level(self):
+        return self.hierarchies[0].level
+
+    @property
+    def last_level(self):
+        return self.hierarchies[-1].level
 
     def populate_edges_from_source(self):
         for node in self.first_subgraph.positive_agent_nodes:

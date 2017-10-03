@@ -227,3 +227,25 @@ class TestAllocationGraph(unittest.TestCase):
             repr(self.allocation_graph), 
             'AllocationGraph(subgraphs=[HIERARCHY_GRAPH_1, HIERARCHY_GRAPH_2, HIERARCHY_GRAPH_3])'
         )
+
+    def test_first_subgraph(self):
+        self.assertEqual(self.allocation_graph.first_subgraph,
+                         self.student_subgraph)
+
+    def test_last_subgraph(self):
+        self.assertEqual(self.allocation_graph.last_subgraph,
+                         self.supervisor_subgraph)
+
+    def test_hierarchies(self):
+        self.assertEqual(self.allocation_graph.hierarchies,
+                         [self.students, self.projects, self.supervisors])
+
+    def test_first_level_agents(self):
+        self.assertEqual(self.allocation_graph.first_level_agents,
+                         [self.student1, self.student2, self.student3])
+
+    def test_first_level(self):
+        self.assertEqual(self.allocation_graph.first_level, 1)
+
+    def test_last_level(self):
+        self.assertEqual(self.allocation_graph.last_level, 3)
