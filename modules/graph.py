@@ -136,7 +136,7 @@ class HierarchyGraph(nx.DiGraph):
         if not isinstance(other, self.__class__):
             return False
         return all([
-            list(self.edges(data=True)) == list(other.edges(data=True)),
+            list(sorted(self.edges(data=True))) == list(sorted(other.edges(data=True))),
             self.hierarchy == other.hierarchy,
             self.agents == other.agents
         ])
@@ -145,7 +145,7 @@ class HierarchyGraph(nx.DiGraph):
         if not isinstance(other, self.__class__):
             return True
         return not all([
-            list(self.edges(data=True)) == list(other.edges(data=True)),
+            list(sorted(self.edges(data=True))) == list(sorted(other.edges(data=True))),
             self.hierarchy == other.hierarchy,
             self.agents == other.agents
         ])
@@ -203,49 +203,59 @@ class HierarchyGraph(nx.DiGraph):
 
 
 class AllocationGraph(nx.DiGraph):
-    def __init__(self, block_list):
+    def __init__(self, subgraphs):
+        '''
+        Parameters
+        ==========
+        subgraphs: list HierarchyGraphs
+            The hierarchy graphs are glued together by edges representing the
+            preferences of each of their agents.
+        '''
         super(AllocationGraph, self).__init__()
-        self.blocks = block_list
-        # should be enums
+        self.subgraphs = subgraphs
         self.source = GraphElement.SOURCE
         self.sink = GraphElement.SINK
-        self.first_block = block_list[0]
-        self.last_block = block_list[-1]
-        self.hierarchies = [block.hierarchy for block in self.blocks]
-        self.first_level_agents = self.hierarchies[0].agents
-        self.first_level = self.hierarchies[0].level
-        self.last_level = self.hierarchies[-1].level
         self.flow = None
         self.flow_cost = None
         self.max_flow = None
         self.simple_flow = None
         self.allocation = []
 
+        self.first_subgraph = self.subgraphs[0]
+        self.last_subgraph = self.subgraphs[-1]
+        self.hierarchies = [subgraph.hierarchy for subgraph in self.subgraphs]
+        self.first_level_agents = self.hierarchies[0].agents
+        self.first_level = self.hierarchies[0].level
+        self.last_level = self.hierarchies[-1].level
+
     def __str__(self):
-        return "Graph with {} blocks".format(len(self.blocks))
+        return 'ALLOCATION_GRAPH({})'.format(len(self.subgraphs))
+    
+    def __repr__(self):
+        return ''
 
     def populate_edges_from_source(self):
-        for node in self.first_block.positive_agent_nodes:
+        for node in self.first_subgraph.positive_agent_nodes:
             self.add_edge(self.source, node, weight=0)
 
     def populate_internal_edges(self):
-        for block in self.blocks:
-            weight = nx.get_edge_attributes(block, "weight")
-            capacity = nx.get_edge_attributes(block, "capacity")
-            for edge in block.edges():
+        for subgraph in self.subgraphs:
+            weight = nx.get_edge_attributes(subgraph, "weight")
+            capacity = nx.get_edge_attributes(subgraph, "capacity")
+            for edge in subgraph.edges():
                 self.add_edge(edge[0], edge[1],
                               weight=weight[edge],
                               capacity=capacity[edge])
 
     def populate_edges_to_sink(self):
-        for node in self.last_block.negative_agent_nodes:
+        for node in self.last_subgraph.negative_agent_nodes:
             self.add_edge(node, self.sink, weight=0)
 
-    def glue_blocks(self, block1, block2, cost_function):
-        for agent in block1.agents:
+    def glue(self, subgraph1, subgraph2, cost_function):
+        for agent in subgraph1.agents:
             for preference in agent.preferences:
-                out_node = block1.negative_node(agent)
-                in_node = block2.positive_node(preference)
+                out_node = subgraph1.negative_node(agent)
+                in_node = subgraph2.positive_node(preference)
                 self.add_edge(out_node,
                               in_node,
                               weight=cost_function(agent, preference))
@@ -254,9 +264,9 @@ class AllocationGraph(nx.DiGraph):
         self.populate_edges_from_source()
         self.populate_edges_to_sink()
         self.populate_internal_edges()
-        for i, block in enumerate(self.blocks[1:]):
+        for i, subgraph in enumerate(self.subgraphs[1:]):
             cost = costs[i]
-            self.glue_blocks(self.blocks[i], block, cost)
+            self.glue(self.subgraphs[i], subgraph, cost)
 
     def set_flow(self):
         try:

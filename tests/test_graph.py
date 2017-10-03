@@ -1,5 +1,5 @@
 from   modules.agents import Agent, Hierarchy
-from   modules.graph import AgentNode, HierarchyGraph
+from   modules.graph import AgentNode, HierarchyGraph, AllocationGraph
 import networkx as nx
 import unittest
 from   utils.enums import Polarity
@@ -166,3 +166,58 @@ class TestHierarchyGraph(unittest.TestCase):
         self.graph.assign_agents_to_nodes()
         self.graph.generate_agent_nodes()
         self.assertEqual(full_graph, self.graph)
+
+
+class TestAllocationGraph(unittest.TestCase):
+    '''Example from paper.'''
+    def setUp(self):
+        self.students    = Hierarchy(level=1)
+        self.projects    = Hierarchy(level=2)
+        self.supervisors = Hierarchy(level=3)
+
+        self.supervisor1 = Agent(id=1, hierarchy=self.supervisors, 
+                                 capacities=(1,2), name='Supervisor 1')
+        self.supervisor2 = Agent(id=2, hierarchy=self.supervisors,
+                                 capacities=(0,2), name='Supervisor 2')
+        self.supervisor3 = Agent(id=3, hierarchy=self.supervisors,
+                                 capacities=(0,2), name='Supervisor 3')
+        self.supervisor4 = Agent(id=4, hierarchy=self.supervisors,
+                                 capacities=(0,2), name='Supervisor 4')
+
+        self.project1 = Agent(id=1, hierarchy=self.projects, 
+                              capacities=(0,2), 
+                              preferences=[self.supervisor1, self.supervisor2],
+                              name='Project 1')
+        self.project2 = Agent(id=2, hierarchy=self.projects, 
+                              capacities=(0,2),
+                              preferences=[self.supervisor2, self.supervisor3,
+                                           self.supervisor1, self.supervisor4],
+                              name='Project 2')
+
+        self.student1 = Agent(id=1, hierarchy=self.students, capacities=(0,1),
+                              preferences=[self.project1, self.project2],
+                              name='Student 1')
+        self.student2 = Agent(id=2, hierarchy=self.students, capacities=(0,1),
+                              preferences=[self.project1, self.project2],
+                              name='Student 2')
+        self.student3 = Agent(id=3, hierarchy=self.students, capacities=(0,1),
+                              preferences=[self.project2],
+                              name='Student 3')
+
+        self.student_subgraph = HierarchyGraph(
+            self.students, [self.student1, self.student2, self.student3],
+        )
+        self.project_subgraph = HierarchyGraph(
+            self.projects, [self.project1, self.project2],
+        )
+        self.supervisor_subgraph = HierarchyGraph(
+            self.supervisors, [self.supervisor1, self.supervisor2,
+                               self.supervisor3, self.supervisor4],
+        )
+
+        self.allocation_graph = AllocationGraph([self.student_subgraph,
+                                                 self.project_subgraph,
+                                                 self.supervisor_subgraph])
+
+    def test___str__(self):
+        self.assertEqual(str(self.allocation_graph), 'ALLOCATION_GRAPH(3)')
