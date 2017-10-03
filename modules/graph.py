@@ -230,9 +230,13 @@ class AllocationGraph(nx.DiGraph):
 
     def __str__(self):
         return 'ALLOCATION_GRAPH({})'.format(len(self.subgraphs))
-    
+   
     def __repr__(self):
-        return ''
+        str_kwargs = []
+        if self.subgraphs:
+            subgraph_strs = [str(subgraph) for subgraph in self.subgraphs]
+            str_kwargs.append('subgraphs={}'.format(subgraph_strs).replace("'",'') )
+        return parse_repr(self, str_kwargs)
 
     def populate_edges_from_source(self):
         for node in self.first_subgraph.positive_agent_nodes:

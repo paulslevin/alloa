@@ -221,3 +221,9 @@ class TestAllocationGraph(unittest.TestCase):
 
     def test___str__(self):
         self.assertEqual(str(self.allocation_graph), 'ALLOCATION_GRAPH(3)')
+
+    def test___repr__(self):
+        self.assertEqual(
+            repr(self.allocation_graph), 
+            'AllocationGraph(subgraphs=[HIERARCHY_GRAPH_1, HIERARCHY_GRAPH_2, HIERARCHY_GRAPH_3])'
+        )
