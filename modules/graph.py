@@ -63,7 +63,8 @@ class AgentNode(object):
 
     def __hash__(self):
         '''These objects are used as nodes in the graph, in particular they are
-        used as dictionary keys.
+        used as dictionary keys. There only exists one agent with each id and
+        level, so those keys plus polarity suffice as identifiers.
         '''
         return hash((self.agent.id, self.agent.level, self.polarity))
 
@@ -273,12 +274,7 @@ class AllocationGraph(nx.DiGraph):
 
     def populate_internal_edges(self):
         for subgraph in self.subgraphs:
-            weight = nx.get_edge_attributes(subgraph, "weight")
-            capacity = nx.get_edge_attributes(subgraph, "capacity")
-            for edge in subgraph.edges():
-                self.add_edge(edge[0], edge[1],
-                              weight=weight[edge],
-                              capacity=capacity[edge])
+            self.add_edges_from(subgraph.edges(data=True))
 
     def glue(self, subgraph1, subgraph2, cost_function):
         for agent in subgraph1.agents:
