@@ -1,7 +1,6 @@
 from itertools import izip
 import unittest
 from modules.agents import Agent, AgentExistsError, Hierarchy
-from modules.agents import AgentNotInPreferencesError
 
 
 class TestAgent(unittest.TestCase):
@@ -16,6 +15,10 @@ class TestAgent(unittest.TestCase):
     def test___repr__(self):
         self.assertEqual(repr(self.agent),
                          'Agent(id=1, hierarchy=HIERARCHY_1)')
+
+    def test___iter__(self):
+        agents = [a for a in self.hierarchy]
+        self.assertEqual(agents, self.hierarchy.agents)
 
     def test_upper_capacity(self):
         self.agent.capacities = [0, 1]
@@ -55,20 +58,18 @@ class TestAgent(unittest.TestCase):
         self.assertEqual(self.agent.preference_position(agent_2_3), 2)
         self.assertEqual(self.agent.preference_position(agent_2_4), 3)
 
+    def test_preference_position_no_preference(self):
+        hierarchy2 = Hierarchy(level=2)
+        other = Agent(id=1, hierarchy=hierarchy2)
+        self.assertEqual(self.agent.preferences, [])
+        self.assertEqual(self.agent.preference_position(other), 0)
+
     def test_AgentExistsError(self):
         '''Test creating an additional agent with the same id raises an Exception.'''
         with self.assertRaises(AgentExistsError) as context:
             double_agent = Agent(id=1, hierarchy=self.hierarchy)
         self.assertEqual(context.exception.message,
                          'HIERARCHY_1 already has an agent with id 1.')
-
-    def test_AgentNotInPreferencesError(self):
-        hierarchy2 = Hierarchy(level=2)
-        with self.assertRaises(AgentNotInPreferencesError) as context:
-            other_agent = Agent(id=1, hierarchy=hierarchy2)
-            self.agent.preference_position(other_agent)
-        self.assertEqual(context.exception.message,
-                         'AGENT_2_1 not in preferences of AGENT_1_1.')
                   
 
 class TestHierarchy(unittest.TestCase):

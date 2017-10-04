@@ -18,7 +18,7 @@ would be represented by eight agent objects at a level 2 hierachy.
 
 import itertools
 from   utils.parsers import parse_repr
-from   utils.exceptions import AgentExistsError, AgentNotInPreferencesError
+from   utils.exceptions import AgentExistsError
 
 
 class Agent(object):
@@ -98,17 +98,17 @@ class Agent(object):
 
     def preference_position(self, other):
         '''Position of another agent in the preference list.'''
-        for i, p in enumerate(self.preferences):
+        for i, preference in enumerate(self.preferences):
             # Is the agent in the preference list?
-            if other == p:
+            if other == preference:
                 return i + 1
             # Is the agent tied with other agents?
             try:
-                if other in p:
+                if other in preference:
                     return i + 1
             except TypeError:
                     continue
-        raise AgentNotInPreferencesError(self, other)
+        return 0
 
 
 class Hierarchy(object):
@@ -127,6 +127,9 @@ class Hierarchy(object):
             agent_strs = [str(agent) for agent in self.agents]
             str_kwargs.append('agents={}'.format(agent_strs).replace("'",'') )
         return parse_repr(self, str_kwargs)
+
+    def __iter__(self):
+        return iter(self.agents)
 
     @property
     def agents(self):

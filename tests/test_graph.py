@@ -2,6 +2,7 @@ from   modules.agents import Agent, Hierarchy
 from   modules.graph import AgentNode, HierarchyGraph, AllocationGraph
 import networkx as nx
 import unittest
+from   costs import SPACosts
 from   utils.enums import GraphElement, Polarity
 
 
@@ -41,6 +42,9 @@ class TestAgentNode(unittest.TestCase):
     def test___neq__(self):
         self.assertNotEqual(self.positive_node, self.negative_node)
 
+    def test_level(self):
+        self.assertEqual(self.positive_node.level, 1)
+        self.assertEqual(self.negative_node.level, 1)
 
 class TestHierarchyGraph(unittest.TestCase):
     def setUp(self):
@@ -224,6 +228,10 @@ class TestAllocationGraph(unittest.TestCase):
         self.allocation_graph = AllocationGraph([self.student_subgraph,
                                                  self.project_subgraph,
                                                  self.supervisor_subgraph])
+        self.source = self.allocation_graph.source
+        self.sink   = self.allocation_graph.sink
+
+        self.costs = SPACosts(self.allocation_graph)
 
     def test___str__(self):
         self.assertEqual(str(self.allocation_graph), 'ALLOCATION_GRAPH(3)')
@@ -246,6 +254,9 @@ class TestAllocationGraph(unittest.TestCase):
         self.assertEqual(self.allocation_graph.hierarchies,
                          [self.students, self.projects, self.supervisors])
 
+    def test_number_of_hierarchies(self):
+        self.assertEqual(self.allocation_graph.number_of_hierarchies, 3)
+
     def test_first_level_agents(self):
         self.assertEqual(self.allocation_graph.first_level_agents,
                          [self.student1, self.student2, self.student3])
@@ -253,25 +264,33 @@ class TestAllocationGraph(unittest.TestCase):
     def test_first_level(self):
         self.assertEqual(self.allocation_graph.first_level, 1)
 
+    def test_last_level_agents(self):
+        self.assertEqual(self.allocation_graph.last_level_agents,
+                         [self.supervisor1, self.supervisor2, 
+                          self.supervisor3, self.supervisor4])
+
     def test_last_level(self):
         self.assertEqual(self.allocation_graph.last_level, 3)
 
+    def test_min_upper_capacity_sum(self):
+        self.assertEqual(self.allocation_graph.min_upper_capacity_sum, 3)
+
     def test_populate_edges_from_source(self):
-        self.allocation_graph.populate_edges_from_source()
+        self.allocation_graph.populate_edges_from_source(self.costs.cost)
         positive_nodes = [AgentNode(self.student1, POSITIVE),
                           AgentNode(self.student2, POSITIVE),
                           AgentNode(self.student3, POSITIVE)]
-        expected = {p: {'weight': 0} for p in positive_nodes}
-        self.assertEqual(self.allocation_graph[SOURCE], expected)
+        expected = {p: {'weight': 256} for p in positive_nodes}
+        self.assertEqual(self.allocation_graph[self.source], expected)
 
     def test_populate_edges_to_sink(self):
-        self.allocation_graph.populate_edges_to_sink()
+        self.allocation_graph.populate_edges_to_sink(self.costs.cost)
         negative_nodes = [AgentNode(self.supervisor1, NEGATIVE),
                           AgentNode(self.supervisor2, NEGATIVE),
                           AgentNode(self.supervisor3, NEGATIVE),
                           AgentNode(self.supervisor3, NEGATIVE)]
         for n in negative_nodes:
-            self.assertEqual(self.allocation_graph[n], {SINK: {'weight': 0}})
+            self.assertEqual(self.allocation_graph[n], {self.sink: {'weight': 1}})
 
     def test_populate_internal_edges(self):
         self.allocation_graph.populate_internal_edges()

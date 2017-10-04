@@ -26,6 +26,8 @@ SOURCE------|Paul     |-------\------|Spheres   |------SINK
                                 \----|Mechanics |---/
                                      |__________|
 '''
+from   itertools import izip
+from   agents import Agent, Hierarchy
 import networkx as nx
 import sys
 from   utils.enums import GraphElement, Polarity
@@ -34,6 +36,11 @@ from   utils.parsers import parse_repr
 
 POSITIVE=Polarity.POSITIVE
 NEGATIVE=Polarity.NEGATIVE
+
+
+class Source(Agent):
+    def preference_position(self, other):
+        return 1
 
 
 class AgentNode(object):
@@ -81,6 +88,10 @@ class AgentNode(object):
         if not isinstance(other, self.__class__):
             return True
         return not(self.agent == other.agent and self.polarity == other.polarity)
+    
+    @property
+    def level(self):
+        return self.agent.level
 
 
 class HierarchyGraph(nx.DiGraph):
@@ -220,13 +231,14 @@ class AllocationGraph(nx.DiGraph):
         '''
         super(AllocationGraph, self).__init__()
         self.subgraphs = subgraphs
-        self.source = GraphElement.SOURCE
-        self.sink = GraphElement.SINK
-        self.flow = None
         self.flow_cost = None
         self.max_flow = None
         self.simple_flow = None
         self.allocation = []
+
+        self._source = None
+        self._sink = None
+        self.flow = None
 
     def __str__(self):
         return 'ALLOCATION_GRAPH({})'.format(len(self.subgraphs))
@@ -237,6 +249,31 @@ class AllocationGraph(nx.DiGraph):
             subgraph_strs = [str(subgraph) for subgraph in self.subgraphs]
             str_kwargs.append('subgraphs={}'.format(subgraph_strs).replace("'",'') )
         return parse_repr(self, str_kwargs)
+
+    @property
+    def source(self):
+        '''Cached property to generate source to avoid recreating objects.'''
+        if not self._source:
+            zero_hierarchy = Hierarchy(level=0)
+            # Create source agent which equally prefers all level 1 agents.
+            source_agent = Agent(id=1, hierarchy=zero_hierarchy,
+                                 preferences=[self.first_level_agents],
+                                 name=GraphElement.SOURCE)
+            self._source = AgentNode(source_agent, POSITIVE)
+        return self._source
+
+    @property
+    def sink(self):
+        '''Cached property to generate sink to avoid recreating objects.'''
+        if not self._sink:
+            final_hierarchy = Hierarchy(level=self.number_of_hierarchies + 1)
+            sink_agent = Agent(id=1, hierarchy=final_hierarchy,
+                          name=GraphElement.SINK)
+            # Each agent in the last hierarchy prefers the sink agent.
+            for agent in self.last_level_agents:
+                agent.preferences = [sink_agent]
+            self._sink = AgentNode(sink_agent, NEGATIVE)
+        return self._sink
 
     @property
     def first_subgraph(self):
@@ -253,6 +290,10 @@ class AllocationGraph(nx.DiGraph):
         return [subgraph.hierarchy for subgraph in self.subgraphs]
 
     @property
+    def number_of_hierarchies(self):
+        return len(self.hierarchies)
+
+    @property
     def first_level_agents(self):
         return self.hierarchies[0].agents
 
@@ -261,37 +302,50 @@ class AllocationGraph(nx.DiGraph):
         return self.hierarchies[0].level
 
     @property
+    def last_level_agents(self):
+        return self.hierarchies[-1].agents
+
+    @property
     def last_level(self):
         return self.hierarchies[-1].level
 
-    def populate_edges_from_source(self):
-        for node in self.first_subgraph.positive_agent_nodes:
-            self.add_edge(self.source, node, weight=0)
+    @property
+    def min_upper_capacity_sum(self):
+        capacity_sums = []
+        for hierarchy in self.hierarchies:
+            _sum = sum(agent.upper_capacity for agent in hierarchy)
+            capacity_sums.append(_sum)
+        return min(capacity_sums)
 
-    def populate_edges_to_sink(self):
+    def add_edge_with_cost(self, out_node, in_node, cost):
+        weight = cost(out_node, in_node)
+        self.add_edge(out_node, in_node, weight=weight)
+
+    def populate_edges_from_source(self, cost):
+        for node in self.first_subgraph.positive_agent_nodes:
+            self.add_edge_with_cost(self.source, node, cost)
+
+    def populate_edges_to_sink(self, cost):
         for node in self.last_subgraph.negative_agent_nodes:
-            self.add_edge(node, self.sink, weight=0)
+            self.add_edge_with_cost(node, self.sink, cost)
 
     def populate_internal_edges(self):
         for subgraph in self.subgraphs:
             self.add_edges_from(subgraph.edges(data=True))
-
-    def glue(self, subgraph1, subgraph2, cost_function):
+        
+    def glue(self, subgraph1, subgraph2, cost):
         for agent in subgraph1.agents:
             for preference in agent.preferences:
                 out_node = subgraph1.negative_node(agent)
-                in_node = subgraph2.positive_node(preference)
-                self.add_edge(out_node,
-                              in_node,
-                              weight=cost_function(agent, preference))
+                in_node  = subgraph2.positive_node(preference)
+                self.add_edge_with_cost(out_node, in_node, cost)
 
-    def setup_graph(self, *costs):
-        self.populate_edges_from_source()
-        self.populate_edges_to_sink()
+    def setup_graph(self, cost):
+        self.populate_edges_from_source(cost)
+        self.populate_edges_to_sink(cost)
         self.populate_internal_edges()
-        for i, subgraph in enumerate(self.subgraphs[1:]):
-            cost = costs[i]
-            self.glue(self.subgraphs[i], subgraph, cost)
+        for subgraph1, subgraph2 in izip(self.subgraphs, self.subgraphs[1:]):
+            self.glue(subgraph1, subgraph2, cost)
 
     def set_flow(self):
         try:
@@ -339,6 +393,3 @@ class AllocationGraph(nx.DiGraph):
             row += [row[i].preference_position(agent) for i, agent in
                     enumerate(row[1:])]
         self.allocation = matrix
-
-
-
