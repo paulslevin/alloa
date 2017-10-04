@@ -2,12 +2,14 @@ from   modules.agents import Agent, Hierarchy
 from   modules.graph import AgentNode, HierarchyGraph, AllocationGraph
 import networkx as nx
 import unittest
-from   utils.enums import Polarity
+from   utils.enums import GraphElement, Polarity
 
 
 POSITIVE = Polarity.POSITIVE
 NEGATIVE = Polarity.NEGATIVE
 
+SOURCE = GraphElement.SOURCE
+SINK   = GraphElement.SINK
 
 class TestAgentNode(unittest.TestCase):
     def setUp(self):
@@ -25,6 +27,10 @@ class TestAgentNode(unittest.TestCase):
                          'AgentNode(agent=AGENT_1_1, polarity=+)')
         self.assertEqual(repr(self.negative_node),
                          'AgentNode(agent=AGENT_1_1, polarity=-)')
+
+    def test___hash__(self):
+        other_positive_node = AgentNode(agent=self.agent, polarity=POSITIVE)
+        self.assertEqual(hash(self.positive_node), hash(other_positive_node))
 
     def test___eq__(self):
         self.positive_node2 = AgentNode(agent=self.agent, polarity=POSITIVE)
@@ -204,13 +210,13 @@ class TestAllocationGraph(unittest.TestCase):
                               preferences=[self.project2],
                               name='Student 3')
 
-        self.student_subgraph = HierarchyGraph(
+        self.student_subgraph = HierarchyGraph.full_subgraph(
             self.students, [self.student1, self.student2, self.student3],
         )
-        self.project_subgraph = HierarchyGraph(
+        self.project_subgraph = HierarchyGraph.full_subgraph(
             self.projects, [self.project1, self.project2],
         )
-        self.supervisor_subgraph = HierarchyGraph(
+        self.supervisor_subgraph = HierarchyGraph.full_subgraph(
             self.supervisors, [self.supervisor1, self.supervisor2,
                                self.supervisor3, self.supervisor4],
         )

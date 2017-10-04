@@ -38,7 +38,7 @@ NEGATIVE=Polarity.NEGATIVE
 
 class AgentNode(object):
     '''Agent nodes split into positive and negative component nodes. An edge is
-    drawn between them when the graph is built. 
+    drawn between them when the graph is built.
     '''
     def __init__(self, agent, polarity):
         '''
@@ -60,6 +60,12 @@ class AgentNode(object):
         str_kwargs = ['agent={}'.format(str(self.agent)),
                       'polarity={}'.format(self.polarity) ]
         return parse_repr(self, str_kwargs)
+
+    def __hash__(self):
+        '''These objects are used as nodes in the graph, in particular they are
+        used as dictionary keys.
+        '''
+        return hash((self.agent.id, self.agent.level, self.polarity))
 
     def __eq__(self, other):
         '''These represent nodes on the allocation graph and are compared to
@@ -206,7 +212,7 @@ class AllocationGraph(nx.DiGraph):
     def __init__(self, subgraphs):
         '''
         Parameters
-        ==========
+        ----------
         subgraphs: list HierarchyGraphs
             The hierarchy graphs are glued together by edges representing the
             preferences of each of their agents.
