@@ -272,3 +272,15 @@ class TestAllocationGraph(unittest.TestCase):
                           AgentNode(self.supervisor3, NEGATIVE)]
         for n in negative_nodes:
             self.assertEqual(self.allocation_graph[n], {SINK: {'weight': 0}})
+
+    def test_populate_internal_edges(self):
+        self.allocation_graph.populate_internal_edges()
+
+        for subgraph in self.allocation_graph.subgraphs:
+            # Get subgraph of allocation graph with same nodes as the
+            # HierarchyGraph object.
+            actual = self.allocation_graph.subgraph(subgraph.nodes)
+
+            # The graphs should have the same edge data.
+            self.assertItemsEqual(actual.edges(data=True),
+                                  subgraph.edges(data=True))
