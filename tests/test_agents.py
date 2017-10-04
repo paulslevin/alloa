@@ -41,6 +41,20 @@ class TestAgent(unittest.TestCase):
         self.assertEqual(self.agent.preference_position(agent_2_2), 2)
         self.assertEqual(self.agent.preference_position(agent_2_3), 3)
 
+    def test_preference_position_tie(self):
+        hierarchy2 = Hierarchy(level=2)
+        agent_2_1 = Agent(id=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id=2, hierarchy=hierarchy2)
+        agent_2_3 = Agent(id=3, hierarchy=hierarchy2)
+        agent_2_4 = Agent(id=4, hierarchy=hierarchy2)
+
+        self.agent.preferences = [agent_2_1, [agent_2_2, agent_2_3], agent_2_4]
+
+        self.assertEqual(self.agent.preference_position(agent_2_1), 1)
+        self.assertEqual(self.agent.preference_position(agent_2_2), 2)
+        self.assertEqual(self.agent.preference_position(agent_2_3), 2)
+        self.assertEqual(self.agent.preference_position(agent_2_4), 3)
+
     def test_AgentExistsError(self):
         '''Test creating an additional agent with the same id raises an Exception.'''
         with self.assertRaises(AgentExistsError) as context:

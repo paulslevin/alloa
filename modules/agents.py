@@ -39,10 +39,10 @@ class Agent(object):
             a project supervisor with capacities (1, 3) would mean she must
             supervise one project as a minimum, but can supervise up to three
             in total.
-        preferences: list of Agent
+        preferences: list of (Agent or (list of Agents))
             The agents at the next hierarchy level that this agent prefers.
+            Elements can be agents or lists of agents to represent ties.
         '''
-
         self.id = id
         self.hierarchy = hierarchy
         self.name = name
@@ -57,7 +57,7 @@ class Agent(object):
         str_kwargs = []
         for attr in [ 'id', 'hierarchy', 'capacities', 'preferences', 'name']:
             value = getattr(self, attr)
-            if value is not None:
+            if value:
                 str_kwargs.append('{}={}'.format(attr, value))
         return parse_repr(self, str_kwargs)
 
@@ -69,6 +69,17 @@ class Agent(object):
     def hierarchy(self, value):
         self._hierarchy = value
         self._hierarchy.add_agent(self)
+
+    @property
+    def preferences(self):
+        return self._preferences
+
+    @preferences.setter
+    def preferences(self, value):
+        if value is None:
+            self._preferences = []
+        else:
+            self._preferences = value
 
     @property
     def upper_capacity(self):
@@ -87,9 +98,16 @@ class Agent(object):
 
     def preference_position(self, other):
         '''Position of another agent in the preference list.'''
-        if self.preferences:
-            if other in self.preferences:
-                return self.preferences.index(other) + 1
+        for i, p in enumerate(self.preferences):
+            # Is the agent in the preference list?
+            if other == p:
+                return i + 1
+            # Is the agent tied with other agents?
+            try:
+                if other in p:
+                    return i + 1
+            except TypeError:
+                    continue
         raise AgentNotInPreferencesError(self, other)
 
 
