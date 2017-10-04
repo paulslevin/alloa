@@ -267,6 +267,10 @@ class AllocationGraph(nx.DiGraph):
         for node in self.first_subgraph.positive_agent_nodes:
             self.add_edge(self.source, node, weight=0)
 
+    def populate_edges_to_sink(self):
+        for node in self.last_subgraph.negative_agent_nodes:
+            self.add_edge(node, self.sink, weight=0)
+
     def populate_internal_edges(self):
         for subgraph in self.subgraphs:
             weight = nx.get_edge_attributes(subgraph, "weight")
@@ -275,10 +279,6 @@ class AllocationGraph(nx.DiGraph):
                 self.add_edge(edge[0], edge[1],
                               weight=weight[edge],
                               capacity=capacity[edge])
-
-    def populate_edges_to_sink(self):
-        for node in self.last_subgraph.negative_agent_nodes:
-            self.add_edge(node, self.sink, weight=0)
 
     def glue(self, subgraph1, subgraph2, cost_function):
         for agent in subgraph1.agents:

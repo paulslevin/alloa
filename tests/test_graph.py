@@ -263,3 +263,12 @@ class TestAllocationGraph(unittest.TestCase):
                           AgentNode(self.student3, POSITIVE)]
         expected = {p: {'weight': 0} for p in positive_nodes}
         self.assertEqual(self.allocation_graph[SOURCE], expected)
+
+    def test_populate_edges_to_sink(self):
+        self.allocation_graph.populate_edges_to_sink()
+        negative_nodes = [AgentNode(self.supervisor1, NEGATIVE),
+                          AgentNode(self.supervisor2, NEGATIVE),
+                          AgentNode(self.supervisor3, NEGATIVE),
+                          AgentNode(self.supervisor3, NEGATIVE)]
+        for n in negative_nodes:
+            self.assertEqual(self.allocation_graph[n], {SINK: {'weight': 0}})
