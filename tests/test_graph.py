@@ -255,3 +255,11 @@ class TestAllocationGraph(unittest.TestCase):
 
     def test_last_level(self):
         self.assertEqual(self.allocation_graph.last_level, 3)
+
+    def test_populate_edges_from_source(self):
+        self.allocation_graph.populate_edges_from_source()
+        positive_nodes = [AgentNode(self.student1, POSITIVE),
+                          AgentNode(self.student2, POSITIVE),
+                          AgentNode(self.student3, POSITIVE)]
+        expected = {p: {'weight': 0} for p in positive_nodes}
+        self.assertEqual(self.allocation_graph[SOURCE], expected)
