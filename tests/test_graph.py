@@ -274,9 +274,6 @@ class TestAllocationGraph(unittest.TestCase):
         self.assertEqual(self.graph.first_level_agents,
                          [self.student1, self.student2, self.student3])
 
-    def test_first_level(self):
-        self.assertEqual(self.graph.first_level, 1)
-
     def test_last_level_agents(self):
         self.assertEqual(self.graph.last_level_agents,
                          [self.supervisor1, self.supervisor2, 

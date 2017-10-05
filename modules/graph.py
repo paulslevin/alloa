@@ -270,7 +270,7 @@ class AllocationGraph(nx.DiGraph):
         if not self._sink:
             final_hierarchy = Hierarchy(level=self.number_of_hierarchies + 1)
             sink_agent = Agent(id=1, hierarchy=final_hierarchy,
-                          name=GraphElement.SINK)
+                               name=GraphElement.SINK)
             # Each agent in the last hierarchy prefers the sink agent.
             for agent in self.last_level_agents:
                 agent.preferences = [sink_agent]
@@ -298,10 +298,6 @@ class AllocationGraph(nx.DiGraph):
     @property
     def first_level_agents(self):
         return self.hierarchies[0].agents
-
-    @property
-    def first_level(self):
-        return self.hierarchies[0].level
 
     @property
     def last_level_agents(self):
