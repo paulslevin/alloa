@@ -202,7 +202,7 @@ class HierarchyGraph(nx.DiGraph):
     def positive_agent_nodes(self):
         '''Return all positive agent nodes.'''
         # Keep these in order
-        return [self._agent_positive_node_map[agent] for agent in self.agents]
+        return [self.positive_node(agent) for agent in self.agents]
 
     def negative_node(self, agent):
         '''Return negative node corresponding to the agent.'''
@@ -211,7 +211,7 @@ class HierarchyGraph(nx.DiGraph):
     @property
     def negative_agent_nodes(self):
         '''Return all negative agent nodes.'''
-        return [self._agent_negative_node_map[agent] for agent in self.agents]
+        return [self.negative_node(agent) for agent in self.agents]
 
 
 class AllocationGraph(nx.DiGraph):
