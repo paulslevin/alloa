@@ -173,7 +173,7 @@ class HierarchyGraph(nx.DiGraph):
             self._agent_negative_node_map[agent] = negative_node
 
     def generate_agent_nodes(self):
-        '''Construct the AgentNodes for each edge and draw an edge between them.
+        '''Construct the AgentNodes for each agent and draw an edge between them.
         Set the capacity of the edge to be the difference between the agent's
         upper and lower capacity. Set demand to be (node polarity)*lower_capacity.
         '''
