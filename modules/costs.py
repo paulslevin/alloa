@@ -6,16 +6,19 @@ class SPACosts(object):
 
     def __init__(self, graph):
         self.graph = graph
-        self.total = self.graph.number_of_hierarchies
 
     def exponent(self, node1, node2):
-        level1, level2 = node1.level, node2.level
         agent1, agent2 = node1.agent, node2.agent
 
+        # Get rank of agent2 in agent1's preferences.
         term = agent1.preference_position(agent2)
-        upper_hierarchies = self.graph.hierarchies[node2.level: self.total - 1]
+
+        # Get all hierarchies above agent1's level, excluding the final level.
+        intermediate_hierarchies = self.graph.intermediate_hierarchies(node1)
+
+        # Sum the maximal rank at each of the intermediate hierarchies.
         _sum = sum(
-            hierarchy.max_preferences_length for hierarchy in upper_hierarchies
+            hierarchy.max_preferences_length for hierarchy in intermediate_hierarchies
         )
         return term - 1 + _sum
 

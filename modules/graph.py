@@ -26,6 +26,7 @@ SOURCE------|Paul     |-------\------|Spheres   |------SINK
                                 \----|Mechanics |---/
                                      |__________|
 '''
+from   collections import OrderedDict
 from   itertools import izip
 from   agents import Agent, Hierarchy
 import networkx as nx
@@ -36,11 +37,6 @@ from   utils.parsers import parse_repr
 
 POSITIVE=Polarity.POSITIVE
 NEGATIVE=Polarity.NEGATIVE
-
-
-class Source(Agent):
-    def preference_position(self, other):
-        return 1
 
 
 class AgentNode(object):
@@ -95,7 +91,7 @@ class AgentNode(object):
 
 
 class HierarchyGraph(nx.DiGraph):
-    '''Represent a hierarchy as a directed graph (network). The full alllocation
+    '''Represent a hierarchy as a directed graph (network). The full allocation
     graph consists of these objects, glued together with edges. For each agent,
     split them into positive and negative agent nodes and draw an edge between
     these. The capacity of the edge represents the capacity of the agent. The
@@ -135,10 +131,8 @@ class HierarchyGraph(nx.DiGraph):
         self.level = hierarchy.level
         self.agents = agents
 
-        self.in_nodes = []
-        self.out_nodes = []
-        self._agent_positive_node_map = {}
-        self._agent_negative_node_map = {}
+        self._agent_positive_node_map = OrderedDict()
+        self._agent_negative_node_map = OrderedDict()
 
     def __str__(self):
         return "HIERARCHY_GRAPH_{}".format(self.level)
@@ -251,6 +245,14 @@ class AllocationGraph(nx.DiGraph):
         return parse_repr(self, str_kwargs)
 
     @property
+    def level_nodes_map(self):
+        sink_source_map = {0: [self.source],
+                           self.number_of_hierarchies + 1: [self.sink]}
+        map = {subgraph.level: list(subgraph.nodes) 
+               for subgraph in self.subgraphs}
+        return dict(map, **sink_source_map)
+
+    @property
     def source(self):
         '''Cached property to generate source to avoid recreating objects.'''
         if not self._source:
@@ -317,6 +319,12 @@ class AllocationGraph(nx.DiGraph):
             capacity_sums.append(_sum)
         return min(capacity_sums)
 
+    def intermediate_hierarchies(self, node):
+        '''Return all hierarchies strictly between the given node and the last
+        hierarchy (non-inclusive).
+        '''
+        return self.hierarchies[node.level: -1]
+
     def add_edge_with_cost(self, out_node, in_node, cost):
         weight = cost(out_node, in_node)
         self.add_edge(out_node, in_node, weight=weight)
@@ -336,9 +344,16 @@ class AllocationGraph(nx.DiGraph):
     def glue(self, subgraph1, subgraph2, cost):
         for agent in subgraph1.agents:
             for preference in agent.preferences:
-                out_node = subgraph1.negative_node(agent)
-                in_node  = subgraph2.positive_node(preference)
-                self.add_edge_with_cost(out_node, in_node, cost)
+                if isinstance(preference, Agent):
+                    out_node = subgraph1.negative_node(agent)
+                    in_node  = subgraph2.positive_node(preference)
+                    self.add_edge_with_cost(out_node, in_node, cost)
+                # In case of ties.
+                elif isinstance(preference, list):
+                    for p in preference:
+                        out_node = subgraph1.negative_node(agent)
+                        in_node = subgraph2.positive_node(p)
+                        self.add_edge_with_cost(out_node, in_node, cost)
 
     def setup_graph(self, cost):
         self.populate_edges_from_source(cost)

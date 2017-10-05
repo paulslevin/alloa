@@ -46,6 +46,7 @@ class TestAgentNode(unittest.TestCase):
         self.assertEqual(self.positive_node.level, 1)
         self.assertEqual(self.negative_node.level, 1)
 
+
 class TestHierarchyGraph(unittest.TestCase):
     def setUp(self):
         self.hierarchy = Hierarchy(level=2)
@@ -196,22 +197,22 @@ class TestAllocationGraph(unittest.TestCase):
 
         self.project1 = Agent(id=1, hierarchy=self.projects, 
                               capacities=(0,2), 
-                              preferences=[self.supervisor1, self.supervisor2],
+                              preferences=[[self.supervisor1, self.supervisor2]],
                               name='Project 1')
         self.project2 = Agent(id=2, hierarchy=self.projects, 
                               capacities=(0,2),
-                              preferences=[self.supervisor2, self.supervisor3,
-                                           self.supervisor1, self.supervisor4],
+                              preferences=[[self.supervisor2, self.supervisor3],
+                                           [self.supervisor1, self.supervisor4]],
                               name='Project 2')
 
         self.student1 = Agent(id=1, hierarchy=self.students, capacities=(0,1),
                               preferences=[self.project1, self.project2],
                               name='Student 1')
         self.student2 = Agent(id=2, hierarchy=self.students, capacities=(0,1),
-                              preferences=[self.project1, self.project2],
+                              preferences=[self.project2],
                               name='Student 2')
         self.student3 = Agent(id=3, hierarchy=self.students, capacities=(0,1),
-                              preferences=[self.project2],
+                              preferences=[self.project1, self.project2],
                               name='Student 3')
 
         self.student_subgraph = HierarchyGraph.full_subgraph(
@@ -225,81 +226,180 @@ class TestAllocationGraph(unittest.TestCase):
                                self.supervisor3, self.supervisor4],
         )
 
-        self.allocation_graph = AllocationGraph([self.student_subgraph,
-                                                 self.project_subgraph,
-                                                 self.supervisor_subgraph])
-        self.source = self.allocation_graph.source
-        self.sink   = self.allocation_graph.sink
+        self.graph = AllocationGraph([self.student_subgraph,
+                                      self.project_subgraph,
+                                      self.supervisor_subgraph])
+        self.source = self.graph.source
+        self.sink   = self.graph.sink
 
-        self.costs = SPACosts(self.allocation_graph)
+        self.costs = SPACosts(self.graph)
 
     def test___str__(self):
-        self.assertEqual(str(self.allocation_graph), 'ALLOCATION_GRAPH(3)')
+        self.assertEqual(str(self.graph), 'ALLOCATION_GRAPH(3)')
 
     def test___repr__(self):
         self.assertEqual(
-            repr(self.allocation_graph), 
+            repr(self.graph), 
             'AllocationGraph(subgraphs=[HIERARCHY_GRAPH_1, HIERARCHY_GRAPH_2, HIERARCHY_GRAPH_3])'
         )
 
+    def test_level_nodes_map(self):
+        student_nodes    = self.student_subgraph.nodes
+        supervisor_nodes = self.supervisor_subgraph.nodes
+        project_nodes    = self.project_subgraph.nodes
+        self.assertEqual(
+            self.graph.level_nodes_map, 
+            {0: [self.source],
+             1: list(student_nodes),
+             2: list(project_nodes),
+             3: list(supervisor_nodes),
+             4: [self.sink]}
+        )
+
     def test_first_subgraph(self):
-        self.assertEqual(self.allocation_graph.first_subgraph,
+        self.assertEqual(self.graph.first_subgraph,
                          self.student_subgraph)
 
     def test_last_subgraph(self):
-        self.assertEqual(self.allocation_graph.last_subgraph,
-                         self.supervisor_subgraph)
+        self.assertEqual(self.graph.last_subgraph, self.supervisor_subgraph)
 
     def test_hierarchies(self):
-        self.assertEqual(self.allocation_graph.hierarchies,
+        self.assertEqual(self.graph.hierarchies,
                          [self.students, self.projects, self.supervisors])
 
     def test_number_of_hierarchies(self):
-        self.assertEqual(self.allocation_graph.number_of_hierarchies, 3)
+        self.assertEqual(self.graph.number_of_hierarchies, 3)
 
     def test_first_level_agents(self):
-        self.assertEqual(self.allocation_graph.first_level_agents,
+        self.assertEqual(self.graph.first_level_agents,
                          [self.student1, self.student2, self.student3])
 
     def test_first_level(self):
-        self.assertEqual(self.allocation_graph.first_level, 1)
+        self.assertEqual(self.graph.first_level, 1)
 
     def test_last_level_agents(self):
-        self.assertEqual(self.allocation_graph.last_level_agents,
+        self.assertEqual(self.graph.last_level_agents,
                          [self.supervisor1, self.supervisor2, 
                           self.supervisor3, self.supervisor4])
 
     def test_last_level(self):
-        self.assertEqual(self.allocation_graph.last_level, 3)
+        self.assertEqual(self.graph.last_level, 3)
 
     def test_min_upper_capacity_sum(self):
-        self.assertEqual(self.allocation_graph.min_upper_capacity_sum, 3)
-
+        self.assertEqual(self.graph.min_upper_capacity_sum, 3)
+        
+    def test_intermediate_hierarchies(self):
+        self.assertEqual(self.graph.intermediate_hierarchies(self.source),
+                         [self.students, self.projects])
+        for node in self.graph.level_nodes_map[1]:
+            self.assertEqual(self.graph.intermediate_hierarchies(node),
+                             [self.projects])
+        for node in self.graph.level_nodes_map[2]:
+            self.assertEqual(self.graph.intermediate_hierarchies(node), [])
+        for node in self.graph.level_nodes_map[3]:
+            self.assertEqual(self.graph.intermediate_hierarchies(node), [])
+        for node in self.graph.level_nodes_map[4]:
+            self.assertEqual(self.graph.intermediate_hierarchies(node), [])
+        
     def test_populate_edges_from_source(self):
-        self.allocation_graph.populate_edges_from_source(self.costs.cost)
+        self.graph.populate_edges_from_source(self.costs.cost)
         positive_nodes = [AgentNode(self.student1, POSITIVE),
                           AgentNode(self.student2, POSITIVE),
                           AgentNode(self.student3, POSITIVE)]
         expected = {p: {'weight': 256} for p in positive_nodes}
-        self.assertEqual(self.allocation_graph[self.source], expected)
+        self.assertEqual(self.graph[self.source], expected)
 
     def test_populate_edges_to_sink(self):
-        self.allocation_graph.populate_edges_to_sink(self.costs.cost)
+        self.graph.populate_edges_to_sink(self.costs.cost)
         negative_nodes = [AgentNode(self.supervisor1, NEGATIVE),
                           AgentNode(self.supervisor2, NEGATIVE),
                           AgentNode(self.supervisor3, NEGATIVE),
                           AgentNode(self.supervisor3, NEGATIVE)]
         for n in negative_nodes:
-            self.assertEqual(self.allocation_graph[n], {self.sink: {'weight': 1}})
+            self.assertEqual(self.graph[n], {self.sink: {'weight': 1}})
 
     def test_populate_internal_edges(self):
-        self.allocation_graph.populate_internal_edges()
+        self.graph.populate_internal_edges()
 
-        for subgraph in self.allocation_graph.subgraphs:
+        for subgraph in self.graph.subgraphs:
             # Get subgraph of allocation graph with same nodes as the
             # HierarchyGraph object.
-            actual = self.allocation_graph.subgraph(subgraph.nodes)
+            actual = self.graph.subgraph(subgraph.nodes)
 
             # The graphs should have the same edge data.
             self.assertItemsEqual(actual.edges(data=True),
                                   subgraph.edges(data=True))
+
+    def test_glue_students_to_projects(self):
+        self.graph.glue(
+            self.student_subgraph, self.project_subgraph, self.costs.cost
+        )
+        #self.assertFalse(
+        #    self.graph.has_edge(
+        #        AgentNode(self.student2, NEGATIVE),
+        #        AgentNode(self.project1, POSITIVE),
+        #     )
+        #)
+        test_cases = [
+            (AgentNode(self.student1, NEGATIVE),
+             AgentNode(self.project1, POSITIVE),
+             {'weight': 16}),
+            (AgentNode(self.student1, NEGATIVE),
+             AgentNode(self.project2, POSITIVE),
+             {'weight': 64 }),
+            (AgentNode(self.student2, NEGATIVE),
+             AgentNode(self.project2, POSITIVE),
+             {'weight': 16}),
+            (AgentNode(self.student3, NEGATIVE),
+             AgentNode(self.project1, POSITIVE),
+             {'weight': 16}),
+            (AgentNode(self.student3, NEGATIVE),
+             AgentNode(self.project2, POSITIVE),
+             {'weight': 64}),
+        ]
+        for negative_node, positive_node, edge_data in test_cases:
+            self.assertEqual(self.graph[negative_node][positive_node],
+                             edge_data)
+
+    def test_glue_projects_to_supervisors(self):
+        self.graph.glue(
+            self.project_subgraph, self.supervisor_subgraph, self.costs.cost
+        )
+
+        self.assertFalse(
+            self.graph.has_edge(
+                AgentNode(self.project1, NEGATIVE),
+                AgentNode(self.supervisor3, POSITIVE),
+             ),
+        )
+        self.assertFalse(
+            self.graph.has_edge(
+                AgentNode(self.project1, NEGATIVE),
+                AgentNode(self.supervisor4, POSITIVE),
+             ),
+        )
+
+        test_cases = [
+            (AgentNode(self.project1, NEGATIVE),
+             AgentNode(self.supervisor1, POSITIVE),
+             {'weight': 1}),
+            (AgentNode(self.project1, NEGATIVE),
+             AgentNode(self.supervisor2, POSITIVE),
+             {'weight': 1}),
+            (AgentNode(self.project2, NEGATIVE),
+             AgentNode(self.supervisor1, POSITIVE),
+             {'weight': 4}),
+            (AgentNode(self.project2, NEGATIVE),
+             AgentNode(self.supervisor2, POSITIVE),
+             {'weight': 1}),
+            (AgentNode(self.project2, NEGATIVE),
+             AgentNode(self.supervisor3, POSITIVE),
+             {'weight': 1}),
+            (AgentNode(self.project2, NEGATIVE),
+             AgentNode(self.supervisor4, POSITIVE),
+             {'weight': 4}),
+        ]
+
+        for negative_node, positive_node, edge_data in test_cases:
+            self.assertEqual(self.graph[negative_node][positive_node],
+                             edge_data)
