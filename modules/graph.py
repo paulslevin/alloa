@@ -344,17 +344,18 @@ class AllocationGraph(nx.DiGraph):
     def glue(self, subgraph1, subgraph2, cost):
         for agent in subgraph1.agents:
             for preference in agent.preferences:
-                if isinstance(preference, Agent):
-                    out_node = subgraph1.negative_node(agent)
-                    in_node  = subgraph2.positive_node(preference)
-                    self.add_edge_with_cost(out_node, in_node, cost)
-                # In case of ties.
-                elif isinstance(preference, list):
-                    for p in preference:
-                        out_node = subgraph1.negative_node(agent)
-                        in_node = subgraph2.positive_node(p)
-                        self.add_edge_with_cost(out_node, in_node, cost)
 
+                # Handle preference ties.
+                if isinstance(preference, Agent):
+                    preference_list = [preference]
+                elif isinstance(preference, list):
+                    preference_list = preference
+
+                for other_agent in preference_list:
+                    out_node = subgraph1.negative_node(agent)
+                    in_node  = subgraph2.positive_node(other_agent)
+                    self.add_edge_with_cost(out_node, in_node, cost)
+               
     def setup_graph(self, cost):
         self.populate_edges_from_source(cost)
         self.populate_edges_to_sink(cost)
