@@ -401,6 +401,12 @@ class TestAllocationGraph(unittest.TestCase):
             self.assertEqual(self.graph[negative_node][positive_node],
                              edge_data)
 
+    def test_graph_consists_of_AgentNodes(self):
+        self.graph.populate_all_edges(self.costs.cost)
+        self.assertEqual(len(self.graph.nodes), 20)
+        for node in self.graph.nodes:
+            self.assertIsInstance(node, AgentNode)
+
     def test_compute_flow(self):
         self.graph.populate_all_edges(self.costs.cost)
         self.graph.compute_flow()
