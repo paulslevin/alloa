@@ -232,7 +232,11 @@ class AllocationGraph(nx.DiGraph):
 
         self._source = None
         self._sink = None
+
         self.flow = None
+        self.flow_cost = None
+        self.max_flow = None
+        self.simple_flow = None
 
     def __str__(self):
         return 'ALLOCATION_GRAPH({})'.format(len(self.subgraphs))
@@ -351,34 +355,24 @@ class AllocationGraph(nx.DiGraph):
                     out_node = subgraph1.negative_node(agent)
                     in_node  = subgraph2.positive_node(other_agent)
                     self.add_edge_with_cost(out_node, in_node, cost)
-               
-    def setup_graph(self, cost):
+           
+    def populate_all_edges(self, cost):
         self.populate_edges_from_source(cost)
         self.populate_edges_to_sink(cost)
         self.populate_internal_edges()
         for subgraph1, subgraph2 in izip(self.subgraphs, self.subgraphs[1:]):
             self.glue(subgraph1, subgraph2, cost)
 
-    def set_flow(self):
-        try:
-            self.flow = nx.max_flow_min_cost(self, self.source, self.sink)
-            self.flow_cost = nx.cost_of_flow(self, self.flow)
-            self.max_flow = nx.maximum_flow(self, self.source, self.sink)[0]
-        except nx.NetworkXUnfeasible:
-            print 'Allocation satisfying the lower bounds is not possible.'
-            print 'Try reducing lower bounds.'
-            sys.exit(1)
-        except nx.NetworkXError:
-            print "The input graph is not directed or not connected."
-            print "Please check the data:"
-            print "e.g. if all the choices on the level 1 list are" \
-                  " included in the level 2 list and same for levels 2, 3."
-            sys.exit(1)
-        except nx.NetworkXUnbounded:
-            print "Allocation is not possible because some upper capacity" \
-                  "bounds at level 1 have not been set up. Please check " \
-                  "the data."
-            sys.exit(1)
+    @classmethod
+    def with_edges(cls, subgraphs, cost):
+        graph = cls(subgraphs)
+        graph.populate_all_edges(cost)
+        return graph
+
+    def compute_flow(self):
+        self.flow = nx.max_flow_min_cost(self, self.source, self.sink)
+        self.flow_cost = nx.cost_of_flow(self, self.flow)
+        self.max_flow = nx.maximum_flow(self, self.source, self.sink)[0]
 
     def simplify_flow(self):
         positives = {k.agent: v for k, v in self.flow.items() if

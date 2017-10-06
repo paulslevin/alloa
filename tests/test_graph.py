@@ -400,3 +400,9 @@ class TestAllocationGraph(unittest.TestCase):
         for negative_node, positive_node, edge_data in test_cases:
             self.assertEqual(self.graph[negative_node][positive_node],
                              edge_data)
+
+    def test_compute_flow(self):
+        self.graph.populate_all_edges(self.costs.cost)
+        self.graph.compute_flow()
+        self.assertEqual(self.graph.flow_cost, 822)
+        self.assertEqual(self.graph.max_flow, 3)

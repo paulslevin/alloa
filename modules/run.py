@@ -39,8 +39,8 @@ class Allocation(object):
                                                      i + 1)
 
     def setup_allocation(self, cost):
-        self.graph.setup_graph(cost)
-        self.graph.set_flow()
+        self.graph.populate_all_edges(cost)
+        self.graph.compute_flow()
         self.graph.simplify_flow()
         self.graph.allocate()
 
