@@ -331,12 +331,12 @@ class TestAllocationGraph(unittest.TestCase):
         self.graph.glue(
             self.student_subgraph, self.project_subgraph, self.costs.cost
         )
-        #self.assertFalse(
-        #    self.graph.has_edge(
-        #        AgentNode(self.student2, NEGATIVE),
-        #        AgentNode(self.project1, POSITIVE),
-        #     )
-        #)
+        self.assertFalse(
+            self.graph.has_edge(
+                AgentNode(self.student2, NEGATIVE),
+                AgentNode(self.project1, POSITIVE),
+             )
+        )
         test_cases = [
             (AgentNode(self.student1, NEGATIVE),
              AgentNode(self.project1, POSITIVE),
