@@ -7,10 +7,3 @@ class AgentExistsError(Exception):
         return super(AgentExistsError, self).__init__(
             '{} already has an agent with id {}.'.format(hierarchy, id)
         )
-
-
-class AgentNotInPreferencesError(Exception):
-    def __init__(self, agent, other_agent):
-        return super(AgentNotInPreferencesError, self).__init__(
-            '{} not in preferences of {}.'.format(other_agent, agent)    
-        )
