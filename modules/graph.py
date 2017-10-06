@@ -389,12 +389,21 @@ class AllocationGraph(nx.DiGraph):
         self.max_flow = nx.maximum_flow(self, self.source, self.sink)[0]
 
     def simplify_flow(self):
-        positives = {k.agent: v for k, v in self.flow.items() 
-                     if k.polarity == NEGATIVE and k.level != self.last_level}
-        for k in positives:
-            positives[k] = {k.agent: v for k, v in positives[k].items() if
-                            isinstance(k, AgentNode) and v}
-        self.simple_flow = {k: v for k, v in positives.items() if positives[k]}
+        '''Create new dictionary mapping Agent objects to other Agent objects
+        and the units of flow sent to them. Assign to simple_flow attribute.
+        '''
+        map = {}
+        
+        # For each agent node (except the last level):
+        for subgraph in self.subgraphs[:-1]:
+            for agent in subgraph.agents:
+                # Assign to it the non-zero flows from negative agent nodes to 
+                # positive agent nodes at the next level.
+                negative_node = subgraph.negative_node(agent)
+                flow = self.flow[negative_node]
+                map[agent] = {k.agent: v for k, v in flow.iteritems() if v}
+
+        self.simple_flow = map
 
     def get_single_agent_allocation(self, agent):
         if agent.level == self.last_level:
