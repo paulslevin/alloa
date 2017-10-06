@@ -42,6 +42,32 @@ class TestAgentNode(unittest.TestCase):
     def test___neq__(self):
         self.assertNotEqual(self.positive_node, self.negative_node)
 
+    def test_lexicographic_ordering(self):
+        hierarchy1 = self.hierarchy
+        hierarchy2 = Hierarchy(level=2)
+        agent_1_1 = self.agent
+        agent_1_2 = Agent(id=2, hierarchy=hierarchy1)
+        agent_2_1 = Agent(id=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id=2, hierarchy=hierarchy2)
+        
+        agent_1_1_p = self.positive_node
+        agent_1_1_n = self.negative_node
+        agent_1_2_p = AgentNode(agent=agent_1_2, polarity=POSITIVE)
+        agent_1_2_n = AgentNode(agent=agent_1_2, polarity=NEGATIVE)
+        agent_2_1_p = AgentNode(agent=agent_2_1, polarity=POSITIVE)
+        agent_2_1_n = AgentNode(agent=agent_2_1, polarity=NEGATIVE)
+        agent_2_2_p = AgentNode(agent=agent_2_2, polarity=POSITIVE)
+        agent_2_2_n = AgentNode(agent=agent_2_2, polarity=NEGATIVE)
+
+        jumbled = [agent_2_2_p, agent_2_1_n, agent_1_1_p, agent_1_2_n,
+                   agent_2_2_n, agent_1_1_n, agent_1_2_p, agent_2_1_p]
+        
+        self.assertEqual(
+            sorted(jumbled),
+            [agent_1_1_p, agent_1_1_n, agent_1_2_p, agent_1_2_n,
+             agent_2_1_p, agent_2_1_n, agent_2_2_p, agent_2_2_n,],
+        )
+
     def test_level(self):
         self.assertEqual(self.positive_node.level, 1)
         self.assertEqual(self.negative_node.level, 1)

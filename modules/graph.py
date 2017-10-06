@@ -27,6 +27,7 @@ SOURCE------|Paul     |-------\------|Spheres   |------SINK
                                      |__________|
 '''
 from   collections import OrderedDict
+from   functools import total_ordering
 from   itertools import izip
 from   agents import Agent, Hierarchy
 import networkx as nx
@@ -39,6 +40,7 @@ POSITIVE=Polarity.POSITIVE
 NEGATIVE=Polarity.NEGATIVE
 
 
+@total_ordering
 class AgentNode(object):
     '''Agent nodes split into positive and negative component nodes. An edge is
     drawn between them when the graph is built.
@@ -85,6 +87,18 @@ class AgentNode(object):
             return True
         return not(self.agent == other.agent and self.polarity == other.polarity)
     
+    def __lt__(self, other):
+        '''Lexicographic ordering by level, id and polarity. We treat positive
+        as less than negative since the graph flows from positive to negative
+        between two agent nodes at the same level.'''
+        data1 = (self.level, self.agent.id)
+        data2 = (other.level, other.agent.id)
+        if data1 == data2:
+            if (self.polarity, other.polarity) == (POSITIVE, NEGATIVE):
+                return True
+            return False
+        return data1 < data2
+
     @property
     def level(self):
         return self.agent.level
