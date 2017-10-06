@@ -1,3 +1,4 @@
+from   itertools import permutations
 from   modules.agents import Agent, Hierarchy
 from   modules.graph import AgentNode, HierarchyGraph, AllocationGraph
 import networkx as nx
@@ -11,6 +12,7 @@ NEGATIVE = Polarity.NEGATIVE
 
 SOURCE = GraphElement.SOURCE
 SINK   = GraphElement.SINK
+
 
 class TestAgentNode(unittest.TestCase):
     def setUp(self):
@@ -59,14 +61,11 @@ class TestAgentNode(unittest.TestCase):
         agent_2_2_p = AgentNode(agent=agent_2_2, polarity=POSITIVE)
         agent_2_2_n = AgentNode(agent=agent_2_2, polarity=NEGATIVE)
 
-        jumbled = [agent_2_2_p, agent_2_1_n, agent_1_1_p, agent_1_2_n,
-                   agent_2_2_n, agent_1_1_n, agent_1_2_p, agent_2_1_p]
-        
-        self.assertEqual(
-            sorted(jumbled),
-            [agent_1_1_p, agent_1_1_n, agent_1_2_p, agent_1_2_n,
-             agent_2_1_p, agent_2_1_n, agent_2_2_p, agent_2_2_n,],
-        )
+        expected = [agent_1_1_p, agent_1_1_n, agent_1_2_p, agent_1_2_n,
+                    agent_2_1_p, agent_2_1_n, agent_2_2_p, agent_2_2_n,]
+
+        for permutation in permutations(expected, 8):
+            self.assertEqual(sorted(permutation), expected)
 
     def test_level(self):
         self.assertEqual(self.positive_node.level, 1)
