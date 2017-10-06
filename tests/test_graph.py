@@ -406,3 +406,92 @@ class TestAllocationGraph(unittest.TestCase):
         self.graph.compute_flow()
         self.assertEqual(self.graph.flow_cost, 822)
         self.assertEqual(self.graph.max_flow, 3)
+
+    def test_simplify_flow(self):
+        '''Use example flow from paper.'''
+        flow = {
+            self.source: {
+                AgentNode(self.student1, POSITIVE): 1,
+                AgentNode(self.student2, POSITIVE): 1,
+                AgentNode(self.student3, POSITIVE): 1,
+            },
+            AgentNode(self.student1, POSITIVE): {
+                AgentNode(self.student1, NEGATIVE): 1,
+            },
+            AgentNode(self.student2, POSITIVE): {
+                AgentNode(self.student2, NEGATIVE): 1,
+            },
+            AgentNode(self.student3, POSITIVE): {
+                AgentNode(self.student3, NEGATIVE): 1,
+            },
+            AgentNode(self.student1, NEGATIVE): {
+                AgentNode(self.project1, POSITIVE): 1,
+                AgentNode(self.project2, POSITIVE): 0,
+            },
+            AgentNode(self.student2, NEGATIVE): {
+                AgentNode(self.project2, POSITIVE): 1,
+            },
+            AgentNode(self.student3, NEGATIVE): {
+                AgentNode(self.project1, POSITIVE): 1,
+                AgentNode(self.project2, POSITIVE): 0,
+            },
+            AgentNode(self.project1, POSITIVE): {
+                AgentNode(self.project1, NEGATIVE): 2
+            },
+            AgentNode(self.project2, POSITIVE): {
+                AgentNode(self.project2, NEGATIVE): 1
+            },
+            AgentNode(self.project1, NEGATIVE): {
+                AgentNode(self.supervisor1, POSITIVE): 1,
+                AgentNode(self.supervisor2, POSITIVE): 1,
+            },
+            AgentNode(self.project2, NEGATIVE): {
+                AgentNode(self.supervisor1, POSITIVE): 0,
+                AgentNode(self.supervisor2, POSITIVE): 0,
+                AgentNode(self.supervisor3, POSITIVE): 1,
+                AgentNode(self.supervisor4, POSITIVE): 0,
+            },
+            AgentNode(self.supervisor1, POSITIVE): {
+                AgentNode(self.supervisor1, NEGATIVE): 0,
+            },
+            AgentNode(self.supervisor2, POSITIVE): {
+                AgentNode(self.supervisor2, NEGATIVE): 1,
+            },
+            AgentNode(self.supervisor3, POSITIVE): {
+                AgentNode(self.supervisor3, NEGATIVE): 1,
+            },
+            AgentNode(self.supervisor4, POSITIVE): {
+                AgentNode(self.supervisor4, NEGATIVE): 0,
+            },
+            AgentNode(self.supervisor1, NEGATIVE): {
+                self.sink: 1,
+            },
+            AgentNode(self.supervisor2, NEGATIVE): {
+                self.sink: 1,
+            },
+            AgentNode(self.supervisor3, NEGATIVE): {
+                self.sink: 1,
+            },
+            AgentNode(self.supervisor4, NEGATIVE): {
+                self.sink: 0,
+            },
+        }
+
+        # Make sure this flow satisfies the constraints.
+        self.graph.populate_all_edges(self.costs.cost)
+        self.assertEqual(nx.cost_of_flow(self.graph, flow), 822)
+
+        # Simplify the test flow.
+        self.graph.flow = flow
+        self.graph.simplify_flow()
+        expected = {
+            # Students 1 and 3 both get Project 1, and Student 2 gets Project 2.
+            self.student1: {self.project1: 1},
+            self.student2: {self.project2: 1},
+            self.student3: {self.project1: 1},
+            # Project 1 has two students on it, and will be supervised by
+            # Supervisors 1 and 2. Supervisor 3 will supervise Project 2.
+            self.project1: {self.supervisor1: 1, self.supervisor2: 1},
+            self.project2: {self.supervisor3: 1},
+        }
+        self.assertEqual(self.graph.simple_flow, expected)

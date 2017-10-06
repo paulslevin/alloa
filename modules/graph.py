@@ -376,7 +376,8 @@ class AllocationGraph(nx.DiGraph):
 
     def simplify_flow(self):
         positives = {k.agent: v for k, v in self.flow.items() if
-                     isinstance(k, AgentNode) and k.polarity == NEGATIVE}
+                     isinstance(k, AgentNode) and k.polarity == NEGATIVE
+                                              and k.level != self.last_level}
         for k in positives:
             positives[k] = {k.agent: v for k, v in positives[k].items() if
                             isinstance(k, AgentNode) and v}
