@@ -15,12 +15,13 @@ level 1 hierarchy, and the projects
 [Spheres, Circles, Lines, Algebra, Cones, Triangles, Mechanics, Algebra]
 would be represented by eight agent objects at a level 2 hierachy.
 '''
-
+from   functools import total_ordering
 import itertools
 from   utils.parsers import parse_repr
 from   utils.exceptions import AgentExistsError
 
 
+@total_ordering
 class Agent(object):
     '''Represent an individual agent e.g. student/project/supervisor.'''
     def __init__(self, id, hierarchy,
@@ -60,6 +61,25 @@ class Agent(object):
             if value:
                 str_kwargs.append('{}={}'.format(attr, value))
         return parse_repr(self, str_kwargs)
+
+    def __hash__(self):
+        '''Agents used as dictionary keys when flow is calculated, so need a 
+        hash method.'''
+        return hash((self.id, self.level))
+
+    def __eq__(self, other):
+        if not isinstance(self, other.__class__):
+            return False
+        return self.id == other.id and self.level == other.level
+
+    def __neq__(self, other):
+        if not isinstance(self, other.__class__):
+            return True
+        return not self.id == other.id or not self.level == other.level
+
+    def __lt__(self, other):
+        '''Lexicographic ordering by level and id.'''
+        return (self.level, self.id) < (other.level, other.id)
 
     @property
     def hierarchy(self):

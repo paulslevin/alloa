@@ -1,4 +1,4 @@
-from itertools import izip
+from itertools import permutations, izip
 import unittest
 from modules.agents import Agent, AgentExistsError, Hierarchy
 
@@ -15,10 +15,19 @@ class TestAgent(unittest.TestCase):
     def test___repr__(self):
         self.assertEqual(repr(self.agent),
                          'Agent(id=1, hierarchy=HIERARCHY_1)')
+        
+    def test_lexicographic_ordering(self):
+        hierarchy1 = self.hierarchy
+        hierarchy2 = Hierarchy(level=2)
+        agent_1_1 = self.agent
+        agent_1_2 = Agent(id=2, hierarchy=hierarchy1)
+        agent_2_1 = Agent(id=1, hierarchy=hierarchy2)
+        agent_2_2 = Agent(id=2, hierarchy=hierarchy2)
 
-    def test___iter__(self):
-        agents = [a for a in self.hierarchy]
-        self.assertEqual(agents, self.hierarchy.agents)
+        expected = [agent_1_1, agent_1_2, agent_2_1, agent_2_2]
+
+        for permutation in permutations(expected, 4):
+            self.assertEqual(sorted(permutation), expected)
 
     def test_upper_capacity(self):
         self.agent.capacities = [0, 1]
@@ -82,9 +91,16 @@ class TestHierarchy(unittest.TestCase):
 
     def test___repr__(self):
         agent_1_1 = Agent(id=1, hierarchy=self.hierarchy, name='Agent')
-        agent_1_2 = Agent(id=2, hierarchy=self.hierarchy, name='Agent')
+        agent_1_2 = Agent(id=2, hierarchy=self.hierarchy, name='Bgent')
         self.assertEqual(repr(self.hierarchy),
                          "Hierarchy(level=1, agents=[AGENT_1_1, AGENT_1_2])")
+
+    def test___iter__(self):
+        agent1 = Agent(id=1, hierarchy=self.hierarchy)
+        agent2 = Agent(id=2, hierarchy=self.hierarchy)
+        agent3 = Agent(id=3, hierarchy=self.hierarchy)
+        agents = [a for a in self.hierarchy]
+        self.assertEqual(agents, [agent1, agent2, agent3])
 
     def test_add_1_agent(self):
         agent = Agent(id=1, hierarchy=self.hierarchy, name='Agent')

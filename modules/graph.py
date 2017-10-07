@@ -71,7 +71,7 @@ class AgentNode(object):
         used as dictionary keys. There only exists one agent with each id and
         level, so those keys plus polarity suffice as identifiers.
         '''
-        return hash((self.agent.id, self.agent.level, self.polarity))
+        return hash((self.agent.level, self.agent.id, self.polarity))
 
     def __eq__(self, other):
         '''These represent nodes on the allocation graph and are compared to
@@ -88,16 +88,14 @@ class AgentNode(object):
         return not(self.agent == other.agent and self.polarity == other.polarity)
     
     def __lt__(self, other):
-        '''Lexicographic ordering by level, id and polarity. We treat positive
-        as less than negative since the graph flows from positive to negative
+        '''Lexicographic ordering by agent and polarity. We treat positive as
+        less than negative since the graph flows from positive to negative
         between two agent nodes at the same level.'''
-        data1 = (self.level, self.agent.id)
-        data2 = (other.level, other.agent.id)
-        if data1 == data2:
+        if self.agent == other.agent:
             if (self.polarity, other.polarity) == (POSITIVE, NEGATIVE):
                 return True
             return False
-        return data1 < data2
+        return self.agent < other.agent
 
     @property
     def level(self):
@@ -389,8 +387,10 @@ class AllocationGraph(nx.DiGraph):
         self.max_flow = nx.maximum_flow(self, self.source, self.sink)[0]
 
     def simplify_flow(self):
-        '''Create new dictionary mapping Agent objects to other Agent objects
-        and the units of flow sent to them. Assign to simple_flow attribute.
+        '''Create new dictionary mapping 
+            Agent --> OrderedDict(Agents: int)
+        Map Agents to every Agent they have non-zero flow towards, and what the
+        flow value is.  Assign to simple_flow attribute.
         '''
         map = {}
         
@@ -401,11 +401,11 @@ class AllocationGraph(nx.DiGraph):
                 # positive agent nodes at the next level.
                 negative_node = subgraph.negative_node(agent)
                 flow = self.flow[negative_node]
-                map[agent] = {k.agent: v for k, v in flow.iteritems() if v}
-
+                items = ((k.agent, v) for k, v in flow.iteritems() if v)
+                map[agent] = OrderedDict(sorted(items))
         self.simple_flow = map
 
-    def get_single_agent_allocation(self, agent):
+    def single_allocation(self, agent):
         if agent.level == self.last_level:
             return [agent]
         next_agent = next(self.simple_flow[agent].iterkeys())
@@ -413,10 +413,10 @@ class AllocationGraph(nx.DiGraph):
             del self.simple_flow[agent][next_agent]
         else:
             self.simple_flow[agent][next_agent] -= 1
-        return [agent] + self.get_single_agent_allocation(next_agent)
+        return [agent] + self.single_allocation(next_agent)
 
     def allocate(self):
-        matrix = [self.get_single_agent_allocation(agent) for
+        matrix = [self.single_allocation(agent) for
                   agent in self.first_level_agents]
         for row in matrix:
             row += [row[i].preference_position(agent) for i, agent in
