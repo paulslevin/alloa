@@ -529,3 +529,20 @@ class TestAllocationGraph(unittest.TestCase):
             self.project2: OrderedDict([(self.supervisor3, 1)]),
         }
         self.assertEqual(self.graph.simple_flow, expected)
+
+    def test_single_allocation(self):
+        self.graph.populate_all_edges(self.costs.cost)
+        self.graph.flow = self.example_flow
+        self.graph.simplify_flow()
+        self.assertEqual(
+            self.graph.single_allocation(self.student1),
+            [self.student1, self.project1, self.supervisor1],
+        )
+        self.assertEqual(
+            self.graph.single_allocation(self.student2),
+            [self.student2, self.project2, self.supervisor3],
+        )
+        self.assertEqual(
+            self.graph.single_allocation(self.student3),
+            [self.student3, self.project1, self.supervisor2],
+        )
