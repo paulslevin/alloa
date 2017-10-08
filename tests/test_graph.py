@@ -100,6 +100,10 @@ class TestHierarchyGraph(unittest.TestCase):
             'HierarchyGraph(hierarchy=HIERARCHY_2, agents=[AGENT_2_1, AGENT_2_3])',
         )
 
+    def test___iter__(self):
+        agents = [a for a in self.graph]
+        self.assertEqual(agents, [self.agent_2_1, self.agent_2_3])
+
     def test___eq__(self):
         '''Generating nodes and agents by hand results in an equivalent graph.'''
         self.graph.assign_agents_to_nodes()
