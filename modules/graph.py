@@ -159,9 +159,6 @@ class HierarchyGraph(nx.DiGraph):
             str_kwargs.append('agents={}'.format(agent_strs).replace("'",'') )
         return parse_repr(self, str_kwargs)
 
-    def __iter__(self):
-        return iter(self.agents)
-
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return False
@@ -267,14 +264,6 @@ class AllocationGraph(nx.DiGraph):
         return parse_repr(self, str_kwargs)
 
     @property
-    def level_nodes_map(self):
-        sink_source_map = {0: [self.source],
-                           self.number_of_hierarchies + 1: [self.sink]}
-        map = {subgraph.level: list(subgraph.nodes) 
-               for subgraph in self.subgraphs}
-        return dict(map, **sink_source_map)
-
-    @property
     def source(self):
         '''Cached property to generate source to avoid recreating objects.'''
         if not self._source:
@@ -356,7 +345,7 @@ class AllocationGraph(nx.DiGraph):
             self.add_edges_from(subgraph.edges(data=True))
         
     def glue(self, subgraph1, subgraph2, cost):
-        for agent in subgraph1:
+        for agent in subgraph1.agents:
             for preference in agent.preferences:
 
                 # Handle preference ties.
@@ -398,7 +387,7 @@ class AllocationGraph(nx.DiGraph):
         
         # For each agent node (except the last level):
         for subgraph in self.subgraphs[:-1]:
-            for agent in subgraph:
+            for agent in subgraph.agents:
                 # Assign to it the non-zero flows from negative agent nodes to 
                 # positive agent nodes at the next level.
                 negative_node = subgraph.negative_node(agent)

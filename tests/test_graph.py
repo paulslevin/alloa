@@ -100,10 +100,6 @@ class TestHierarchyGraph(unittest.TestCase):
             'HierarchyGraph(hierarchy=HIERARCHY_2, agents=[AGENT_2_1, AGENT_2_3])',
         )
 
-    def test___iter__(self):
-        agents = [a for a in self.graph]
-        self.assertEqual(agents, [self.agent_2_1, self.agent_2_3])
-
     def test___eq__(self):
         '''Generating nodes and agents by hand results in an equivalent graph.'''
         self.graph.assign_agents_to_nodes()
@@ -342,19 +338,6 @@ class TestAllocationGraph(unittest.TestCase):
             'AllocationGraph(subgraphs=[HIERARCHY_GRAPH_1, HIERARCHY_GRAPH_2, HIERARCHY_GRAPH_3])'
         )
 
-    def test_level_nodes_map(self):
-        student_nodes    = self.student_subgraph.nodes
-        supervisor_nodes = self.supervisor_subgraph.nodes
-        project_nodes    = self.project_subgraph.nodes
-        self.assertEqual(
-            self.graph.level_nodes_map, 
-            {0: [self.source],
-             1: list(student_nodes),
-             2: list(project_nodes),
-             3: list(supervisor_nodes),
-             4: [self.sink]}
-        )
-
     def test_first_subgraph(self):
         self.assertEqual(self.graph.first_subgraph,
                          self.student_subgraph)
@@ -387,15 +370,15 @@ class TestAllocationGraph(unittest.TestCase):
     def test_intermediate_hierarchies(self):
         self.assertEqual(self.graph.intermediate_hierarchies(self.source),
                          [self.students, self.projects])
-        for node in self.graph.level_nodes_map[1]:
+        for node in self.student_subgraph:
             self.assertEqual(self.graph.intermediate_hierarchies(node),
                              [self.projects])
-        for node in self.graph.level_nodes_map[2]:
+        for node in self.project_subgraph:
             self.assertEqual(self.graph.intermediate_hierarchies(node), [])
-        for node in self.graph.level_nodes_map[3]:
+        for node in self.supervisor_subgraph:
             self.assertEqual(self.graph.intermediate_hierarchies(node), [])
-        for node in self.graph.level_nodes_map[4]:
-            self.assertEqual(self.graph.intermediate_hierarchies(node), [])
+
+        self.assertEqual(self.graph.intermediate_hierarchies(self.sink), [])
         
     def test_populate_edges_from_source(self):
         self.graph.populate_edges_from_source(self.costs.cost)
