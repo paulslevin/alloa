@@ -201,3 +201,7 @@ class Hierarchy(object):
     @property
     def max_preferences_length(self):
         return max(len(agent.preferences) for agent in self.agents)
+
+    @property
+    def upper_capacity_sum(self):
+        return sum(agent.upper_capacity for agent in self)

@@ -203,4 +203,9 @@ class TestHierarchy(unittest.TestCase):
         agent = Agent(id=1, hierarchy=self.hierarchy)
         self.assertEqual(self.hierarchy.has_agent_with_id(1), True)
         self.assertEqual(self.hierarchy.has_agent_with_id(2), False)   
-                                                             
+                                  
+    def test_upper_capacity_sum(self):
+        agent1 = Agent(id=1, hierarchy=self.hierarchy, capacities=[0, 1])
+        agent2 = Agent(id=2, hierarchy=self.hierarchy, capacities=[0, 10])
+        agent3 = Agent(id=3, hierarchy=self.hierarchy, capacities=[0, 100])
+        self.assertEqual(self.hierarchy.upper_capacity_sum, 111)

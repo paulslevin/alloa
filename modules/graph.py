@@ -328,11 +328,7 @@ class AllocationGraph(nx.DiGraph):
 
     @property
     def min_upper_capacity_sum(self):
-        capacity_sums = []
-        for hierarchy in self.hierarchies:
-            _sum = sum(agent.upper_capacity for agent in hierarchy)
-            capacity_sums.append(_sum)
-        return min(capacity_sums)
+        return min(hierarchy.upper_capacity_sum for hierarchy in self.hierarchies)
 
     def intermediate_hierarchies(self, node):
         '''Return all hierarchies strictly between the given node and the last
