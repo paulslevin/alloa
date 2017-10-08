@@ -72,9 +72,8 @@ class Allocation(object):
     @property
     def allocation(self):
         unnamed = self.graph.allocation
-        split_point = self.number_of_levels
-        rows = [[agent.name for agent in row[:split_point]] + row[split_point:]
-                for row in unnamed]
+        rows = [[agent.name] + [dude.agent.name for dude in unnamed[agent] ] + [dude.rank for dude in unnamed[agent]] for agent  in self.graph.first_level_agents]
+
         rows = sorted(rows,
                       key=lambda r: r[0][len(r[0]) - r[0][::-1].index(" "):])
         return rows

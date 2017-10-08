@@ -26,7 +26,7 @@ SOURCE------|Paul     |-------\------|Spheres   |------SINK
                                 \----|Mechanics |---/
                                      |__________|
 '''
-from   collections import OrderedDict
+from   collections import namedtuple, OrderedDict
 from   functools import total_ordering
 from   itertools import izip
 from   agents import Agent, Hierarchy
@@ -38,6 +38,9 @@ from   utils.parsers import parse_repr
 
 POSITIVE=Polarity.POSITIVE
 NEGATIVE=Polarity.NEGATIVE
+
+
+AllocationDatum = namedtuple('AllocationDatum', ['agent', 'rank'])
 
 
 @total_ordering
@@ -403,22 +406,42 @@ class AllocationGraph(nx.DiGraph):
                 flow = self.flow[negative_node]
                 items = ((k.agent, v) for k, v in flow.iteritems() if v)
                 map[agent] = OrderedDict(sorted(items))
+
         self.simple_flow = map
 
-    def single_allocation(self, agent):
-        if agent.level == self.last_level:
-            return [agent]
-        next_agent = next(self.simple_flow[agent].iterkeys())
-        if self.simple_flow[agent][next_agent] == 1:
-            del self.simple_flow[agent][next_agent]
-        else:
-            self.simple_flow[agent][next_agent] -= 1
-        return [agent] + self.single_allocation(next_agent)
+    def single_allocation(self, agent, flow):
+        '''Return a list of AllocationDatum objects describing the allocation
+        of higher level agents to a given level 1 agent.
+        Parameters
+        ----------
+        agent: Agent
+            Agent at level 1.
+        flow: dict
+            Copy of self.simple_flow where keys are deleted or values modified
+            as they are encountered.
+        '''
+        value = []
+        current_agent = agent
+        while current_agent in flow:
+            agent_flow = flow[current_agent]
+            next_agent, flow_units = agent_flow.iteritems().next()
+            rank = current_agent.preference_position(next_agent)
+            value.append(AllocationDatum(next_agent, rank))
+            if flow_units == 1:
+                agent_flow.pop(next_agent)
+            else:
+                agent_flow[next_agent] -= 1
+            current_agent = next_agent
+        return value
 
     def allocate(self):
-        matrix = [self.single_allocation(agent) for
-                  agent in self.first_level_agents]
-        for row in matrix:
-            row += [row[i].preference_position(agent) for i, agent in
-                    enumerate(row[1:])]
-        self.allocation = matrix
+        allocation = {}
+
+        # Make inexpensive deep copy of simple_flow.
+        g = ((agent, dict(d)) for agent, d in self.simple_flow.iteritems())
+        flow = dict(g)
+
+        for agent in self.hierarchies[0]:
+            allocation[agent] = self.single_allocation(agent, flow)
+
+        self.allocation = allocation

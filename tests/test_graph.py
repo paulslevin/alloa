@@ -1,7 +1,8 @@
 from   collections import OrderedDict
 from   itertools import permutations
 from   modules.agents import Agent, Hierarchy
-from   modules.graph import AgentNode, HierarchyGraph, AllocationGraph
+from   modules.graph import AgentNode, HierarchyGraph, AllocationDatum
+from   modules.graph import AllocationGraph
 import networkx as nx
 import unittest
 from   costs import SPACosts
@@ -530,19 +531,44 @@ class TestAllocationGraph(unittest.TestCase):
         }
         self.assertEqual(self.graph.simple_flow, expected)
 
+    def test_allocate(self):
+        self.graph.populate_all_edges(self.costs.cost)
+        self.graph.flow = self.example_flow
+        self.graph.simplify_flow()
+        self.graph.allocate()
+        # Every agent in this example got their first choice.
+        self.assertEqual(
+            self.graph.allocation,
+            {self.student1: [
+                (self.project1, 1),
+                (self.supervisor1, 1),
+             ],
+             self.student2: [
+                 (self.project2, 1),
+                 (self.supervisor3, 1),
+             ],
+             self.student3: [
+                 (self.project1, 1),
+                 (self.supervisor2, 1),
+             ],}
+        )
+
     def test_single_allocation(self):
         self.graph.populate_all_edges(self.costs.cost)
         self.graph.flow = self.example_flow
         self.graph.simplify_flow()
+        g = ((agent, dict(d)) for agent, d in self.graph.simple_flow.iteritems())
+        flow = dict(g)
+
         self.assertEqual(
-            self.graph.single_allocation(self.student1),
-            [self.student1, self.project1, self.supervisor1],
+            self.graph.single_allocation(self.student1, flow),
+            [(self.project1, 1), (self.supervisor1, 1)],
         )
         self.assertEqual(
-            self.graph.single_allocation(self.student2),
-            [self.student2, self.project2, self.supervisor3],
+            self.graph.single_allocation(self.student2, flow),
+            [(self.project2, 1), (self.supervisor3, 1)],
         )
         self.assertEqual(
-            self.graph.single_allocation(self.student3),
-            [self.student3, self.project1, self.supervisor2],
+            self.graph.single_allocation(self.student3, flow),
+            [(self.project1, 1), (self.supervisor2, 1)],
         )
