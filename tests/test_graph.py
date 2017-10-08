@@ -91,6 +91,8 @@ class TestHierarchyGraph(unittest.TestCase):
         self.agent_node_2_3_p = AgentNode(self.agent_2_3, POSITIVE)
         self.agent_node_2_3_n = AgentNode(self.agent_2_3, NEGATIVE)
 
+        self.graph.generate_agent_nodes()
+
     def test___str__(self):
         self.assertEqual(str(self.graph), 'HIERARCHY_GRAPH_2')
 
@@ -102,8 +104,6 @@ class TestHierarchyGraph(unittest.TestCase):
 
     def test___eq__(self):
         '''Generating nodes and agents by hand results in an equivalent graph.'''
-        self.graph.assign_agents_to_nodes()
-        self.graph.generate_agent_nodes()
 
         graph = HierarchyGraph(hierarchy=self.hierarchy, agents=[])
         graph.add_nodes_from([
@@ -122,8 +122,6 @@ class TestHierarchyGraph(unittest.TestCase):
         self.assertEqual(graph, self.graph)
 
     def test___neq__(self):
-        self.graph.assign_agents_to_nodes()
-        self.graph.generate_agent_nodes()
 
         graph = HierarchyGraph(hierarchy=self.hierarchy, agents=[])
         graph.add_nodes_from([
@@ -143,7 +141,6 @@ class TestHierarchyGraph(unittest.TestCase):
         self.assertNotEqual(graph, self.graph)
 
     def test_assign_agents_to_nodes(self):
-        self.graph.assign_agents_to_nodes()
         self.assertEqual(self.graph._agent_positive_node_map,
                          {self.agent_2_1: self.agent_node_2_1_p,
                           self.agent_2_3: self.agent_node_2_3_p,})
@@ -152,32 +149,27 @@ class TestHierarchyGraph(unittest.TestCase):
                           self.agent_2_3: self.agent_node_2_3_n,})
 
     def test_agent_to_positive_node(self):
-        self.graph.assign_agents_to_nodes()
         self.assertEqual(self.graph.positive_node(self.agent_2_1),
                          self.agent_node_2_1_p)
         self.assertEqual(self.graph.positive_node(self.agent_2_3),
                          self.agent_node_2_3_p)
 
     def test_agent_to_negative_node(self):
-        self.graph.assign_agents_to_nodes()
         self.assertEqual(self.graph.negative_node(self.agent_2_1),
                          self.agent_node_2_1_n)
         self.assertEqual(self.graph.negative_node(self.agent_2_3),
                          self.agent_node_2_3_n)
 
     def test_positive_agent_nodes(self):
-        self.graph.assign_agents_to_nodes()
         self.assertEqual(list(self.graph.positive_agent_nodes),
                          [self.agent_node_2_1_p, self.agent_node_2_3_p])
 
     def test_negative_agent_nodes(self):
-        self.graph.assign_agents_to_nodes()
+        self.graph.generate_agent_nodes()
         self.assertEqual(list(self.graph.negative_agent_nodes),
                          [self.agent_node_2_1_n, self.agent_node_2_3_n])
 
     def test_generate_agent_nodes(self):
-        self.graph.assign_agents_to_nodes()
-        self.graph.generate_agent_nodes()
 
         # data=True will get the nodes with demand data.
         nodes = self.graph.nodes(data=True)
@@ -201,7 +193,6 @@ class TestHierarchyGraph(unittest.TestCase):
 
     def test_full_subgraph(self):
         full_graph = HierarchyGraph.full_subgraph(self.hierarchy, self.agents)
-        self.graph.assign_agents_to_nodes()
         self.graph.generate_agent_nodes()
         self.assertEqual(full_graph, self.graph)
 

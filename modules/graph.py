@@ -177,35 +177,28 @@ class HierarchyGraph(nx.DiGraph):
             self.agents == other.agents
         ])
 
-    def assign_agents_to_nodes(self):
-        '''Construct two AgentNode objects for each agent, and update
-        dictionary which keeps track of these.
-        '''
-        for agent in self.agents:
-            positive_node = AgentNode(agent, POSITIVE)
-            negative_node = AgentNode(agent, NEGATIVE)
-            self._agent_positive_node_map[agent] = positive_node
-            self._agent_negative_node_map[agent] = negative_node
-
     def generate_agent_nodes(self):
         '''Construct the AgentNodes for each agent and draw an edge between them.
         Set the capacity of the edge to be the difference between the agent's
         upper and lower capacity. Set demand to be (node polarity)*lower_capacity.
+        Update internal dictionary keeping track of which nodes have been assigned
+        to agents.
         '''
         for agent in self.agents:
+            out_node = AgentNode(agent, POSITIVE)
+            in_node  = AgentNode(agent, NEGATIVE)
             demand = agent.lower_capacity
-            out_node = self.positive_node(agent)
-            in_node = self.negative_node(agent)
             capacity = agent.capacity_difference
             self.add_node(out_node, demand=demand)
             self.add_node(in_node, demand=-demand)
             self.add_edge(out_node, in_node, capacity=capacity, weight=0)
+            self._agent_positive_node_map[agent] = out_node
+            self._agent_negative_node_map[agent] = in_node
 
     @classmethod
     def full_subgraph(cls, hierarchy, agents):
         '''Create graph with all agent nodes and edges set up.'''
         graph = cls(hierarchy, agents)
-        graph.assign_agents_to_nodes()
         graph.generate_agent_nodes()
         return graph
 
@@ -215,7 +208,7 @@ class HierarchyGraph(nx.DiGraph):
 
     @property
     def positive_agent_nodes(self):
-        '''Return (ordered) iterable of all positive agent nodes.'''
+        '''Return generator of all positive agent nodes, in order.'''
         return self._agent_positive_node_map.itervalues()
 
     def negative_node(self, agent):
@@ -224,7 +217,7 @@ class HierarchyGraph(nx.DiGraph):
 
     @property
     def negative_agent_nodes(self):
-        '''Return (ordered) iterable of all negative agent nodes.'''
+        '''Return generator of all negative agent nodes, in order.'''
         return self._agent_negative_node_map.itervalues()
 
 
