@@ -105,7 +105,7 @@ class AgentNode(object):
         return self.agent.level
 
 
-class HierarchyGraph(nx.DiGraph):
+class HierarchyGraph(nx.OrderedDiGraph):
     '''Represent a hierarchy as a directed graph (network). The full allocation
     graph consists of these objects, glued together with edges. For each agent,
     split them into positive and negative agent nodes and draw an edge between
@@ -146,8 +146,8 @@ class HierarchyGraph(nx.DiGraph):
         self.level = hierarchy.level
         self.agents = agents
 
-        self._agent_positive_node_map = OrderedDict()
-        self._agent_negative_node_map = OrderedDict()
+        self._agent_positive_node_map = None
+        self._agent_negative_node_map = None
 
     def __str__(self):
         return "HIERARCHY_GRAPH_{}".format(self.level)
@@ -192,8 +192,25 @@ class HierarchyGraph(nx.DiGraph):
             self.add_node(out_node, demand=demand)
             self.add_node(in_node, demand=-demand)
             self.add_edge(out_node, in_node, capacity=capacity, weight=0)
-            self._agent_positive_node_map[agent] = out_node
-            self._agent_negative_node_map[agent] = in_node
+        self.generate_agent_node_maps()
+
+    @property
+    def positive_agent_nodes(self):
+        '''Return generator of all positive agent nodes, in order.'''
+        return [node for node in self if node.polarity == POSITIVE]
+
+    @property
+    def negative_agent_nodes(self):
+        '''Return generator of all negative agent nodes, in order.'''
+        return [node for node in self if node.polarity == NEGATIVE]
+
+    def generate_agent_node_maps(self):
+        self._agent_positive_node_map = OrderedDict(
+            izip(self.agents, self.positive_agent_nodes)
+        )
+        self._agent_negative_node_map = OrderedDict(
+            izip(self.agents, self.negative_agent_nodes)
+        )
 
     @classmethod
     def full_subgraph(cls, hierarchy, agents):
@@ -206,19 +223,9 @@ class HierarchyGraph(nx.DiGraph):
         '''Return positive node corresponding to the agent.'''
         return self._agent_positive_node_map[agent]
 
-    @property
-    def positive_agent_nodes(self):
-        '''Return generator of all positive agent nodes, in order.'''
-        return self._agent_positive_node_map.itervalues()
-
     def negative_node(self, agent):
         '''Return negative node corresponding to the agent.'''
         return self._agent_negative_node_map[agent]
-
-    @property
-    def negative_agent_nodes(self):
-        '''Return generator of all negative agent nodes, in order.'''
-        return self._agent_negative_node_map.itervalues()
 
 
 class AllocationGraph(nx.DiGraph):
