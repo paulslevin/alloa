@@ -117,15 +117,16 @@ class DataSequence(object):
             self.block_list = []
         for i, hierarchy in enumerate(self.hierarchies):
             if i == 0:
-                first_block = HierarchyGraph(hierarchy, hierarchy.agents)
-                first_block.generate_agent_nodes()
+                first_block = HierarchyGraph.full_subgraph(
+                    hierarchy, hierarchy.agents
+                )
                 self.block_list.append(first_block)
                 continue
             previous_block = self.block_list[i - 1]
             previous_agents = previous_block.agents
-            next_block = HierarchyGraph(hierarchy,
-                               hierarchy.preferred(previous_agents))
-            next_block.generate_agent_nodes()
+            next_block = HierarchyGraph.full_subgraph(
+                hierarchy, hierarchy.preferred(previous_agents)
+            )
             self.block_list.append(next_block)
 
     def get_graph(self):
