@@ -50,7 +50,7 @@ class Agent:
         self.preferences = preferences or []
 
     def __str__(self) -> str:
-        return 'AGENT_{}_{}'.format(self.level, self.agent_id)
+        return f'AGENT_{self.level}_{self.agent_id}'
 
     def __repr__(self) -> str:
         str_kwargs = []
@@ -59,7 +59,7 @@ class Agent:
         ]:
             value = getattr(self, attr)
             if value:
-                str_kwargs.append('{}={}'.format(attr, value))
+                str_kwargs.append(f'{attr}={value}')
         return parse_repr(self, str_kwargs)
 
     def __hash__(self) -> int:
@@ -124,13 +124,13 @@ class Hierarchy:
         self.agents = agents or []
 
     def __str__(self) -> str:
-        return 'HIERARCHY_{}'.format(str(self.level))
+        return f'HIERARCHY_{self.level}'
 
     def __repr__(self) -> str:
-        str_kwargs = ['level={}'.format(self.level)]
+        str_kwargs = [f'level={self.level}']
         if self.agents:
             agent_strs = [str(agent) for agent in self.agents]
-            str_kwargs.append('agents={}'.format(agent_strs).replace("'", ''))
+            str_kwargs.append(f'agents={agent_strs}'.replace('\'', ''))
         return parse_repr(self, str_kwargs)
 
     def __iter__(self) -> Iterator[Agent]:

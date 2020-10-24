@@ -62,7 +62,7 @@ class Allocation:
             ])
             for i in range(self.number_of_levels - 1):
                 profile.write(
-                    '\nLevel {} Preference Count\n'.format(i + 1)
+                    f'\nLevel {i + 1} Preference Count\n'
                 )
                 for j in range(
                     self.graph.hierarchies[i].max_preferences_length
