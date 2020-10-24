@@ -126,7 +126,7 @@ class HierarchyGraph(nx.OrderedDiGraph):
         str_kwargs = [f'hierarchy={self.hierarchy}']
         if self.agents:
             agent_strs = [str(agent) for agent in self.agents]
-            str_kwargs.append(f'agents={agent_strs}'.replace("'", ''))
+            str_kwargs.append(f'agents={agent_strs}'.replace('\'', ''))
         return parse_repr(self, str_kwargs)
 
     def __eq__(self, other: HierarchyGraph) -> bool:
@@ -228,7 +228,7 @@ class AllocationGraph(nx.DiGraph):
         str_kwargs = []
         if self.subgraphs:
             subgraph_strs = [str(subgraph) for subgraph in self.subgraphs]
-            str_kwargs.append(f'subgraphs={subgraph_strs}'.replace("'", ''))
+            str_kwargs.append(f'subgraphs={subgraph_strs}'.replace('\'', ''))
         return parse_repr(self, str_kwargs)
 
     @property
