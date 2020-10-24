@@ -1,5 +1,1 @@
-decorator==4.1.2
-networkx==2.0
-pip==9.0.1
-setuptools==36.5.0
-wheel==0.30.0
+networkx
