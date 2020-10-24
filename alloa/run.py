@@ -54,26 +54,26 @@ class Allocation:
 
     def write_profile(self) -> None:
         with open(settings.ALLOCATION_PROFILE_PATH, 'w') as profile:
-            writer = csv.writer(profile, delimiter='\n')
-            writer.writerow([
+            # writer = csv.writer(profile, delimiter='\n')
+            profile.writelines([
                 f'Total number of assigned level 1 agents '
-                f'is {self.graph.max_flow}',
-                f'Total cost of assignment is {self.graph.flow_cost}'
+                f'is {self.graph.max_flow}\n',
+                f'Total cost of assignment is {self.graph.flow_cost}\n'
             ])
             for i in range(self.number_of_levels - 1):
-                writer.writerow([
-                    '', 'Level {} Preference Count'.format(i + 1)
-                ])
+                profile.write(
+                    '\nLevel {} Preference Count\n'.format(i + 1)
+                )
                 for j in range(
-                        self.graph.hierarchies[i].max_preferences_length
+                    self.graph.hierarchies[i].max_preferences_length
                 ):
                     split_point = self.number_of_levels
                     column = [row[split_point + i] for row in self.allocation]
                     count = column.count(j + 1)
-                    writer.writerow([
+                    profile.write(
                         f'Number of level {i + 2} agents that were '
-                        f'choice #{j + 1}: {count}'
-                    ])
+                        f'choice #{j + 1}: {count}\n'
+                    )
 
     @property
     def allocation(self) -> List[List[Union[str, int]]]:

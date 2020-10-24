@@ -11,7 +11,7 @@ CONFIG_PATH = os.path.abspath(os.path.join(CURRENT, os.pardir))
 config = configparser.RawConfigParser()
 config.read(os.path.join(CONFIG_PATH, 'alloa.conf'))
 
-ALLOCATION_PROFILE_FILENAME = f'allocation_profile_{DATE}.csv'
+ALLOCATION_PROFILE_FILENAME = f'allocation_profile_{DATE}.txt'
 ALLOCATION_FILENAME = f'allocation_{DATE}.csv'
 
 # Path for storing temporary files
