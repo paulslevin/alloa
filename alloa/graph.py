@@ -206,7 +206,7 @@ class AllocationGraph(nx.DiGraph):
             The hierarchy graphs are glued together by edges representing the
             preferences of each of their agents.
         """
-        super(AllocationGraph, self).__init__()
+        super().__init__()
         self.subgraphs = subgraphs or []
         self.flow_cost = None
         self.max_flow = None
