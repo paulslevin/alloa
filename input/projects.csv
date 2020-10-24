@@ -1,136 +1,136 @@
 Project,Project Lower Capacity,Project Upper Capacity,Choice 1,Choice 2,Choice 3
-1:Elliptic Curves,0,1,Askew,Villiers
+1:Elliptic Curves,0,1,Askew,Villiers,
 2:Finite Reflection Groups I-III,0,3,Askew,Belladonna,Fishington-Smythe
-3:Fuchsian Differential Equations,0,1,Askew
-4:Lie Symmetries of Differential Equations,0,1,Askew
-5:Projective Geometry,0,1,Askew
-6:Cyclotomic Fields,0,1,Bertram
-7:Homological Algebra I-III,0,3,Bertram,Kraehmer
-8:Algebraic K-Theory,0,1,Kraehmer
+3:Fuchsian Differential Equations,0,1,Askew,,
+4:Lie Symmetries of Differential Equations,0,1,Askew,,
+5:Projective Geometry,0,1,Askew,,
+6:Cyclotomic Fields,0,1,Bertram,,
+7:Homological Algebra I-III,0,3,Bertram,Kraehmer,
+8:Algebraic K-Theory,0,1,Kraehmer,,
 9:Lie Groups and Lie Algebras,0,1,Bertram,Belladonna,Kraehmer
 10:The Steenrod Algebra,0,1,Kraehmer,Bertram
-11:Frobenius Algebras,0,1,Bertram
-12:Rings of Numerical Polynomials,0,1,Bertram
-13:Simple Groups and Rings I-III,0,3,Bertram
-14:Counting Subgroups,0,1,Bertram
-15:The Riemann-Hilbert Correspondence,0,1,Belladonna
-16:Representations of the Symmetric Group,0,1,Belladonna
-17:Quivers (Linear Algebra on Steroids),0,1,Belladonna,Boris
-18:Braids I-III,0,3,Bolt
-19:Group Rings,0,1,Boris
-20:Invariant Theory of Finite Groups,0,1,Boris
-21:Dynamics of Infectious Diseases I-II,0,2,Cristiano
-22:Mathematical Models of Evolution,0,1,Cristiano
-23:Random Walks in Biology,0,1,Cristiano
-24:Asymptotic Methods,0,1,Fern
-25:Convection in Solidifying Systems,0,1,Fern
-26:Double Diffusive Convection,0,1,Fern
-27:The Earth's Magnetic Field,0,1,Fern
-28:Oil Extraction and Special Domains I-II,0,2,Fishington-Smythe
-29:Orthogonal Polynomials and Random Matrices,0,1,Fishington-Smythe
-30:Representation Theory of sl_2,0,1,Fourier
-31:The Theory of Poset Polytypes,0,1,Fourier
-32:The Ehrhart polynomial of a Polytope,0,1,Fourier
-33:The Gelfand-Tsetlin Polytope in Representation Theory,0,1,Fourier
-34:Direct Methods in Soliton Theory,0,1,Gilbert
-35:Mathematics of Musical Instruments I-II,0,2,Gilbert
-36:Pfaffians,0,1,Gilbert
-37:The Alternating Sign Matrix Conjecture and Plane Partitions,0,1,Gilbert
-38:Transform Theory,0,1,Gilbert
-39:Bioconvection – spontaneous pattern formation by micro-organisms,0,1,Hillington
-40:Costs and Benefits of Animal Migration,0,1,Hillington
-41:To push or not to push - how to swim at zero Reynolds number,0,1,Hillington
-42:Random Walks and Animal Movement,0,1,Hillington
-43:The Mechanics of Climbing Equipment,0,1,Hillington
-44:The Mechanics of Weightlifting,0,1,Hillington
-45:The Ring of Symmetric Functions I-III,0,3,Koka-Kola
-46:Ice and alternating sign matrices,0,1,Koka-Kola
-47:Crystal Graphs and Young Tableaux,0,1,Koka-Kola
-48:The Robinson-Schensted Correspondence I-III,0,3,Koka-Kola
-49:Weyl Groups,0,1,Koka-Kola
-50:Noncommutative Geometry I-III,0,3,Kraehmer
-51:Hopf Algebras and Quantum Groups I-III,0,3,Boris
-52:Modelling of the Heart I-III,0,0,Liu
-53:Modelling of Arteries I-III,0,1,Liu,Strain
-54:Modelling of Cerebral Aneurysm I-III,0,0,Liu
-55:Flow in the Zebrafish Heart I-III,0,0,Liu
-56:Modelling the Lymphatic System I-III:Challenges and Opportunities,0,0,Liu
-57:Magnetic reconnection,0,1,MacTaggart
-58:MHD equilibria,0,1,MacTaggart
-59:Collisionless kinetic theory,0,1,MacTaggart
-60:Buoyancy instabilities,0,1,MacTaggart
-61:Differential forms in physics,0,1,MacTaggart
-62:Applications of Cellular Automata,0,1,Nostradamus
-63:Integrable Discrete Systems,0,1,Nostradamus
-64:Nonlinear Mappings of the Plane,0,1,Nostradamus
-65:Nonlinear Oscillators,0,1,Nostradamus
-66:The Sine-Gordon Equation,0,1,Nostradamus
-67:Elastic Properties of Polymers,0,1,Oliver
-68:Symmetry Classes of Elastic Constitutive Laws,0,1,Oliver
-69:The Elastic Properties of Arteries,0,1,Oliver
-70:The mathematical works of George Green,0,1,Oliver
-71:Lagrange's contributions to mechanics,0,1,Oliver
-72:The Mechanics of Elastic Proteins,0,1,Oliver
-73:Dedekind Sums I-III,0,3,Owens
-74:Linking Numbers I-III,0,3,Owens
+11:Frobenius Algebras,0,1,Bertram,,
+12:Rings of Numerical Polynomials,0,1,Bertram,,
+13:Simple Groups and Rings I-III,0,3,Bertram,,
+14:Counting Subgroups,0,1,Bertram,,
+15:The Riemann-Hilbert Correspondence,0,1,Belladonna,,
+16:Representations of the Symmetric Group,0,1,Belladonna,,
+17:Quivers (Linear Algebra on Steroids),0,1,Belladonna,Boris,
+18:Braids I-III,0,3,Bolt,,
+19:Group Rings,0,1,Boris,,
+20:Invariant Theory of Finite Groups,0,1,Boris,,
+21:Dynamics of Infectious Diseases I-II,0,2,Cristiano,,
+22:Mathematical Models of Evolution,0,1,Cristiano,,
+23:Random Walks in Biology,0,1,Cristiano,,
+24:Asymptotic Methods,0,1,Fern,,
+25:Convection in Solidifying Systems,0,1,Fern,,
+26:Double Diffusive Convection,0,1,Fern,,
+27:The Earth's Magnetic Field,0,1,Fern,,
+28:Oil Extraction and Special Domains I-II,0,2,Fishington-Smythe,,
+29:Orthogonal Polynomials and Random Matrices,0,1,Fishington-Smythe,,
+30:Representation Theory of sl_2,0,1,Fourier,,
+31:The Theory of Poset Polytypes,0,1,Fourier,,
+32:The Ehrhart polynomial of a Polytope,0,1,Fourier,,
+33:The Gelfand-Tsetlin Polytope in Representation Theory,0,1,Fourier,,
+34:Direct Methods in Soliton Theory,0,1,Gilbert,,
+35:Mathematics of Musical Instruments I-II,0,2,Gilbert,,
+36:Pfaffians,0,1,Gilbert,,
+37:The Alternating Sign Matrix Conjecture and Plane Partitions,0,1,Gilbert,,
+38:Transform Theory,0,1,Gilbert,,
+39:Bioconvection – spontaneous pattern formation by micro-organisms,0,1,Hillington,,
+40:Costs and Benefits of Animal Migration,0,1,Hillington,,
+41:To push or not to push - how to swim at zero Reynolds number,0,1,Hillington,,
+42:Random Walks and Animal Movement,0,1,Hillington,,
+43:The Mechanics of Climbing Equipment,0,1,Hillington,,
+44:The Mechanics of Weightlifting,0,1,Hillington,,
+45:The Ring of Symmetric Functions I-III,0,3,Koka-Kola,,
+46:Ice and alternating sign matrices,0,1,Koka-Kola,,
+47:Crystal Graphs and Young Tableaux,0,1,Koka-Kola,,
+48:The Robinson-Schensted Correspondence I-III,0,3,Koka-Kola,,
+49:Weyl Groups,0,1,Koka-Kola,,
+50:Noncommutative Geometry I-III,0,3,Kraehmer,,
+51:Hopf Algebras and Quantum Groups I-III,0,3,Boris,,
+52:Modelling of the Heart I-III,0,0,Liu,,
+53:Modelling of Arteries I-III,0,1,Liu,Strain,
+54:Modelling of Cerebral Aneurysm I-III,0,0,Liu,,
+55:Flow in the Zebrafish Heart I-III,0,0,Liu,,
+56:Modelling the Lymphatic System I-III:Challenges and Opportunities,0,0,Liu,,
+57:Magnetic reconnection,0,1,MacTaggart,,
+58:MHD equilibria,0,1,MacTaggart,,
+59:Collisionless kinetic theory,0,1,MacTaggart,,
+60:Buoyancy instabilities,0,1,MacTaggart,,
+61:Differential forms in physics,0,1,MacTaggart,,
+62:Applications of Cellular Automata,0,1,Nostradamus,,
+63:Integrable Discrete Systems,0,1,Nostradamus,,
+64:Nonlinear Mappings of the Plane,0,1,Nostradamus,,
+65:Nonlinear Oscillators,0,1,Nostradamus,,
+66:The Sine-Gordon Equation,0,1,Nostradamus,,
+67:Elastic Properties of Polymers,0,1,Oliver,,
+68:Symmetry Classes of Elastic Constitutive Laws,0,1,Oliver,,
+69:The Elastic Properties of Arteries,0,1,Oliver,,
+70:The mathematical works of George Green,0,1,Oliver,,
+71:Lagrange's contributions to mechanics,0,1,Oliver,,
+72:The Mechanics of Elastic Proteins,0,1,Oliver,,
+73:Dedekind Sums I-III,0,3,Owens,,
+74:Linking Numbers I-III,0,3,Owens,,
 75:Calculus on Manifolds I-III,0,3,Alive,Kraehmer,Owens
-76:Capillary Effects,0,1,Rasputin
-77:Molecular Structure and Computational Chemistry,0,1,Rasputin
-78:Similarity Solutions,0,1,Rasputin
-79:Solidification and Materials Sciences,0,1,Rasputin
-80:Tomography - Seismology,0,1,Rasputin
+76:Capillary Effects,0,1,Rasputin,,
+77:Molecular Structure and Computational Chemistry,0,1,Rasputin,,
+78:Similarity Solutions,0,1,Rasputin,,
+79:Solidification and Materials Sciences,0,1,Rasputin,,
+80:Tomography - Seismology,0,1,Rasputin,,
 81:Foams I-III,0,3,Rasputin,Strain,Szabo
-82:Finite Element Simulations of Cardiac Propagation,0,1,Smiley
-83:Mantle Convection,0,1,Smiley
-84:Mathematical Models of Cardiac Action Potential,0,1,Smiley
-85:Pattern Formation and Dynamics in the Swift-Hohenberg Equation,0,1,Smiley
-86:Spectral Approximations of Functions,0,1,Smiley
-87:Construction and Characterisation of the Real Numbers,0,1,Souza
-88:Representations of Natural Numbers as Sums of Squares,0,1,Souza
-89:Sharkovsky's Theorem,0,1,Souza
-90:The Axiom of Choice,0,1,Souza
-91:The Prime Number Theorem,0,1,Souza
-92:Simplicial Sets,0,3,Kraehmer,Alive
-93:Hydrodynamic stability theory,0,1,Strain,Hillington
-94:Non-normal Operators and Transient Growth,0,1,Strain
-95:Van-der-Waals Intermolecular Attractions,0,1,Strain
-96:Rayleigh-Taylor Instability,0,1,Strain
-97:Fluid dynamics in the human eye,0,1,Strain
-98:Mathematical modelling of Retinitis Pigmentosa,0,1,Strain
-99:Catastrophe Theory I-III,0,3,Stripy
-100:General Relativity I-III,0,3,Stripy
-101:Modular Functions and Their Differential Equations I-III,0,3,Stripy
-102:Wave Equations,0,1,Vaughan
-103:The Heat Equation,0,1,Vaughan
-104:Wave Propagation in Elastic Materials,0,1,Vaughan
-105:Perturbation Methods,0,1,Vaughan
-106:Clifford Algebras and Spinors,0,1,Voigt
-107:The Riemann Zeta Function,0,1,Voigt
-108:Fractals,0,1,Voigt
-109:Quantum Computers,0,1,Voigt
-110:The Noncommutative Torus,0,1,Voigt
-111:Topological Quantum Field Theory I-III,0,3,Voigt
-112:Contact structures and open book decompositions in 3D,0,1,Wanderer
-113:Kirby calculus,0,1,Wanderer
-114:Legendrian knots,0,1,Wanderer
-115:Categorification,0,1,Looper
-116:Symmetry Groups of Knots and Links,0,1,Looper
-117:Left-Orderable Groups,0,1,Looper
-118:Foliations,0,1,Looper,Kraehmer
-119:Surgery on 3-Manifolds,0,1,Looper,Alive
-120:The Theory of Ordinary Differential Equations,0,1,Szabo
-121:Algebraic-Geometric Error correcting codes,0,1,Villiers
-122:Cubic surfaces,0,1,Villiers
-123:Minimal Model Program for Surfaces,0,1,Villiers
-124:Riemann-Roch Theorem for Curves,0,1,Villiers
-125:Singularities of Curves,0,1,Villiers
-126:Ergodic Theory,0,1,Zsa-Zsa
-127:P-adic Numbers,0,1,Zsa-Zsa,Bertram
-128:The Banach Tarski Paradox,0,1,Zsa-Zsa
-129:The Marriage Theorem,0,1,Zsa-Zsa,Mephisto
-130:Van der Waerden's Theorem,0,1,Zsa-Zsa,Mephisto
-131:Introduction to Algebraic Geometry,0,1,Owens
-132:Dynamical systems associated with aperiodic tilings,0,1,Williams
-133:Basic fractal geometry,0,1,Williams
-134:The noncommutative geometry of the circle,0,1,Williams
-135:Self-similar groups,0,1,Williams
+82:Finite Element Simulations of Cardiac Propagation,0,1,Smiley,,
+83:Mantle Convection,0,1,Smiley,,
+84:Mathematical Models of Cardiac Action Potential,0,1,Smiley,,
+85:Pattern Formation and Dynamics in the Swift-Hohenberg Equation,0,1,Smiley,,
+86:Spectral Approximations of Functions,0,1,Smiley,,
+87:Construction and Characterisation of the Real Numbers,0,1,Souza,,
+88:Representations of Natural Numbers as Sums of Squares,0,1,Souza,,
+89:Sharkovsky's Theorem,0,1,Souza,,
+90:The Axiom of Choice,0,1,Souza,,
+91:The Prime Number Theorem,0,1,Souza,,
+92:Simplicial Sets,0,3,Kraehmer,Alive,
+93:Hydrodynamic stability theory,0,1,Strain,Hillington,
+94:Non-normal Operators and Transient Growth,0,1,Strain,,
+95:Van-der-Waals Intermolecular Attractions,0,1,Strain,,
+96:Rayleigh-Taylor Instability,0,1,Strain,,
+97:Fluid dynamics in the human eye,0,1,Strain,,
+98:Mathematical modelling of Retinitis Pigmentosa,0,1,Strain,,
+99:Catastrophe Theory I-III,0,3,Stripy,,
+100:General Relativity I-III,0,3,Stripy,,
+101:Modular Functions and Their Differential Equations I-III,0,3,Stripy,,
+102:Wave Equations,0,1,Vaughan,,
+103:The Heat Equation,0,1,Vaughan,,
+104:Wave Propagation in Elastic Materials,0,1,Vaughan,,
+105:Perturbation Methods,0,1,Vaughan,,
+106:Clifford Algebras and Spinors,0,1,Voigt,,
+107:The Riemann Zeta Function,0,1,Voigt,,
+108:Fractals,0,1,Voigt,,
+109:Quantum Computers,0,1,Voigt,,
+110:The Noncommutative Torus,0,1,Voigt,,
+111:Topological Quantum Field Theory I-III,0,3,Voigt,,
+112:Contact structures and open book decompositions in 3D,0,1,Wanderer,,
+113:Kirby calculus,0,1,Wanderer,,
+114:Legendrian knots,0,1,Wanderer,,
+115:Categorification,0,1,Looper,,
+116:Symmetry Groups of Knots and Links,0,1,Looper,,
+117:Left-Orderable Groups,0,1,Looper,,
+118:Foliations,0,1,Looper,Kraehmer,
+119:Surgery on 3-Manifolds,0,1,Looper,Alive,
+120:The Theory of Ordinary Differential Equations,0,1,Szabo,,
+121:Algebraic-Geometric Error correcting codes,0,1,Villiers,,
+122:Cubic surfaces,0,1,Villiers,,
+123:Minimal Model Program for Surfaces,0,1,Villiers,,
+124:Riemann-Roch Theorem for Curves,0,1,Villiers,,
+125:Singularities of Curves,0,1,Villiers,,
+126:Ergodic Theory,0,1,Zsa-Zsa,,
+127:P-adic Numbers,0,1,Zsa-Zsa,Bertram,
+128:The Banach Tarski Paradox,0,1,Zsa-Zsa,,
+129:The Marriage Theorem,0,1,Zsa-Zsa,Mephisto,
+130:Van der Waerden's Theorem,0,1,Zsa-Zsa,Mephisto,
+131:Introduction to Algebraic Geometry,0,1,Owens,,
+132:Dynamical systems associated with aperiodic tilings,0,1,Williams,,
+133:Basic fractal geometry,0,1,Williams,,
+134:The noncommutative geometry of the circle,0,1,Williams,,
+135:Self-similar groups,0,1,Williams,,

@@ -47,11 +47,10 @@ class Allocation:
         self.graph.allocate()
 
     def write_allocations(self) -> None:
-        allocation = open(settings.ALLOCATION_PATH, 'w', newline='')
-        writer = csv.writer(allocation, delimiter=',')
-        for row in self.allocation:
-            writer.writerow(row)
-        allocation.close()
+        with open(settings.ALLOCATION_PATH, 'w', newline='') as allocation:
+            writer = csv.writer(allocation, delimiter=',')
+            for row in self.allocation:
+                writer.writerow(row)
 
     def write_profile(self) -> None:
         with open(settings.ALLOCATION_PROFILE_PATH, 'w') as profile:
@@ -78,8 +77,22 @@ class Allocation:
 
     @property
     def allocation(self) -> List[List[Union[str, int]]]:
+
+        if not self.graph.first_level_agents:
+            return []
+
         unnamed = self.graph.allocation
+
+        first_agent = self.graph.first_level_agents[0]
+        num_of_agents = len(unnamed[first_agent]) // 2 + 1
+        name_columns, rank_columns = [], []
+        for i in range(num_of_agents):
+            name_columns.append(f'Level {i + 1} Agent Name')
+            rank_columns.append(f'Level {i + 1} Agent Rank')
+        column_names = ['Level 1 Agent Name'] + name_columns + rank_columns
+
         rows = []
+
         for agent in self.graph.first_level_agents:
             row = [agent.name]
             row.extend(
@@ -94,7 +107,7 @@ class Allocation:
             rows,
             key=lambda r: r[0][len(r[0]) - r[0][::-1].index(' '):]
         )
-        return rows
+        return [column_names] + rows
 
 
 # Now one can run the program using custom cost functions.
