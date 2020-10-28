@@ -70,7 +70,7 @@ class Agent:
     def __eq__(self, other: Agent):
         if not isinstance(self, other.__class__):
             return False
-        return self.agent_id == other.agent_id and self.level == other.level
+        return (self.agent_id, self.level) == (other.agent_id, other.level)
 
     def __lt__(self, other: Agent) -> bool:
         """Lexicographic ordering by level and ID."""

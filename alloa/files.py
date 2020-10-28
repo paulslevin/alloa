@@ -5,7 +5,8 @@ from random import shuffle
 from typing import Dict, List, Optional
 
 from alloa.agents import Agent, Hierarchy
-from alloa.graph import HierarchyGraph, AllocationGraph
+from alloa.costs import spa_cost
+from alloa.graph import AllocationGraph
 
 
 class Line:
@@ -118,27 +119,7 @@ class DataSequence:
         self.hierarchies.append(self.sequence[0].hierarchy)
         self.hierarchies = self.hierarchies[::-1]
 
-    def set_block_list(self) -> None:
-        if self.block_list:
-            return None
-        if not self.hierarchies:
-            self.block_list = []
-        for i, hierarchy in enumerate(self.hierarchies):
-            if i == 0:
-                first_block = HierarchyGraph.full_subgraph(
-                    hierarchy, hierarchy.agents
-                )
-                self.block_list.append(first_block)
-                continue
-            previous_block = self.block_list[i - 1]
-            previous_agents = previous_block.agents
-            next_block = HierarchyGraph.full_subgraph(
-                hierarchy, hierarchy.preferred(previous_agents)
-            )
-            self.block_list.append(next_block)
-
     def get_graph(self) -> AllocationGraph:
         self.set_hierarchies()
-        self.set_block_list()
-        graph = AllocationGraph(self.block_list)
+        graph = AllocationGraph.with_edges(self.hierarchies, cost=spa_cost)
         return graph

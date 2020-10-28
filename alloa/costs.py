@@ -3,34 +3,43 @@ from __future__ import annotations
 
 from typing import Callable, TYPE_CHECKING
 
+from alloa.utils.enums import Polarity
+
 if TYPE_CHECKING:
     from alloa.graph import AgentNode, AllocationGraph
 
 # Used for type annotation of cost functions.
-CostFunc = Callable[['AgentNode', 'AgentNode'], int]
+CostFunc = Callable[['AgentNode', 'AgentNode', 'AllocationGraph'], int]
 
 
-class SPACosts:
-    """Costs for student project allocation as described in the paper."""
-    def __init__(self, graph: AllocationGraph) -> None:
-        self.graph = graph
+def default_cost(
+    node1: AgentNode, node2: AgentNode, graph: AllocationGraph
+) -> int:
+    _ = node1, node2, graph
+    return 0
 
-    def exponent(self, node1: AgentNode, node2: AgentNode) -> int:
-        agent1, agent2 = node1.agent, node2.agent
 
-        # Get rank of agent2 in agent1's preferences.
-        term = agent1.preference_position(agent2)
+def spa_cost(node1: AgentNode, node2: AgentNode, graph: AllocationGraph) -> int:
+    if (
+        node1.polarity == Polarity.POSITIVE
+    ) and (
+        node2.polarity == Polarity.NEGATIVE
+    ):
+        return 0
 
-        # Get all hierarchies above agent1's level, excluding the final level.
-        intermediate_hierarchies = self.graph.intermediate_hierarchies(node1)
+    agent1, agent2 = node1.agent, node2.agent
 
-        # Sum the maximal rank at each of the intermediate hierarchies.
-        _sum = sum(
-            hierarchy.max_preferences_length
-            for hierarchy in intermediate_hierarchies
-        )
-        return term - 1 + _sum
+    # Get rank of agent2 in agent1's preferences.
+    term = agent1.preference_position(agent2)
 
-    def cost(self, node1: AgentNode, node2: AgentNode) -> int:
-        exponent = self.exponent(node1, node2)
-        return (self.graph.min_upper_capacity_sum + 1) ** exponent
+    # Get all hierarchies above agent1's level, excluding the final level.
+    intermediate_hierarchies = graph.intermediate_hierarchies(node1.level)
+
+    # Sum the maximal rank at each of the intermediate hierarchies.
+    _sum = sum(
+        hierarchy.max_preferences_length
+        for hierarchy in intermediate_hierarchies
+    )
+    exponent = term - 1 + _sum
+
+    return (graph.min_upper_capacity_sum + 1) ** exponent

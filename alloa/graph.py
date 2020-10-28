@@ -7,12 +7,12 @@ from __future__ import annotations
 
 from collections import namedtuple, OrderedDict
 from functools import total_ordering
-from typing import Dict, Generator
+from typing import Any, Dict, Generator
 
 import networkx as nx
 
 from alloa.agents import Agent, Hierarchy, List, Optional
-from alloa.costs import CostFunc
+from alloa.costs import CostFunc, default_cost
 from alloa.utils.enums import GraphElement, Polarity
 from alloa.utils.parsers import parse_repr
 
@@ -85,133 +85,31 @@ class AgentNode:
         return self.agent.level
 
 
-class HierarchyGraph(nx.OrderedDiGraph):
-    """Represent a hierarchy as a directed graph (network). The full allocation
-    graph consists of these objects, glued together with edges. For each agent,
-    split them into positive and negative agent nodes and draw an edge between
-    these. The capacity of the edge represents the capacity of the agent. The
-    rules are:
-
-      1) edge capacity = agent upper capacity - agent lower capacity.
-      2) positive node demand = agent lower capacity.
-      3) negative node demand = agent lower capacity * (-1).
-    """
-
-    edge_attr_dict_factory = dict
-
-    def __init__(self, hierarchy: Hierarchy, agents: List[Agent]) -> None:
-        """
-        Parameters
-        ----------
-        hierarchy:
-            The hierarchy we are modelling as a graph.
-        agents:
-            Agents used to populate the graph. These don't necessarily have to
-            be the same agents as those on the hierarchy -- there's no need to
-            include agents that aren't preferred by anyone on the level beneath,
-            for example.
-        """
-        super().__init__()
-        self.hierarchy = hierarchy
-        self.level = hierarchy.level
-        self.agents = agents
-
-        self._agent_positive_node_map = None
-        self._agent_negative_node_map = None
-
-    def __str__(self) -> str:
-        return f'HIERARCHY_GRAPH_{self.level}'
-
-    def __repr__(self) -> str:
-        str_kwargs = [f'hierarchy={self.hierarchy}']
-        if self.agents:
-            agent_strs = [str(agent) for agent in self.agents]
-            str_kwargs.append(f'agents={agent_strs}'.replace('\'', ''))
-        return parse_repr(self, str_kwargs)
-
-    def __eq__(self, other: HierarchyGraph) -> bool:
-        return all(self._graph_eq_comparison(other))
-
-    def _graph_eq_comparison(
-            self, other: HierarchyGraph
-    ) -> Generator[bool, None, None]:
-        """Generator of all attributes which define graph equality."""
-        yield isinstance(other, self.__class__)
-        yield self.nodes == other.nodes
-        yield sorted(self.edges(data=True)) == sorted(other.edges(data=True))
-        yield self.hierarchy == other.hierarchy
-        yield self.agents == other.agents
-
-    def generate_agent_nodes(self) -> None:
-        """Construct the AgentNodes for each agent and draw an edge between
-        them. Set the capacity of the edge to be the difference between the
-        agent's upper and lower capacity. Set demand to be
-        (node polarity)*lower_capacity. Update internal dictionary keeping track
-        of which nodes have been assigned to agents.
-        """
-        for agent in self.agents:
-            out_node = AgentNode(agent, Polarity.POSITIVE)
-            in_node = AgentNode(agent, Polarity.NEGATIVE)
-            demand = agent.lower_capacity
-            capacity = agent.capacity_difference
-            self.add_node(out_node, demand=demand)
-            self.add_node(in_node, demand=-demand)
-            self.add_edge(out_node, in_node, capacity=capacity, weight=0)
-        self.generate_agent_node_maps()
-
-    @property
-    def positive_agent_nodes(self) -> List[AgentNode]:
-        """Return generator of all positive agent nodes, in order."""
-        return [node for node in self if node.polarity == Polarity.POSITIVE]
-
-    @property
-    def negative_agent_nodes(self) -> List[AgentNode]:
-        """Return generator of all negative agent nodes, in order."""
-        return [node for node in self if node.polarity == Polarity.NEGATIVE]
-
-    def generate_agent_node_maps(self) -> None:
-        self._agent_positive_node_map = OrderedDict(
-            zip(self.agents, self.positive_agent_nodes)
-        )
-        self._agent_negative_node_map = OrderedDict(
-            zip(self.agents, self.negative_agent_nodes)
-        )
-
-    @classmethod
-    def full_subgraph(
-        cls, hierarchy: Hierarchy, agents: List[Agent]
-    ) -> HierarchyGraph:
-        """Create graph with all agent nodes and edges set up."""
-        graph = cls(hierarchy, agents)
-        graph.generate_agent_nodes()
-        return graph
-
-    def positive_node(self, agent: Agent) -> AgentNode:
-        """Return positive node corresponding to the agent."""
-        return self._agent_positive_node_map[agent]
-
-    def negative_node(self, agent) -> AgentNode:
-        """Return negative node corresponding to the agent."""
-        return self._agent_negative_node_map[agent]
-
-
 class AllocationGraph(nx.DiGraph):
-    def __init__(
-        self, subgraphs: Optional[List[HierarchyGraph]] = None
-    ) -> None:
+    """Representation of the allocation problem as a directed graph (network).
+    For each agent, split them into positive and negative agent nodes and draw
+    an edge between these. The capacity of the edge represents the capacity of
+    the agent. The rules are:
+        1) edge capacity = agent upper capacity - agent lower capacity.
+        2) positive node demand = agent lower capacity.
+        3) negative node demand = agent lower capacity * (-1).
+    We also draw an edge from the negative node of an agent to the positive node
+    of each agent at the next hierarchy level, based on preference. The cost of
+    these edges is determined by the cost function passed in.
+    """
+    def __init__(self, cost: Optional[CostFunc] = None):
         """
         Parameters
         ----------
-        subgraphs:
-            The hierarchy graphs are glued together by edges representing the
-            preferences of each of their agents.
+        cost:
+            Function determining the cost of an edge between two given agents
         """
         super().__init__()
-        self.subgraphs = subgraphs or []
-        self.flow_cost = None
-        self.max_flow = None
-        self.simple_flow = None
-        self.allocation = []
+        self.cost = default_cost if cost is None else cost
+        self._agent_positive_node_map = {}
+        self._agent_negative_node_map = {}
+        self.hierarchies = []
+        self.hierarchy_subgraphs = []
 
         self._source = None
         self._sink = None
@@ -221,15 +119,19 @@ class AllocationGraph(nx.DiGraph):
         self.max_flow = None
         self.simple_flow = None
 
-    def __str__(self) -> str:
-        return f'ALLOCATION_GRAPH({len(self.subgraphs)})'
+        self.allocation = None
 
-    def __repr__(self):
-        str_kwargs = []
-        if self.subgraphs:
-            subgraph_strs = [str(subgraph) for subgraph in self.subgraphs]
-            str_kwargs.append(f'subgraphs={subgraph_strs}'.replace('\'', ''))
-        return parse_repr(self, str_kwargs)
+    def __eq__(self, other: AllocationGraph) -> bool:
+        return all(self._graph_eq_comparison(other))
+
+    def _graph_eq_comparison(
+        self, other: AllocationGraph
+    ) -> Generator[bool, None, None]:
+        """Generator of all attributes which define graph equality."""
+        yield isinstance(other, self.__class__)
+        yield self.nodes == other.nodes
+        yield sorted(self.edges(data=True)) == sorted(other.edges(data=True))
+        yield self.hierarchies == other.hierarchies
 
     @property
     def source(self) -> AgentNode:
@@ -261,24 +163,6 @@ class AllocationGraph(nx.DiGraph):
         return self._sink
 
     @property
-    def first_subgraph(self) -> Optional[HierarchyGraph]:
-        if self.subgraphs:
-            return self.subgraphs[0]
-
-    @property
-    def last_subgraph(self) -> Optional[HierarchyGraph]:
-        if self.subgraphs:
-            return self.subgraphs[-1]
-
-    @property
-    def hierarchies(self) -> List[Hierarchy]:
-        return [subgraph.hierarchy for subgraph in self.subgraphs]
-
-    @property
-    def number_of_hierarchies(self) -> int:
-        return len(self.hierarchies)
-
-    @property
     def first_level_agents(self) -> List[Agent]:
         return self.hierarchies[0].agents
 
@@ -287,102 +171,76 @@ class AllocationGraph(nx.DiGraph):
         return self.hierarchies[-1].agents
 
     @property
-    def last_level(self) -> int:
-        return self.hierarchies[-1].level
+    def number_of_hierarchies(self) -> int:
+        return len(self.hierarchies)
 
     @property
-    def min_upper_capacity_sum(self) -> int:
-        return min(
-            hierarchy.upper_capacity_sum for hierarchy in self.hierarchies
-        )
+    def positive_agent_nodes(self) -> List[AgentNode]:
+        """Return generator of all positive agent nodes, in order."""
+        return [node for node in self if node.polarity == Polarity.POSITIVE]
 
-    def intermediate_hierarchies(self, node: AgentNode) -> List[Hierarchy]:
-        """Return all hierarchies strictly between the given node and the last
-        hierarchy (non-inclusive).
-        """
-        return self.hierarchies[node.level: -1]
-
-    def add_edge_with_cost(
-        self, out_node: AgentNode, in_node: AgentNode, cost: CostFunc
-    ) -> None:
-        weight = cost(out_node, in_node)
-        self.add_edge(out_node, in_node, weight=weight)
-
-    def populate_edges_from_source(self, cost: CostFunc) -> None:
-        for node in self.first_subgraph.positive_agent_nodes:
-            self.add_edge_with_cost(self.source, node, cost)
-
-    def populate_edges_to_sink(self, cost: CostFunc) -> None:
-        for node in self.last_subgraph.negative_agent_nodes:
-            self.add_edge_with_cost(node, self.sink, cost)
-
-    def populate_internal_edges(self) -> None:
-        for subgraph in self.subgraphs:
-            self.add_edges_from(subgraph.edges(data=True))
-
-    def glue(
-        self,
-        subgraph1: HierarchyGraph,
-        subgraph2: HierarchyGraph,
-        cost: CostFunc
-    ) -> None:
-        for agent in subgraph1.agents:
-            for preference in agent.preferences:
-
-                # Handle preference ties.
-                if isinstance(preference, Agent):
-                    preference_list = [preference]
-                elif isinstance(preference, list):
-                    preference_list = preference
-                else:
-                    preference_list = []
-
-                for other_agent in preference_list:
-                    out_node = subgraph1.negative_node(agent)
-                    in_node = subgraph2.positive_node(other_agent)
-                    self.add_edge_with_cost(out_node, in_node, cost)
-
-    def populate_all_edges(self, cost: CostFunc) -> None:
-        self.populate_edges_from_source(cost)
-        self.populate_edges_to_sink(cost)
-        self.populate_internal_edges()
-        for subgraph1, subgraph2 in zip(self.subgraphs, self.subgraphs[1:]):
-            self.glue(subgraph1, subgraph2, cost)
+    @property
+    def negative_agent_nodes(self) -> List[AgentNode]:
+        """Return generator of all negative agent nodes, in order."""
+        return [node for node in self if node.polarity == Polarity.NEGATIVE]
 
     @classmethod
     def with_edges(
         cls,
-        subgraphs: List[HierarchyGraph],
+        hierarchies: List[Hierarchy],
         cost: CostFunc
     ) -> AllocationGraph:
-        graph = cls(subgraphs)
-        graph.populate_all_edges(cost)
+        graph = cls(cost)
+        for hierarchy in hierarchies:
+            graph.add_hierarchy(hierarchy)
+        graph.populate_all_edges()
         return graph
 
-    def compute_flow(self) -> None:
-        self.flow = nx.max_flow_min_cost(self, self.source, self.sink)
-        self.flow_cost = nx.cost_of_flow(self, self.flow)
-        self.max_flow = nx.maximum_flow(self, self.source, self.sink)[0]
+    def add_hierarchy(self, hierarchy: Hierarchy) -> None:
+        for agent in hierarchy.agents:
+            out_node = AgentNode(agent, Polarity.POSITIVE)
+            in_node = AgentNode(agent, Polarity.NEGATIVE)
+            demand = agent.lower_capacity
+            capacity = agent.capacity_difference
+            self.add_node(out_node, demand=demand)
+            self.add_node(in_node, demand=-demand)
+            self.add_edge_with_cost(out_node, in_node, capacity=capacity)
+        self.hierarchies.append(hierarchy)
 
-    def simplify_flow(self) -> None:
-        """Create new dictionary mapping
-            Agent --> OrderedDict(Agents: int)
-        Map Agents to every Agent they have non-zero flow towards, and what the
-        flow value is.  Assign to simple_flow attribute.
-        """
-        mapping = {}
+    def add_node(self, node: AgentNode, **attr: Any) -> None:
+        if node.polarity == Polarity.POSITIVE:
+            self._agent_positive_node_map[node.agent] = node
+        else:
+            self._agent_negative_node_map[node.agent] = node
+        super().add_node(node, **attr)
 
-        # For each agent node (except the last level):
-        for subgraph in self.subgraphs[:-1]:
-            for agent in subgraph.agents:
-                # Assign to it the non-zero flows from negative agent nodes to
-                # positive agent nodes at the next level.
-                negative_node = subgraph.negative_node(agent)
-                flow = self.flow[negative_node]
-                items = ((k.agent, v) for k, v in flow.items() if v)
-                mapping[agent] = OrderedDict(sorted(items))
+    def populate_all_edges(self) -> None:
+        self.populate_edges_from_source()
+        self.populate_edges_to_sink()
+        for hierarchy in self.hierarchies[:-1]:
+            self.glue(hierarchy)
 
-        self.simple_flow = mapping
+    def populate_edges_from_source(self) -> None:
+        for agent in self.first_level_agents:
+            node = self._agent_positive_node_map[agent]
+            self.add_edge_with_cost(self.source, node)
+
+    def populate_edges_to_sink(self) -> None:
+        for agent in self.last_level_agents:
+            node = self._agent_negative_node_map[agent]
+            self.add_edge_with_cost(node, self.sink)
+
+    def allocate(self) -> None:
+        allocation = {}
+
+        # Make inexpensive deep copy of simple_flow.
+        g = ((agent, dict(d)) for agent, d in self.simple_flow.items())
+        flow = dict(g)
+
+        for agent in self.hierarchies[0]:
+            allocation[agent] = self.single_allocation(agent, flow)
+
+        self.allocation = allocation
 
     @staticmethod
     def single_allocation(
@@ -413,14 +271,76 @@ class AllocationGraph(nx.DiGraph):
             current_agent = next_agent
         return value
 
-    def allocate(self) -> None:
-        allocation = {}
+    def intermediate_hierarchies(self, level: int) -> List[Hierarchy]:
+        """Return all hierarchies strictly between the given level (inclusive)
+        and the last hierarchy (non-inclusive).
+        """
+        return self.hierarchies[level: -1]
 
-        # Make inexpensive deep copy of simple_flow.
-        g = ((agent, dict(d)) for agent, d in self.simple_flow.items())
-        flow = dict(g)
+    @property
+    def min_upper_capacity_sum(self) -> int:
+        return min(
+            hierarchy.upper_capacity_sum for hierarchy in self.hierarchies
+        )
 
-        for agent in self.hierarchies[0]:
-            allocation[agent] = self.single_allocation(agent, flow)
+    def glue(self, hierarchy: Hierarchy) -> None:
+        for agent in hierarchy.agents:
+            for preference in agent.preferences:
 
-        self.allocation = allocation
+                # Handle preference ties.
+                if isinstance(preference, Agent):
+                    preference_list = [preference]
+                elif isinstance(preference, list):
+                    preference_list = preference
+                else:
+                    preference_list = []
+
+                for other_agent in preference_list:
+                    out_node = self.negative_node(agent)
+                    in_node = self.positive_node(other_agent)
+                    self.add_edge_with_cost(out_node, in_node)
+
+    def positive_node(self, agent: Agent) -> AgentNode:
+        """Return positive node corresponding to the agent."""
+        return self._agent_positive_node_map[agent]
+
+    def negative_node(self, agent) -> AgentNode:
+        """Return negative node corresponding to the agent."""
+        return self._agent_negative_node_map[agent]
+
+    def add_edge_with_cost(
+        self,
+        out_node: AgentNode,
+        in_node: AgentNode,
+        capacity: Optional[int] = None
+    ) -> None:
+        weight = self.cost(out_node, in_node, graph=self)
+        if capacity is not None:
+            self.add_edge(out_node, in_node, weight=weight, capacity=capacity)
+        else:
+            self.add_edge(out_node, in_node, weight=weight)
+
+    def compute_flow(self) -> None:
+        self.flow = nx.max_flow_min_cost(self, self.source, self.sink)
+        self.flow_cost = nx.cost_of_flow(self, self.flow)
+        self.max_flow = nx.maximum_flow(self, self.source, self.sink)[0]
+
+    def simplify_flow(self) -> None:
+        """Create new dictionary mapping
+            Agent --> OrderedDict(Agents: int)
+        Map Agents to every Agent they have non-zero flow towards, and what the
+        flow value is.  Assign to simple_flow attribute.
+        """
+        mapping = {}
+
+        # For each agent node (except the last level):
+        for hierarchy in self.hierarchies[:-1]:
+            for agent in hierarchy.agents:
+                # Assign to it the non-zero flows from negative agent nodes to
+                # positive agent nodes at the next level.
+                negative_node = self.negative_node(agent)
+                flow = self.flow[negative_node]
+                items = ((k.agent, v) for k, v in flow.items() if v)
+                mapping[agent] = OrderedDict(sorted(items))
+
+        self.simple_flow = mapping

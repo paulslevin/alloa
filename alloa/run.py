@@ -3,7 +3,6 @@ import textwrap
 from typing import Dict, List, Union
 
 import alloa.settings as settings
-from alloa.costs import CostFunc, SPACosts
 from alloa.files import DataSequence, FileData
 
 
@@ -40,8 +39,8 @@ class Allocation:
             num_of_agents = self.graph.hierarchies[i].number_of_agents
             print(f'{num_of_agents} agents of hierarchy {i + 1}')
 
-    def setup_allocation(self, cost: CostFunc) -> None:
-        self.graph.populate_all_edges(cost)
+    def setup_allocation(self) -> None:
+        self.graph.populate_all_edges()
         self.graph.compute_flow()
         self.graph.simplify_flow()
         self.graph.allocate()
@@ -54,7 +53,6 @@ class Allocation:
 
     def write_profile(self) -> None:
         with open(settings.ALLOCATION_PROFILE_PATH, 'w') as profile:
-            # writer = csv.writer(profile, delimiter='\n')
             profile.writelines([
                 f'Total number of assigned level 1 agents '
                 f'is {self.graph.max_flow}\n',
@@ -81,10 +79,10 @@ class Allocation:
         if not self.graph.first_level_agents:
             return []
 
-        unnamed = self.graph.allocation
+        allocation = self.graph.allocation
 
         first_agent = self.graph.first_level_agents[0]
-        num_of_agents = len(unnamed[first_agent]) // 2 + 1
+        num_of_agents = len(allocation[first_agent]) // 2 + 1
         name_columns, rank_columns = [], []
         for i in range(num_of_agents):
             name_columns.append(f'Level {i + 1} Agent Name')
@@ -96,10 +94,10 @@ class Allocation:
         for agent in self.graph.first_level_agents:
             row = [agent.name]
             row.extend(
-                dude.agent.name for dude in unnamed[agent]
+                datum.agent.name for datum in allocation[agent]
             )
             row.extend(
-                dude.rank for dude in unnamed[agent]
+                datum.rank for datum in allocation[agent]
             )
             rows.append(row)
 
@@ -122,8 +120,7 @@ class Example:
         self.number_of_students = self.student_hierarchy.number_of_agents
 
     def set_up(self) -> None:
-        costs = SPACosts(self.allocation.graph)
-        self.allocation.setup_allocation(costs.cost)
+        self.allocation.setup_allocation()
 
 
 def run_project_allocation() -> None:
