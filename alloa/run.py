@@ -2,19 +2,26 @@ import csv
 import textwrap
 from typing import Dict, List, Union
 
-import alloa.settings as settings
 from alloa.files import DataSequence, FileData
+from alloa.settings import parse_config
 
 
 class Allocation:
-    def __init__(self, *paths: str, **kwargs: Dict[int, bool]) -> None:
+    def __init__(self, config: Dict) -> None:
+        self.config = config
+
+        self.level_paths = self.config['level_paths']
+        self.allocation_path = self.config['allocation_path']
+        self.allocation_profile_path = self.config['allocation_profile_path']
+        self.randomised = self.config['randomised']
+
         self.data_objects = []
-        self.randomised = kwargs.get('randomised', {})
-        for i, path in enumerate(paths):
-            randomise = self.randomised.get(i + 1, False)
+
+        for i, path in enumerate(self.level_paths):
             self.data_objects.append(
-                FileData(path, level=i + 1, randomise=randomise)
+                FileData(path, level=i + 1, randomise=self.randomised)
             )
+
         self.sequence = DataSequence(*self.data_objects)
         self.number_of_levels = len(self.sequence)
         self.graph = self.sequence.get_graph()
@@ -39,20 +46,20 @@ class Allocation:
             num_of_agents = self.graph.hierarchies[i].number_of_agents
             print(f'{num_of_agents} agents of hierarchy {i + 1}')
 
-    def setup_allocation(self) -> None:
+    def setup_and_run_allocation(self) -> None:
         self.graph.populate_all_edges()
         self.graph.compute_flow()
         self.graph.simplify_flow()
         self.graph.allocate()
 
     def write_allocations(self) -> None:
-        with open(settings.ALLOCATION_PATH, 'w', newline='') as allocation:
+        with open(self.allocation_path, 'w') as allocation:
             writer = csv.writer(allocation, delimiter=',')
             for row in self.allocation:
                 writer.writerow(row)
 
     def write_profile(self) -> None:
-        with open(settings.ALLOCATION_PROFILE_PATH, 'w') as profile:
+        with open(self.allocation_profile_path, 'w') as profile:
             profile.writelines([
                 f'Total number of assigned level 1 agents '
                 f'is {self.graph.max_flow}\n',
@@ -101,32 +108,23 @@ class Allocation:
             )
             rows.append(row)
 
-        rows = sorted(
-            rows,
-            key=lambda r: r[0][len(r[0]) - r[0][::-1].index(' '):]
-        )
+        # Sort so the output CSV file has the same order as the input CSV file
+        # for first level agents.
+        first_level_agent_names = [
+            x.raw_name for x in self.data_objects[0].results()
+        ]
+
+        def _key(_row):
+            return first_level_agent_names.index(_row[0])
+
+        rows = sorted(rows, key=_key)
         return [column_names] + rows
 
 
-# Now one can run the program using custom cost functions.
-# Include the Student/Project/Academic ones in the following class.
-class Example:
-    def __init__(self) -> None:
-        self.allocation = Allocation(
-            *settings.LEVEL_PATHS, randomised={1: True}
-        )
-        self.student_hierarchy = self.allocation.graph.hierarchies[0]
-        self.project_hierarchy = self.allocation.graph.hierarchies[1]
-        self.number_of_students = self.student_hierarchy.number_of_agents
-
-    def set_up(self) -> None:
-        self.allocation.setup_allocation()
-
-
-def run_project_allocation() -> None:
-    example = Example()
-    example.set_up()
-    allocation = example.allocation
+def run_project_allocation(config_filename: str) -> None:
+    config = parse_config(config_filename)
+    allocation = Allocation(config)
+    allocation.setup_and_run_allocation()
     allocation.write_allocations()
     allocation.write_profile()
     allocation.print_intro_string()

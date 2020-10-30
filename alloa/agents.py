@@ -9,7 +9,6 @@ from functools import total_ordering
 from typing import Any, Collection, Dict, Iterator, Optional, Union, List
 
 from alloa.utils.exceptions import AgentExistsError
-from alloa.utils.parsers import parse_repr
 
 
 @total_ordering
@@ -20,9 +19,7 @@ class Agent:
         agent_id: int,
         hierarchy: Hierarchy,
         capacities: Optional[Collection[int]] = None,
-        preferences: Optional[
-            List[Union[Agent, List[Agent]]]
-        ] = None,
+        preferences: Optional[List[Union[Agent, List[Agent]]]] = None,
         name: Any = None
     ) -> None:
         """
@@ -31,6 +28,7 @@ class Agent:
         agent_id:
             Unique number identifying the agent at each hierarchy.
         hierarchy:
+            Hierarchy to which the agent belongs.
         name:
             Name of agent e.g. Paul. This is not unique.
         capacities:
@@ -45,26 +43,19 @@ class Agent:
         self.agent_id = agent_id
         self.hierarchy = hierarchy
         self.name = name
-        self.level = self.hierarchy.level
+        # self.level = self.hierarchy.level
+
+        self.level = hierarchy.level
         self.capacities = capacities or []
         self.preferences = preferences or []
 
     def __str__(self) -> str:
         return f'AGENT_{self.level}_{self.agent_id}'
 
-    def __repr__(self) -> str:
-        str_kwargs = []
-        for attr in [
-            'agent_id', 'hierarchy', 'capacities', 'preferences', 'name'
-        ]:
-            value = getattr(self, attr)
-            if value:
-                str_kwargs.append(f'{attr}={value}')
-        return parse_repr(self, str_kwargs)
-
     def __hash__(self) -> int:
         """Agents are used as dictionary keys when flow is calculated, so need a
-        hash method."""
+        hash method.
+        """
         return hash((self.agent_id, self.level))
 
     def __eq__(self, other: Agent):
@@ -118,20 +109,14 @@ class Agent:
 class Hierarchy:
     """Representation of a bucket of agents."""
     def __init__(
-            self, level: int, agents: Optional[List[Agent]] = None
+        self, level: int, agents: Optional[List[Agent]] = None
     ) -> None:
         self.level = level
         self.agents = agents or []
+        self.agent_ids = {agent.agent_id for agent in self.agents}
 
     def __str__(self) -> str:
         return f'HIERARCHY_{self.level}'
-
-    def __repr__(self) -> str:
-        str_kwargs = [f'level={self.level}']
-        if self.agents:
-            agent_strs = [str(agent) for agent in self.agents]
-            str_kwargs.append(f'agents={agent_strs}'.replace('\'', ''))
-        return parse_repr(self, str_kwargs)
 
     def __iter__(self) -> Iterator[Agent]:
         return iter(self.agents)
@@ -158,12 +143,10 @@ class Hierarchy:
         if self.has_agent_with_id(agent.agent_id):
             raise AgentExistsError(self, agent.agent_id)
         self.agents.append(agent)
+        self.agent_ids.add(agent.agent_id)
 
     def has_agent_with_id(self, agent_id: int) -> bool:
-        for agent in self.agents:
-            if agent.agent_id == agent_id:
-                return True
-        return False
+        return agent_id in self.agent_ids
 
     @property
     def number_of_agents(self) -> int:
@@ -172,7 +155,8 @@ class Hierarchy:
     @staticmethod
     def preferred(agent_subset: Collection[Agent]) -> List[Agent]:
         """Return list of unique agents, sorted by ID, that the agents in the
-        given subset prefer at the next hierarchy level."""
+        given subset prefer at the next hierarchy level.
+        """
         all_unflattened = [agent.preferences for agent in agent_subset]
         all_flattened = itertools.chain(*all_unflattened)
         all_flattened_unique = set(all_flattened)

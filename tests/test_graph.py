@@ -26,14 +26,6 @@ class TestAgentNode(unittest.TestCase):
         self.assertEqual(str(self.positive_node), 'AGENT_1_1(+)')
         self.assertEqual(str(self.negative_node), 'AGENT_1_1(-)')
 
-    def test___repr__(self):
-        self.assertEqual(
-            repr(self.positive_node), 'AgentNode(agent=AGENT_1_1, polarity=+)'
-        )
-        self.assertEqual(
-            repr(self.negative_node), 'AgentNode(agent=AGENT_1_1, polarity=-)'
-        )
-
     def test___hash__(self):
         other_positive_node = AgentNode(agent=self.agent, polarity=POSITIVE)
         self.assertEqual(hash(self.positive_node), hash(other_positive_node))

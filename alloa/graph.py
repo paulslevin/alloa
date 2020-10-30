@@ -14,7 +14,6 @@ import networkx as nx
 from alloa.agents import Agent, Hierarchy, List, Optional
 from alloa.costs import CostFunc, default_cost
 from alloa.utils.enums import GraphElement, Polarity
-from alloa.utils.parsers import parse_repr
 
 AllocationDatum = namedtuple('AllocationDatum', ['agent', 'rank'])
 
@@ -39,12 +38,6 @@ class AgentNode:
 
     def __str__(self) -> str:
         return f'{self.agent}({self.polarity.value})'
-
-    def __repr__(self) -> str:
-        str_kwargs = [
-            f'agent={self.agent}, polarity={self.polarity.value}'
-        ]
-        return parse_repr(self, str_kwargs)
 
     def __hash__(self) -> int:
         """These objects are used as nodes in the graph, in particular they are

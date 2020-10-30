@@ -96,8 +96,7 @@ class FileData:
 
 
 class DataSequence:
-    """Container file data objects and joins together to create graph."""
-
+    """Container for file data objects and joins together to create graph."""
     def __init__(self, *args: FileData) -> None:
         self.sequence = args
         self.hierarchies = []

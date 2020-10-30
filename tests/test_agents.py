@@ -12,11 +12,6 @@ class TestAgent(unittest.TestCase):
     def test___str__(self):
         self.assertEqual(str(self.agent), 'AGENT_1_1')
 
-    def test___repr__(self):
-        self.assertEqual(
-            repr(self.agent), 'Agent(agent_id=1, hierarchy=HIERARCHY_1)'
-        )
-
     def test_lexicographic_ordering(self):
         hierarchy1 = self.hierarchy
         hierarchy2 = Hierarchy(level=2)
@@ -90,14 +85,6 @@ class TestHierarchy(unittest.TestCase):
 
     def test___str__(self):
         self.assertEqual(str(self.hierarchy), 'HIERARCHY_1')
-
-    def test___repr__(self):
-        Agent(agent_id=1, hierarchy=self.hierarchy, name='Agent')
-        Agent(agent_id=2, hierarchy=self.hierarchy, name='Bgent')
-        self.assertEqual(
-            repr(self.hierarchy),
-            'Hierarchy(level=1, agents=[AGENT_1_1, AGENT_1_2])'
-        )
 
     def test___iter__(self):
         agent1 = Agent(agent_id=1, hierarchy=self.hierarchy)
