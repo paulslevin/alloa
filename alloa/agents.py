@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import itertools
 import uuid
-from typing import Any, Collection, Dict, Iterator, Optional, Union, List
+from typing import Any, Collection, Dict, Iterator, List, Optional, Union
 
 from alloa.utils.exceptions import AgentExistsError
 
