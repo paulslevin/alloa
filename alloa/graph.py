@@ -329,7 +329,6 @@ class AllocationGraph(nx.DiGraph):
                 negative_node = self.negative_node(agent)
                 flow = self.flow[negative_node]
                 items = ((k.agent, v) for k, v in flow.items() if v)
-                # mapping[agent] = OrderedDict(sorted(items))
                 mapping[agent] = dict(items)
 
         self.simple_flow = mapping

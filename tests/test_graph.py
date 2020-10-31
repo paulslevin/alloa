@@ -261,20 +261,6 @@ class TestAllocationGraph(unittest.TestCase):
         for n in negative_nodes:
             self.assertEqual(self.graph[n], {self.sink: {'weight': 1}})
 
-    # def test_populate_internal_edges(self):
-    #     self.graph.populate_internal_edges()
-    #
-    #     for subgraph in self.graph.subgraphs:
-    #         # Get subgraph of allocation graph with same nodes as the
-    #         # HierarchyGraph object.
-    #         actual = self.graph.subgraph(subgraph.nodes)
-    #
-    #         # The graphs should have the same edge data.
-    #         self.assertCountEqual(
-    #             actual.edges(data=True),
-    #             subgraph.edges(data=True)
-    #         )
-
     def test_glue_students_to_projects(self):
         self.graph.glue(self.students)
         self.assertFalse(
@@ -471,43 +457,3 @@ class TestAllocationGraph(unittest.TestCase):
                 ),
                 0
             )
-
-        # self.assertEqual(
-        #     self.costs.exponent(
-        #         AgentNode(self.student1, NEGATIVE),
-        #         AgentNode(self.project1, POSITIVE)
-        #     ),
-        #     2
-        # )
-        #
-        # self.assertEqual(
-        #     self.costs.exponent(
-        #         AgentNode(self.student1, NEGATIVE),
-        #         AgentNode(self.project2, POSITIVE)
-        #     ),
-        #     3
-        # )
-        #
-        # self.assertEqual(
-        #     self.costs.exponent(
-        #         AgentNode(self.project1, NEGATIVE),
-        #         AgentNode(self.supervisor1, POSITIVE)
-        #     ),
-        #     0
-        # )
-        #
-        # self.assertEqual(
-        #     self.costs.exponent(
-        #         AgentNode(self.project1, NEGATIVE),
-        #         AgentNode(self.supervisor2, POSITIVE)
-        #     ),
-        #     0
-        # )
-        #
-        # self.assertEqual(
-        #     self.costs.exponent(
-        #         AgentNode(self.project1, NEGATIVE),
-        #         AgentNode(self.supervisor3, POSITIVE)
-        #     ),
-        #     -1
-        # )
