@@ -6,7 +6,7 @@ of the agents between each hierarchy level.
 from __future__ import annotations
 
 from collections import namedtuple
-from functools import total_ordering
+from functools import cached_property, total_ordering
 from typing import Any, Dict, Generator
 
 import networkx as nx
@@ -100,9 +100,6 @@ class AllocationGraph(nx.DiGraph):
         self.hierarchies = []
         self.hierarchy_subgraphs = []
 
-        self._source = None
-        self._sink = None
-
         self.flow = None
         self.flow_cost = None
         self.max_flow = None
@@ -124,34 +121,32 @@ class AllocationGraph(nx.DiGraph):
         yield sorted(self.edges(data=True)) == sorted(other.edges(data=True))
         yield self.hierarchies == other.hierarchies
 
-    @property
+    @cached_property
     def source(self) -> AgentNode:
-        """Cached property to generate source to avoid recreating objects."""
-        if self._source is None:
-            # Create source agent which equally prefers all level 1 agents.
-            source_agent = Agent(
-                preferences=[self.first_level_agents],
-                name=GraphElement.SOURCE
-            )
-            zero_hierarchy = Hierarchy(level=0)
-            zero_hierarchy.add_agent(source_agent)
-            self._source = AgentNode(source_agent, Polarity.POSITIVE)
-            self.agent_node_to_hierarchy_map[self._source] = zero_hierarchy
-        return self._source
+        """Create source agent which equally prefers all level 1 agents."""
+        source_agent = Agent(
+            preferences=[self.first_level_agents],
+            name=GraphElement.SOURCE
+        )
+        zero_hierarchy = Hierarchy(level=0)
+        zero_hierarchy.add_agent(source_agent)
+        source = AgentNode(source_agent, Polarity.POSITIVE)
+        self.agent_node_to_hierarchy_map[source] = zero_hierarchy
+        return source
 
-    @property
+    @cached_property
     def sink(self) -> AgentNode:
-        """Cached property to generate sink to avoid recreating objects."""
-        if self._sink is None:
-            sink_agent = Agent(name=GraphElement.SINK)
-            # Each agent in the last hierarchy prefers the sink agent.
-            for agent in self.last_level_agents:
-                agent.preferences = [sink_agent]
-            final_hierarchy = Hierarchy(level=self.number_of_hierarchies + 1)
-            final_hierarchy.agents.append(sink_agent)
-            self._sink = AgentNode(sink_agent, Polarity.NEGATIVE)
-            self.agent_node_to_hierarchy_map[self._sink] = final_hierarchy
-        return self._sink
+        """Create sink agent which is equally preferred by all agents in the
+        last hierarchy.
+        """
+        sink_agent = Agent(name=GraphElement.SINK)
+        for agent in self.last_level_agents:
+            agent.preferences = [sink_agent]
+        final_hierarchy = Hierarchy(level=self.number_of_hierarchies + 1)
+        final_hierarchy.agents.append(sink_agent)
+        sink = AgentNode(sink_agent, Polarity.NEGATIVE)
+        self.agent_node_to_hierarchy_map[sink] = final_hierarchy
+        return sink
 
     @property
     def first_level_agents(self) -> List[Agent]:
