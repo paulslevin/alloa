@@ -5,7 +5,7 @@ of the agents between each hierarchy level.
 """
 from __future__ import annotations
 
-from collections import namedtuple, OrderedDict
+from collections import namedtuple
 from functools import total_ordering
 from typing import Any, Dict, Generator
 
