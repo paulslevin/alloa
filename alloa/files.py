@@ -48,17 +48,27 @@ class FileData:
     def __repr__(self) -> str:
         return f'LEVEL_{self.level}_DATA'
 
-    def id_to_agents(self) -> Dict[int, Agent]:
-        return {
-            agent_id: agent for agent, agent_id in self.agents_to_id.items()
-        }
-
     def set_higher_agent(self, higher_agent: Agent) -> None:
         self.higher_agent = higher_agent
 
-    def set_hierarchy(self, level: int) -> None:
-        self.level = level
-        self.hierarchy = Hierarchy(level)
+    def set_agents_and_ids(self) -> None:
+        results_copy = deepcopy(self.results())
+        if self.randomise:
+            shuffle(results_copy)
+        preferences = None
+        for i, line in enumerate(results_copy):
+            if line.raw_preferences:
+                preferences = [
+                    self.higher_agent.get(preference)
+                    for preference in line.raw_preferences
+                ]
+            agent = Agent(
+                capacities=line.capacities,
+                preferences=preferences,
+                name=line.raw_name
+            )
+            self.hierarchy.agents.append(agent)
+            self.agents_to_id[agent] = agent.agent_id
 
     def results(self) -> List[Line]:
         with open(self.file, 'r') as opened_file:
@@ -74,26 +84,6 @@ class FileData:
                 results.append(Line([x.strip() for x in row if x]))
         return results
 
-    def set_agents_and_ids(self) -> None:
-        results_copy = deepcopy(self.results())
-        if self.randomise:
-            shuffle(results_copy)
-        preferences = None
-        for i, line in enumerate(results_copy):
-            if line.raw_preferences:
-                preferences = [
-                    self.higher_agent.get(preference)
-                    for preference in line.raw_preferences
-                ]
-            agent = Agent(
-                i + 1,
-                self.hierarchy,
-                capacities=line.capacities,
-                preferences=preferences,
-                name=line.raw_name
-            )
-            self.agents_to_id[agent] = agent.agent_id
-
 
 class DataSequence:
     """Container for file data objects and joins together to create graph."""
@@ -105,7 +95,12 @@ class DataSequence:
     def __len__(self) -> int:
         return len(self.sequence)
 
-    def set_hierarchies(self) -> None:
+    def get_graph(self) -> AllocationGraph:
+        self._set_hierarchies()
+        graph = AllocationGraph.with_edges(self.hierarchies, cost=spa_cost)
+        return graph
+
+    def _set_hierarchies(self) -> None:
         backwards = self.sequence[::-1]
         backwards[0].set_agents_and_ids()
         for i, file_data in enumerate(backwards[1:]):
@@ -117,8 +112,3 @@ class DataSequence:
             self.hierarchies.append(last_hierarchy)
         self.hierarchies.append(self.sequence[0].hierarchy)
         self.hierarchies = self.hierarchies[::-1]
-
-    def get_graph(self) -> AllocationGraph:
-        self.set_hierarchies()
-        graph = AllocationGraph.with_edges(self.hierarchies, cost=spa_cost)
-        return graph

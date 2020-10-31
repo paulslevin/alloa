@@ -41,10 +41,10 @@ class AgentNode:
 
     def __hash__(self) -> int:
         """These objects are used as nodes in the graph, in particular they are
-        used as dictionary keys. There only exists one agent with each id and
-        level, so those keys plus polarity suffice as identifiers.
+        used as dictionary keys. There should only exist one agent with each id
+        so that plus polarity suffice as identifiers.
         """
-        return hash((self.agent.level, self.agent.agent_id, self.polarity))
+        return hash((self.agent.agent_id, self.polarity))
 
     def __eq__(self, other: AgentNode) -> bool:
         """These represent nodes on the allocation graph and are compared to
@@ -72,10 +72,6 @@ class AgentNode:
                 other.polarity == Polarity.NEGATIVE
             )
         return self.agent < other.agent
-
-    @property
-    def level(self) -> int:
-        return self.agent.level
 
 
 class AllocationGraph(nx.DiGraph):
@@ -114,6 +110,8 @@ class AllocationGraph(nx.DiGraph):
 
         self.allocation = None
 
+        self.agent_node_to_hierarchy_map = {}
+
     def __eq__(self, other: AllocationGraph) -> bool:
         return all(self._graph_eq_comparison(other))
 
@@ -130,29 +128,29 @@ class AllocationGraph(nx.DiGraph):
     def source(self) -> AgentNode:
         """Cached property to generate source to avoid recreating objects."""
         if self._source is None:
-            zero_hierarchy = Hierarchy(level=0)
             # Create source agent which equally prefers all level 1 agents.
             source_agent = Agent(
-                agent_id=1,
-                hierarchy=zero_hierarchy,
                 preferences=[self.first_level_agents],
                 name=GraphElement.SOURCE
             )
+            zero_hierarchy = Hierarchy(level=0)
+            zero_hierarchy.add_agent(source_agent)
             self._source = AgentNode(source_agent, Polarity.POSITIVE)
+            self.agent_node_to_hierarchy_map[self._source] = zero_hierarchy
         return self._source
 
     @property
     def sink(self) -> AgentNode:
         """Cached property to generate sink to avoid recreating objects."""
         if self._sink is None:
-            final_hierarchy = Hierarchy(level=self.number_of_hierarchies + 1)
-            sink_agent = Agent(
-                agent_id=1, hierarchy=final_hierarchy, name=GraphElement.SINK
-            )
+            sink_agent = Agent(name=GraphElement.SINK)
             # Each agent in the last hierarchy prefers the sink agent.
             for agent in self.last_level_agents:
                 agent.preferences = [sink_agent]
+            final_hierarchy = Hierarchy(level=self.number_of_hierarchies + 1)
+            final_hierarchy.agents.append(sink_agent)
             self._sink = AgentNode(sink_agent, Polarity.NEGATIVE)
+            self.agent_node_to_hierarchy_map[self._sink] = final_hierarchy
         return self._sink
 
     @property
@@ -192,7 +190,9 @@ class AllocationGraph(nx.DiGraph):
     def add_hierarchy(self, hierarchy: Hierarchy) -> None:
         for agent in hierarchy.agents:
             out_node = AgentNode(agent, Polarity.POSITIVE)
+            self.agent_node_to_hierarchy_map[out_node] = hierarchy
             in_node = AgentNode(agent, Polarity.NEGATIVE)
+            self.agent_node_to_hierarchy_map[in_node] = hierarchy
             demand = agent.lower_capacity
             capacity = agent.capacity_difference
             self.add_node(out_node, demand=demand)
@@ -334,6 +334,7 @@ class AllocationGraph(nx.DiGraph):
                 negative_node = self.negative_node(agent)
                 flow = self.flow[negative_node]
                 items = ((k.agent, v) for k, v in flow.items() if v)
-                mapping[agent] = OrderedDict(sorted(items))
+                # mapping[agent] = OrderedDict(sorted(items))
+                mapping[agent] = dict(items)
 
         self.simple_flow = mapping

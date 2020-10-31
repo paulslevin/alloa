@@ -33,7 +33,9 @@ def spa_cost(node1: AgentNode, node2: AgentNode, graph: AllocationGraph) -> int:
     term = agent1.preference_position(agent2)
 
     # Get all hierarchies above agent1's level, excluding the final level.
-    intermediate_hierarchies = graph.intermediate_hierarchies(node1.level)
+    hierarchy = graph.agent_node_to_hierarchy_map[node1]
+    level = hierarchy.level
+    intermediate_hierarchies = graph.intermediate_hierarchies(level)
 
     # Sum the maximal rank at each of the intermediate hierarchies.
     _sum = sum(

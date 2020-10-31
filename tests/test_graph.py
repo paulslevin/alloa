@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from itertools import permutations
 from alloa.agents import Agent, Hierarchy
 from alloa.graph import AgentNode, AllocationGraph
 import networkx as nx
@@ -17,14 +16,14 @@ SINK = GraphElement.SINK
 
 class TestAgentNode(unittest.TestCase):
     def setUp(self):
-        self.hierarchy = Hierarchy(level=1)
-        self.agent = Agent(agent_id=1, hierarchy=self.hierarchy)
+        self.hierarchy = Hierarchy(level='1')
+        self.agent = Agent(agent_id='1')
         self.positive_node = AgentNode(agent=self.agent, polarity=POSITIVE)
         self.negative_node = AgentNode(agent=self.agent, polarity=NEGATIVE)
 
     def test___str__(self):
-        self.assertEqual(str(self.positive_node), 'AGENT_1_1(+)')
-        self.assertEqual(str(self.negative_node), 'AGENT_1_1(-)')
+        self.assertEqual(str(self.positive_node), 'AGENT_1(+)')
+        self.assertEqual(str(self.negative_node), 'AGENT_1(-)')
 
     def test___hash__(self):
         other_positive_node = AgentNode(agent=self.agent, polarity=POSITIVE)
@@ -39,203 +38,6 @@ class TestAgentNode(unittest.TestCase):
     def test___neq__(self):
         self.assertNotEqual(self.positive_node, self.negative_node)
 
-    def test_lexicographic_ordering(self):
-        hierarchy1 = self.hierarchy
-        hierarchy2 = Hierarchy(level=2)
-        agent_1_2 = Agent(agent_id=2, hierarchy=hierarchy1)
-        agent_2_1 = Agent(agent_id=1, hierarchy=hierarchy2)
-        agent_2_2 = Agent(agent_id=2, hierarchy=hierarchy2)
-
-        agent_1_1_p = self.positive_node
-        agent_1_1_n = self.negative_node
-        agent_1_2_p = AgentNode(agent=agent_1_2, polarity=POSITIVE)
-        agent_1_2_n = AgentNode(agent=agent_1_2, polarity=NEGATIVE)
-        agent_2_1_p = AgentNode(agent=agent_2_1, polarity=POSITIVE)
-        agent_2_1_n = AgentNode(agent=agent_2_1, polarity=NEGATIVE)
-        agent_2_2_p = AgentNode(agent=agent_2_2, polarity=POSITIVE)
-        agent_2_2_n = AgentNode(agent=agent_2_2, polarity=NEGATIVE)
-
-        expected = [
-            agent_1_1_p, agent_1_1_n, agent_1_2_p, agent_1_2_n,
-            agent_2_1_p, agent_2_1_n, agent_2_2_p, agent_2_2_n,
-        ]
-
-        for permutation in permutations(expected, 8):
-            self.assertEqual(sorted(permutation), expected)
-
-    def test_level(self):
-        self.assertEqual(self.positive_node.level, 1)
-        self.assertEqual(self.negative_node.level, 1)
-
-
-# class TestHierarchyGraph(unittest.TestCase):
-#     def setUp(self):
-#         self.cost = spa_cost
-#
-#         self.hierarchy = Hierarchy(level=2)
-#         self.agent_2_1 = Agent(
-#             agent_id=1, hierarchy=self.hierarchy, capacities=(2, 5)
-#         )
-#         self.agent_2_2 = Agent(
-#             agent_id=2, hierarchy=self.hierarchy, capacities=(0, 1)
-#         )
-#         self.agent_2_3 = Agent(
-#             agent_id=3, hierarchy=self.hierarchy, capacities=(1, 1)
-#         )
-#
-#         # Suppose that only agents 1 and 3 are preferred by the level 1 agents,
-#         # so don't need put agent 2 on.
-#         self.agents = [self.agent_2_1, self.agent_2_3]
-#         self.graph = HierarchyGraph(self.hierarchy, self.agents, self.cost)
-#
-#         self.agent_node_2_1_p = AgentNode(self.agent_2_1, POSITIVE)
-#         self.agent_node_2_1_n = AgentNode(self.agent_2_1, NEGATIVE)
-#         self.agent_node_2_3_p = AgentNode(self.agent_2_3, POSITIVE)
-#         self.agent_node_2_3_n = AgentNode(self.agent_2_3, NEGATIVE)
-#
-#         self.graph.generate_agent_nodes()
-#
-#     def test___str__(self):
-#         self.assertEqual(str(self.graph), 'HIERARCHY_GRAPH_2')
-#
-#     def test___repr__(self):
-#         self.assertEqual(
-#             repr(self.graph),
-#             'HierarchyGraph(hierarchy=HIERARCHY_2, agents=[AGENT_2_1, AGENT_2_3])',
-#         )
-#
-#     def test___eq__(self):
-#         """Generating nodes and agents by hand gives an equivalent graph."""
-#         graph = HierarchyGraph(hierarchy=self.hierarchy, agents=[])
-#         graph.add_nodes_from([
-#             (self.agent_node_2_1_p, {'demand': 2}),
-#             (self.agent_node_2_1_n, {'demand': -2}),
-#             (self.agent_node_2_3_p, {'demand': 1}),
-#             (self.agent_node_2_3_n, {'demand': -1}),
-#         ])
-#         graph.add_edges_from([
-#             (
-#                 self.agent_node_2_1_p,
-#                 self.agent_node_2_1_n,
-#                 {'weight': 0, 'capacity': 3}
-#             ),
-#             (
-#                 self.agent_node_2_3_p,
-#                 self.agent_node_2_3_n,
-#                 {'weight': 0, 'capacity': 0}
-#             ),
-#         ])
-#         graph.agents = self.agents
-#         self.assertEqual(graph, self.graph)
-#
-#     def test___ne__(self):
-#         graph = HierarchyGraph(hierarchy=self.hierarchy, agents=[])
-#         graph.add_nodes_from([
-#             (self.agent_node_2_1_p, {'demand': 3}),  # Differs only here.
-#             (self.agent_node_2_1_n, {'demand': -2}),
-#             (self.agent_node_2_3_p, {'demand': 1}),
-#             (self.agent_node_2_3_n, {'demand': -1}),
-#         ])
-#         graph.add_edges_from([
-#             (
-#                 self.agent_node_2_1_p,
-#                 self.agent_node_2_1_n,
-#                 {'weight': 0, 'capacity': 3}
-#             ),
-#             (
-#                 self.agent_node_2_3_p,
-#                 self.agent_node_2_3_n,
-#                 {'weight': 0, 'capacity': 0}
-#             )
-#         ])
-#         graph.agents = self.agents
-#
-#         self.assertNotEqual(graph, self.graph)
-#
-#     def test_assign_agents_to_nodes(self):
-#         self.assertEqual(
-#             self.graph._agent_positive_node_map,
-#             {
-#                 self.agent_2_1: self.agent_node_2_1_p,
-#                 self.agent_2_3: self.agent_node_2_3_p
-#             }
-#         )
-#         self.assertEqual(
-#             self.graph._agent_negative_node_map,
-#             {
-#                 self.agent_2_1: self.agent_node_2_1_n,
-#                 self.agent_2_3: self.agent_node_2_3_n
-#             }
-#         )
-#
-#     def test_agent_to_positive_node(self):
-#         self.assertEqual(
-#             self.graph.positive_node(self.agent_2_1),
-#             self.agent_node_2_1_p
-#         )
-#         self.assertEqual(
-#             self.graph.positive_node(self.agent_2_3),
-#             self.agent_node_2_3_p
-#         )
-#
-#     def test_agent_to_negative_node(self):
-#         self.assertEqual(
-#             self.graph.negative_node(self.agent_2_1),
-#             self.agent_node_2_1_n
-#         )
-#         self.assertEqual(
-#             self.graph.negative_node(self.agent_2_3),
-#             self.agent_node_2_3_n
-#         )
-#
-#     def test_positive_agent_nodes(self):
-#         self.assertEqual(
-#             self.graph.positive_agent_nodes,
-#             [self.agent_node_2_1_p, self.agent_node_2_3_p]
-#         )
-#
-#     def test_negative_agent_nodes(self):
-#         self.graph.generate_agent_nodes()
-#         self.assertEqual(
-#             self.graph.negative_agent_nodes,
-#             [self.agent_node_2_1_n, self.agent_node_2_3_n]
-#         )
-#
-#     def test_generate_agent_nodes(self):
-#
-#         # data=True will get the nodes with demand data.
-#         nodes = self.graph.nodes(data=True)
-#         expected_nodes = [
-#             (self.agent_node_2_1_p, {'demand': 2}),
-#             (self.agent_node_2_1_n, {'demand': -2}),
-#             (self.agent_node_2_3_p, {'demand': 1}),
-#             (self.agent_node_2_3_n, {'demand': -1}),
-#         ]
-#         self.assertCountEqual(expected_nodes, nodes)
-#
-#         # data=True will get the edges with capacity and weight data.
-#         edges = self.graph.edges(data=True)
-#         expected_edges = [
-#             (
-#                 self.agent_node_2_1_p,
-#                 self.agent_node_2_1_n,
-#                 {'capacity': 3, 'weight': 0}
-#             ),
-#             (
-#                 self.agent_node_2_3_p,
-#                 self.agent_node_2_3_n,
-#                 {'capacity': 0, 'weight': 0}
-#             ),
-#         ]
-#         self.assertCountEqual(expected_edges, edges)
-#
-#     def test_full_subgraph(self):
-#         full_graph = HierarchyGraph.full_subgraph(
-#             self.hierarchy, self.agents, self.cost
-#         )
-#         self.graph.generate_agent_nodes()
-#         self.assertEqual(full_graph, self.graph)
-
 
 class TestAllocationGraph(unittest.TestCase):
     """Example from paper."""
@@ -248,33 +50,34 @@ class TestAllocationGraph(unittest.TestCase):
         self.supervisors = Hierarchy(level=3)
 
         self.supervisor1 = Agent(
-            agent_id=1,
-            hierarchy=self.supervisors,
+            agent_id='1',
             capacities=(1, 2),
             name='Supervisor 1'
         )
         self.supervisor2 = Agent(
-            agent_id=2,
-            hierarchy=self.supervisors,
+            agent_id='2',
             capacities=(0, 2),
             name='Supervisor 2'
         )
         self.supervisor3 = Agent(
-            agent_id=3,
-            hierarchy=self.supervisors,
+            agent_id='3',
             capacities=(0, 2),
             name='Supervisor 3'
         )
         self.supervisor4 = Agent(
-            agent_id=4,
-            hierarchy=self.supervisors,
+            agent_id='4',
             capacities=(0, 2),
             name='Supervisor 4'
         )
+        self.supervisors.agents = [
+            self.supervisor1,
+            self.supervisor2,
+            self.supervisor3,
+            self.supervisor4
+        ]
 
         self.project1 = Agent(
-            agent_id=1,
-            hierarchy=self.projects,
+            agent_id='5',
             capacities=(0, 2),
             preferences=[
                 [self.supervisor1, self.supervisor2]
@@ -282,8 +85,7 @@ class TestAllocationGraph(unittest.TestCase):
             name='Project 1'
         )
         self.project2 = Agent(
-            agent_id=2,
-            hierarchy=self.projects,
+            agent_id='6',
             capacities=(0, 2),
             preferences=[
                 [self.supervisor2, self.supervisor3],
@@ -291,28 +93,27 @@ class TestAllocationGraph(unittest.TestCase):
             ],
             name='Project 2'
         )
+        self.projects.agents = [self.project1, self.project2]
 
         self.student1 = Agent(
-            agent_id=1,
-            hierarchy=self.students,
+            agent_id='7',
             capacities=(0, 1),
             preferences=[self.project1, self.project2],
             name='Student 1'
         )
         self.student2 = Agent(
-            agent_id=2,
-            hierarchy=self.students,
+            agent_id='8',
             capacities=(0, 1),
             preferences=[self.project2],
             name='Student 2'
         )
         self.student3 = Agent(
-            agent_id=3,
-            hierarchy=self.students,
+            agent_id='9',
             capacities=(0, 1),
             preferences=[self.project1, self.project2],
             name='Student 3'
         )
+        self.students.agents = [self.student1, self.student2, self.student3]
 
         self.graph = AllocationGraph.with_edges(
             hierarchies=[
@@ -424,20 +225,20 @@ class TestAllocationGraph(unittest.TestCase):
 
     def test_intermediate_hierarchies(self):
         self.assertEqual(
-            self.graph.intermediate_hierarchies(self.source.level),
+            self.graph.intermediate_hierarchies(0),
             [self.students, self.projects]
         )
-        for agent in self.students:
-            self.assertEqual(
-                self.graph.intermediate_hierarchies(agent.level),
-                [self.projects]
-            )
-        for agent in self.projects:
-            self.assertEqual(self.graph.intermediate_hierarchies(agent.level), [])
-        for agent in self.supervisors:
-            self.assertEqual(self.graph.intermediate_hierarchies(agent.level), [])
-
-        self.assertEqual(self.graph.intermediate_hierarchies(self.sink.level), [])
+        self.assertEqual(
+            self.graph.intermediate_hierarchies(self.students.level),
+            [self.projects]
+        )
+        self.assertEqual(
+            self.graph.intermediate_hierarchies(self.projects.level), []
+        )
+        self.assertEqual(
+            self.graph.intermediate_hierarchies(self.supervisors.level), []
+        )
+        self.assertEqual(self.graph.intermediate_hierarchies(4), [])
 
     def test_populate_edges_from_source(self):
         self.graph.populate_edges_from_source()
