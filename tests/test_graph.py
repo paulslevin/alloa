@@ -16,7 +16,7 @@ SINK = GraphElement.SINK
 
 class TestAgentNode(unittest.TestCase):
     def setUp(self):
-        self.hierarchy = Hierarchy(level='1')
+        self.hierarchy = Hierarchy(level=1)
         self.agent = Agent(agent_id='1')
         self.positive_node = AgentNode(agent=self.agent, polarity=POSITIVE)
         self.negative_node = AgentNode(agent=self.agent, polarity=NEGATIVE)
@@ -127,71 +127,71 @@ class TestAllocationGraph(unittest.TestCase):
         self.sink = self.graph.sink
 
         self.example_flow = {
-            self.source: OrderedDict((
-                (AgentNode(self.student1, POSITIVE), 1),
-                (AgentNode(self.student2, POSITIVE), 1),
-                (AgentNode(self.student3, POSITIVE), 1),
-            )),
-            AgentNode(self.student1, POSITIVE): OrderedDict((
-                (AgentNode(self.student1, NEGATIVE), 1),
-            )),
-            AgentNode(self.student2, POSITIVE): OrderedDict((
-                (AgentNode(self.student2, NEGATIVE), 1),
-            )),
-            AgentNode(self.student3, POSITIVE): OrderedDict((
-                (AgentNode(self.student3, NEGATIVE), 1),
-            )),
-            AgentNode(self.student1, NEGATIVE): OrderedDict((
-                (AgentNode(self.project1, POSITIVE), 1),
-                (AgentNode(self.project2, POSITIVE), 0),
-            )),
-            AgentNode(self.student2, NEGATIVE): OrderedDict((
-                (AgentNode(self.project2, POSITIVE), 1),
-            )),
-            AgentNode(self.student3, NEGATIVE): OrderedDict((
-                (AgentNode(self.project1, POSITIVE), 1),
-                (AgentNode(self.project2, POSITIVE), 0),
-            )),
-            AgentNode(self.project1, POSITIVE): OrderedDict((
-                (AgentNode(self.project1, NEGATIVE), 2),
-            )),
-            AgentNode(self.project2, POSITIVE): OrderedDict((
-                (AgentNode(self.project2, NEGATIVE), 1),
-            )),
-            AgentNode(self.project1, NEGATIVE): OrderedDict((
-                (AgentNode(self.supervisor1, POSITIVE), 1),
-                (AgentNode(self.supervisor2, POSITIVE), 1),
-            )),
-            AgentNode(self.project2, NEGATIVE): OrderedDict((
-                (AgentNode(self.supervisor1, POSITIVE), 0),
-                (AgentNode(self.supervisor2, POSITIVE), 0),
-                (AgentNode(self.supervisor3, POSITIVE), 1),
-                (AgentNode(self.supervisor4, POSITIVE), 0),
-            )),
-            AgentNode(self.supervisor1, POSITIVE): OrderedDict((
-                (AgentNode(self.supervisor1, NEGATIVE), 0),
-            )),
-            AgentNode(self.supervisor2, POSITIVE): OrderedDict((
-                (AgentNode(self.supervisor2, NEGATIVE), 1),
-            )),
-            AgentNode(self.supervisor3, POSITIVE): OrderedDict((
-                (AgentNode(self.supervisor3, NEGATIVE), 1),
-            )),
-            AgentNode(self.supervisor4, POSITIVE): OrderedDict((
-                (AgentNode(self.supervisor4, NEGATIVE), 0),
-            )),
-            AgentNode(self.supervisor1, NEGATIVE): OrderedDict((
-                (self.sink, 1),
-            )),
-            AgentNode(self.supervisor2, NEGATIVE): OrderedDict((
-                (self.sink, 1),
-            )),
-            AgentNode(self.supervisor3, NEGATIVE): OrderedDict((
-                (self.sink, 1),
-            )),
-            AgentNode(self.supervisor4, NEGATIVE): OrderedDict((
-                (self.sink, 0),
-            )),
+            self.source: {
+                AgentNode(self.student1, POSITIVE): 1,
+                AgentNode(self.student2, POSITIVE): 1,
+                AgentNode(self.student3, POSITIVE): 1,
+            },
+            AgentNode(self.student1, POSITIVE): {
+                AgentNode(self.student1, NEGATIVE): 1
+            },
+            AgentNode(self.student2, POSITIVE): {
+                AgentNode(self.student2, NEGATIVE): 1
+            },
+            AgentNode(self.student3, POSITIVE): {
+                AgentNode(self.student3, NEGATIVE): 1
+            },
+            AgentNode(self.student1, NEGATIVE): {
+                AgentNode(self.project1, POSITIVE): 1,
+                AgentNode(self.project2, POSITIVE): 0
+            },
+            AgentNode(self.student2, NEGATIVE): {
+                AgentNode(self.project2, POSITIVE): 1
+            },
+            AgentNode(self.student3, NEGATIVE): {
+                AgentNode(self.project1, POSITIVE): 1,
+                AgentNode(self.project2, POSITIVE): 0
+            },
+            AgentNode(self.project1, POSITIVE): {
+                AgentNode(self.project1, NEGATIVE): 2
+            },
+            AgentNode(self.project2, POSITIVE): {
+                AgentNode(self.project2, NEGATIVE): 1
+            },
+            AgentNode(self.project1, NEGATIVE): {
+                AgentNode(self.supervisor1, POSITIVE): 1,
+                AgentNode(self.supervisor2, POSITIVE): 1
+            },
+            AgentNode(self.project2, NEGATIVE): {
+                AgentNode(self.supervisor1, POSITIVE): 0,
+                AgentNode(self.supervisor2, POSITIVE): 0,
+                AgentNode(self.supervisor3, POSITIVE): 1,
+                AgentNode(self.supervisor4, POSITIVE): 0
+            },
+            AgentNode(self.supervisor1, POSITIVE): {
+                AgentNode(self.supervisor1, NEGATIVE): 0
+            },
+            AgentNode(self.supervisor2, POSITIVE): {
+                AgentNode(self.supervisor2, NEGATIVE): 1
+            },
+            AgentNode(self.supervisor3, POSITIVE): {
+                AgentNode(self.supervisor3, NEGATIVE): 1
+            },
+            AgentNode(self.supervisor4, POSITIVE): {
+                AgentNode(self.supervisor4, NEGATIVE): 0
+            },
+            AgentNode(self.supervisor1, NEGATIVE): {
+                self.sink: 1
+            },
+            AgentNode(self.supervisor2, NEGATIVE): {
+                self.sink: 1
+            },
+            AgentNode(self.supervisor3, NEGATIVE): {
+                self.sink: 1
+            },
+            AgentNode(self.supervisor4, NEGATIVE): {
+                self.sink: 0
+            },
         }
 
     def test_hierarchies(self):
@@ -439,21 +439,141 @@ class TestAllocationGraph(unittest.TestCase):
             [(self.project1, 1), (self.supervisor2, 1)]
         )
 
-    def test_costs(self):
-
-        for agent in [self.student1, self.student2, self.student3]:
+    def test_costs_zero_from_positive_to_negative_agent_nodes(self):
+        for agent in [
+            self.student1, self.student2, self.student3,
+            self.project1, self.project2,
+            self.supervisor1, self.supervisor2, self.supervisor3,
+            self.supervisor4
+        ]:
             self.assertEqual(
                 self.cost(
-                    self.source, AgentNode(agent, POSITIVE), self.graph
-                ),
-                256
-            )
-
-            self.assertEqual(
-                self.cost(
-                    AgentNode(agent, POSITIVE),
-                    AgentNode(agent, NEGATIVE),
+                    self.graph.positive_node(agent),
+                    self.graph.negative_node(agent),
                     self.graph
                 ),
                 0
             )
+
+    def test_costs_from_source(self):
+        for agent in [self.student1, self.student2, self.student3]:
+            self.assertEqual(
+                self.cost(
+                    self.source, self.graph.positive_node(agent), self.graph
+                ),
+                256
+            )
+
+    def test_costs_to_sink(self):
+        for agent in [
+            self.supervisor1,
+            self.supervisor2,
+            self.supervisor3,
+            self.supervisor4
+        ]:
+            self.assertEqual(
+                self.cost(
+                    self.graph.negative_node(agent), self.sink, self.graph
+                ),
+                1
+            )
+
+    def test_intermediate_costs(self):
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.student1),
+                self.graph.positive_node(self.project1),
+                self.graph,
+            ),
+            16
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.student1),
+                self.graph.positive_node(self.project2),
+                self.graph,
+            ),
+            64
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.student2),
+                self.graph.positive_node(self.project2),
+                self.graph,
+            ),
+            16
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.student3),
+                self.graph.positive_node(self.project1),
+                self.graph,
+            ),
+            16
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.student3),
+                self.graph.positive_node(self.project2),
+                self.graph,
+            ),
+            64
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.project1),
+                self.graph.positive_node(self.supervisor1),
+                self.graph,
+            ),
+            1
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.project1),
+                self.graph.positive_node(self.supervisor2),
+                self.graph,
+            ),
+            1
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.project2),
+                self.graph.positive_node(self.supervisor1),
+                self.graph,
+            ),
+            4
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.project2),
+                self.graph.positive_node(self.supervisor2),
+                self.graph,
+            ),
+            1
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.project2),
+                self.graph.positive_node(self.supervisor3),
+                self.graph,
+            ),
+            1
+        )
+
+        self.assertEqual(
+            self.cost(
+                self.graph.negative_node(self.project2),
+                self.graph.positive_node(self.supervisor4),
+                self.graph,
+            ),
+            4
+        )
