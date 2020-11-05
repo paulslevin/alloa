@@ -1,0 +1,11 @@
+Student Name,Student Lower Capacity,Student Upper Capacity,Choice 1:,Choice 2:,Choice 3:,Choice 4:,Choice 5:,Choice 6:,Choice 7:
+Firstname1 Lastname1,0,1,Project2,Project3,Project1
+Firstname2 Lastname2,0,1,Project2,Project3,Project4
+Firstname3 Lastname3,0,1,Project2,Project1,Project4
+Firstname4 Lastname4,0,1,Project3,Project2,Project1
+Firstname5 Lastname5,0,1,Project1,Project2,Project3
+Firstname6 Lastname6,0,1,Project1,Project2,Project4
+Firstname7 Lastname7,0,1,Project4,Project5,Project3
+Firstname8 Lastname8,0,1,Project4,Project2,Project3
+Firstname9 Lastname9,0,1,Project1,Project4,Project5
+Firstname10 Lastname10,0,1,Project1,Project2,Project5

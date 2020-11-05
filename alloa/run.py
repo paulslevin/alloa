@@ -96,6 +96,8 @@ class Allocation:
             rank_columns.append(f'Level {i + 1} Agent Rank')
         column_names = ['Level 1 Agent Name'] + name_columns + rank_columns
 
+        number_of_columns = len(column_names)
+
         rows = []
 
         for agent in self.graph.first_level_agents:
@@ -106,6 +108,10 @@ class Allocation:
             row.extend(
                 datum.rank for datum in allocation[agent]
             )
+
+            # Extend row to correct length in case agent is not allocated.
+            row.extend(None for _ in range(number_of_columns - len(row)))
+
             rows.append(row)
 
         # Sort so the output CSV file has the same order as the input CSV file

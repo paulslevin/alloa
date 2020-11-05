@@ -249,14 +249,18 @@ class AllocationGraph(nx.DiGraph):
         current_agent = agent
         while current_agent in flow:
             agent_flow = flow[current_agent]
-            next_agent, flow_units = next(iter(agent_flow.items()))
-            rank = current_agent.preference_position(next_agent)
-            value.append(AllocationDatum(next_agent, rank))
-            if flow_units == 1:
-                agent_flow.pop(next_agent)
+            try:
+                next_agent, flow_units = next(iter(agent_flow.items()))
+            except StopIteration:
+                break
             else:
-                agent_flow[next_agent] -= 1
-            current_agent = next_agent
+                rank = current_agent.preference_position(next_agent)
+                value.append(AllocationDatum(next_agent, rank))
+                if flow_units == 1:
+                    agent_flow.pop(next_agent)
+                else:
+                    agent_flow[next_agent] -= 1
+                current_agent = next_agent
         return value
 
     def intermediate_hierarchies(self, level: int) -> List[Hierarchy]:
