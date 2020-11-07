@@ -2,7 +2,7 @@
 import csv
 from copy import deepcopy
 from random import shuffle
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from alloa.agents import Agent, Hierarchy
 from alloa.costs import spa_cost
@@ -12,10 +12,13 @@ from alloa.graph import AllocationGraph
 class Line:
     """Represents a line to be written to output CSV file."""
     def __init__(self, line: List[str]) -> None:
-        self.line = line
+        self.line = [x.strip() for x in line]
         self.raw_name = line[0]
         self.capacities = [int(x) for x in self.line[1:3]]
         self.raw_preferences = self.line[3:]
+
+    def __eq__(self, other) -> bool:
+        return self.line == other.line
 
     def __repr__(self) -> str:
         return str(self.line)
@@ -31,8 +34,6 @@ class FileData:
         randomise: bool = False,
         quoting: int = csv.QUOTE_NONE,
         first_line: bool = True,
-        higher_agent: Optional[Agent] = None,
-        agents_to_id: Optional[Dict[Agent, int]] = None
     ) -> None:
         self.randomise = randomise
         self.delimiter = delimiter
@@ -42,33 +43,27 @@ class FileData:
         self.file = csv_file
 
         self.hierarchy = Hierarchy(level) if level else None
-        self.higher_agent = higher_agent or {}
-        self.agents_to_id = agents_to_id or {}
 
     def __repr__(self) -> str:
         return f'LEVEL_{self.level}_DATA'
 
-    def set_higher_agent(self, higher_agent: Agent) -> None:
-        self.higher_agent = higher_agent
-
-    def set_agents_and_ids(self) -> None:
+    def create_agents(
+        self, next_hierarchy: Optional[Hierarchy] = None
+    ) -> None:
         results_copy = deepcopy(self.results())
         if self.randomise:
             shuffle(results_copy)
-        preferences = None
         for i, line in enumerate(results_copy):
-            if line.raw_preferences:
-                preferences = [
-                    self.higher_agent.get(preference)
-                    for preference in line.raw_preferences
-                ]
+            preferences = [
+                next_hierarchy.name_agent_map.get(preference)
+                for preference in line.raw_preferences
+            ] if next_hierarchy else []
             agent = Agent(
                 capacities=line.capacities,
                 preferences=preferences,
                 name=line.raw_name
             )
             self.hierarchy.agents.append(agent)
-            self.agents_to_id[agent] = agent.agent_id
 
     def results(self) -> List[Line]:
         with open(self.file, 'r') as opened_file:
@@ -81,7 +76,7 @@ class FileData:
             for i, row in enumerate(reader):
                 if i == 0 and self.first_line:
                     continue
-                results.append(Line([x.strip() for x in row if x]))
+                results.append(Line(row))
         return results
 
 
@@ -102,13 +97,11 @@ class DataSequence:
 
     def _set_hierarchies(self) -> None:
         backwards = self.sequence[::-1]
-        backwards[0].set_agents_and_ids()
+        backwards[0].create_agents()
         for i, file_data in enumerate(backwards[1:]):
             last_level = backwards[i]
             last_hierarchy = last_level.hierarchy
-            name_agent_map = last_hierarchy.name_agent_map
-            file_data.set_higher_agent(name_agent_map)
-            file_data.set_agents_and_ids()
+            file_data.create_agents(last_hierarchy)
             self.hierarchies.append(last_hierarchy)
         self.hierarchies.append(self.sequence[0].hierarchy)
         self.hierarchies = self.hierarchies[::-1]
