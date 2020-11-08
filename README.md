@@ -19,6 +19,7 @@ http://www.sciencedirect.com/science/article/pii/S1570866706000207
 # High-level design
 This diagram gives an approximation of how the program works. Each blue box is 
 one of the main Python modules that comprise alloa.
+
 ![design](docs/design.svg)
 
 1. The user provides a config file which specifies input csv files
@@ -32,6 +33,7 @@ code for agents and hierarchies comes from the **agents** module
 graph
 1. The allocation is performed on the graph and **files** is used to write the
 results
+
 # A very simple example
 ## Agents and hierarchies
 
