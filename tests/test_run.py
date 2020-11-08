@@ -5,7 +5,7 @@ import textwrap
 import unittest
 from datetime import datetime
 
-from alloa.run import run_project_allocation
+from alloa.run import run
 
 
 class TestRun(unittest.TestCase):
@@ -20,8 +20,8 @@ class TestRun(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.output_dir)
 
-    def test_run_project_allocation_unmatched_student(self):
-        run_project_allocation('tests/data/unmatched_student/alloa.conf')
+    def test_run_unmatched_student(self):
+        run('tests/data/unmatched_student/alloa.conf')
         allocation_filepath = os.path.join(
             self.output_dir, f'allocation_{self.current_date}.csv'
         )

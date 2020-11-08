@@ -16,6 +16,22 @@ we minimise the occurrence of situations where students are assigned projects
 they give a low preference rating to. This algorithm is a variant of SPA as in
 http://www.sciencedirect.com/science/article/pii/S1570866706000207
 
+# High-level design
+This diagram gives an approximation of how the program works. Each blue box is 
+one of the main Python modules that comprise alloa.
+![design](docs/design.svg)
+
+1. The user provides a config file which specifies input csv files
+1. The **run** module uses **files** module to parse input csv files, converting
+into list objects in Python
+1. The data is passed into the **graph_builder** module along with the spa cost
+function which is defined in **costs**
+1. The **graph_builder** creates agents and groups these into hierarchies. The 
+code for agents and hierarchies comes from the **agents** module
+1. The hierarchies are passed into the **graph** module to create the allocation
+graph
+1. The allocation is performed on the graph and **files** is used to write the
+results
 # A very simple example
 ## Agents and hierarchies
 

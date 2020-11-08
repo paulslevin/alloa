@@ -1,5 +1,5 @@
-from alloa.run import run_project_allocation
+from alloa.run import run
 
 
 if __name__ == '__main__':
-    run_project_allocation('alloa.conf')
+    run('alloa.conf')

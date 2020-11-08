@@ -1,7 +1,12 @@
-from alloa.agents import Agent
-from alloa.files import FileData, Line
-import unittest
 import os.path
+import shutil
+import unittest
+from datetime import datetime
+
+from alloa.costs import spa_cost
+from alloa.files import FileReader, FileWriter, Line
+from alloa.graph_builder import GraphBuilder
+from alloa.settings import parse_config
 
 
 class TestLine(unittest.TestCase):
@@ -27,21 +32,21 @@ class TestLine(unittest.TestCase):
         )
 
 
-class TestFileData(unittest.TestCase):
+class TestFileReader(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.test_dir = os.path.dirname(os.path.realpath(__file__))
+        test_dir = os.path.dirname(os.path.realpath(__file__))
         cls.input_dir = os.path.join(
-            cls.test_dir, 'data', 'unmatched_student', 'input'
+            test_dir, 'data', 'unmatched_student', 'input'
         )
-        cls.student_file_data = FileData(
+        cls.student_file_data = FileReader.parse(
             csv_file=os.path.join(cls.input_dir, 'students.csv'), level=1
         )
-        cls.project_file_data = FileData(
+        cls.project_file_data = FileReader.parse(
             csv_file=os.path.join(cls.input_dir, 'projects.csv'), level=2
         )
-        cls.academic_file_data = FileData(
+        cls.academic_file_data = FileReader.parse(
             csv_file=os.path.join(cls.input_dir, 'academics.csv'), level=3
         )
 
@@ -59,71 +64,9 @@ class TestFileData(unittest.TestCase):
         self.assertEqual(repr(self.project_file_data), 'LEVEL_2_DATA')
         self.assertEqual(repr(self.academic_file_data), 'LEVEL_3_DATA')
 
-    def test_create_agents(self):
-        self.academic_file_data.create_agents()
-        academic_hierarchy = self.academic_file_data.hierarchy
-        self.assertEqual(len(academic_hierarchy.agents), 2)
-        academic_test_cases = [
-            ('Academic1', [], [0, 2]),
-            ('Academic2', [], [0, 7]),
-        ]
-        for academic, test_case in zip(
-            academic_hierarchy.agents, academic_test_cases
-        ):
-            self.assertEqual(academic.name, test_case[0])
-            self.assertEqual(academic.preferences, test_case[1])
-            self.assertEqual(academic.capacities, test_case[2])
-        academic1, academic2 = academic_hierarchy.agents
-
-        self.project_file_data.create_agents(
-            next_hierarchy=self.academic_file_data.hierarchy
-        )
-        project_hierarchy = self.project_file_data.hierarchy
-        self.assertEqual(len(project_hierarchy.agents), 5)
-        project_test_cases = [
-            ('Project1', [academic2], [0, 2]),
-            ('Project2', [academic2], [0, 3]),
-            ('Project3', [academic2], [0, 3]),
-            ('Project4', [academic1], [0, 2]),
-            ('Project5', [academic1], [0, 2]),
-        ]
-        for project, test_case in zip(
-            project_hierarchy.agents, project_test_cases
-        ):
-            self.assertEqual(project.name, test_case[0])
-            self.assertEqual(project.preferences, test_case[1])
-            self.assertEqual(project.capacities, test_case[2])
-        project1, project2, project3, project4, project5 = (
-            project_hierarchy.agents
-        )
-
-        self.student_file_data.create_agents(
-            next_hierarchy=self.project_file_data.hierarchy
-        )
-        student_hierarchy = self.student_file_data.hierarchy
-        self.assertEqual(len(student_hierarchy.agents), 10)
-        student_test_cases = [
-            ('Firstname1 Lastname1', [project2, project3, project1], [0, 1]),
-            ('Firstname2 Lastname2', [project2, project3, project4], [0, 1]),
-            ('Firstname3 Lastname3', [project2, project1, project4], [0, 1]),
-            ('Firstname4 Lastname4', [project3, project2, project1], [0, 1]),
-            ('Firstname5 Lastname5', [project1, project2, project3], [0, 1]),
-            ('Firstname6 Lastname6', [project1, project2, project4], [0, 1]),
-            ('Firstname7 Lastname7', [project4, project5, project3], [0, 1]),
-            ('Firstname8 Lastname8', [project4, project2, project3], [0, 1]),
-            ('Firstname9 Lastname9', [project1, project4, project5], [0, 1]),
-            ('Firstname10 Lastname10', [project1, project2, project5], [0, 1]),
-        ]
-        for project, test_case in zip(
-            student_hierarchy.agents, student_test_cases
-        ):
-            self.assertEqual(project.name, test_case[0])
-            self.assertEqual(project.preferences, test_case[1])
-            self.assertEqual(project.capacities, test_case[2])
-
-    def test_results(self):
+    def test_file_content(self):
         self.assertEqual(
-            self.student_file_data.results(),
+            self.student_file_data.file_content,
             [
                 Line([
                     'Firstname1 Lastname1',
@@ -179,7 +122,7 @@ class TestFileData(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.project_file_data.results(),
+            self.project_file_data.file_content,
             [
                 Line(['Project1', '0', '2', 'Academic2']),
                 Line(['Project2', '0', '3', 'Academic2']),
@@ -190,9 +133,105 @@ class TestFileData(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.academic_file_data.results(),
+            self.academic_file_data.file_content,
             [
                 Line(['Academic1', '0', '2']),
                 Line(['Academic2', '0', '7'])
             ]
         )
+
+
+class TestFileWriter(unittest.TestCase):
+
+    output_dir = ''
+
+    @classmethod
+    def setUpClass(cls):
+        test_dir = os.path.dirname(os.path.realpath(__file__))
+        input_dir = os.path.join(
+            test_dir, 'data', 'unmatched_student', 'input'
+        )
+        cls.output_dir = os.path.join(
+            test_dir, 'data', 'unmatched_student', 'output'
+        )
+
+        graph_builder = GraphBuilder(
+            file_data_objects=[
+                FileReader.parse(
+                    csv_file=os.path.join(input_dir, 'students.csv'),
+                    level=1
+                ),
+                FileReader.parse(
+                    csv_file=os.path.join(input_dir, 'projects.csv'),
+                    level=2
+                ),
+                FileReader.parse(
+                    csv_file=os.path.join(input_dir, 'academics.csv'),
+                    level=3
+                )
+            ],
+            cost=spa_cost
+        )
+
+        graph = graph_builder.build_graph()
+        graph.populate_all_edges()
+        graph.compute_flow()
+        graph.simplify_flow()
+        graph.allocate()
+
+        config = parse_config('tests/data/unmatched_student/alloa.conf')
+        cls.file_writer = FileWriter(
+            graph,
+            config,
+            [
+                'Firstname1 Lastname1',
+                'Firstname2 Lastname2',
+                'Firstname3 Lastname3',
+                'Firstname4 Lastname4',
+                'Firstname5 Lastname5',
+                'Firstname6 Lastname6',
+                'Firstname7 Lastname7',
+                'Firstname8 Lastname8',
+                'Firstname9 Lastname9',
+                'Firstname10 Lastname10'
+            ]
+        )
+        cls.file_writer.parse_graph()
+
+        cls.current_date = datetime.today().strftime('%d%m%y')
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.output_dir)
+
+    def test_parse_graph(self):
+        output_rows = self.file_writer.output_rows
+        self.assertEqual(
+            output_rows[0],
+            [
+                'Level 1 Agent Name',
+                'Level 1 Agent Name',
+                'Level 2 Agent Name',
+                'Level 1 Agent Rank',
+                'Level 2 Agent Rank'
+            ]
+        )
+        for i, row in enumerate(output_rows[1:]):
+            self.assertEqual(
+                row[0],
+                f'Firstname{i + 1} Lastname{i + 1}'
+            )
+
+    def test_write_allocations(self):
+        self.file_writer.write_allocations()
+        allocation_filepath = os.path.join(
+            self.output_dir, f'allocation_{self.current_date}.csv'
+        )
+        self.assertTrue(os.path.isfile(allocation_filepath))
+
+    def test_write_profile(self):
+        self.file_writer.write_profile()
+        profile_filepath = os.path.join(
+            self.output_dir, f'allocation_profile_{self.current_date}.txt'
+        )
+        self.assertTrue(os.path.isfile(profile_filepath))

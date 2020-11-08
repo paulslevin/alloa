@@ -1,16 +1,14 @@
 """Contains code for parsing input files and writing output files."""
 import csv
-from copy import deepcopy
 from random import shuffle
-from typing import List, Optional
+from typing import Dict, List, Optional
 
-from alloa.agents import Agent, Hierarchy
-from alloa.costs import spa_cost
+from alloa.agents import Hierarchy
 from alloa.graph import AllocationGraph
 
 
 class Line:
-    """Represents a line to be written to output CSV file."""
+    """Represents a line of data read from input CSV file."""
     def __init__(self, line: List[str]) -> None:
         self.line = [x.strip() for x in line]
         self.raw_name = line[0]
@@ -24,7 +22,7 @@ class Line:
         return str(self.line)
 
 
-class FileData:
+class FileReader:
     """Contains data parsed from input CSV file."""
     def __init__(
         self,
@@ -33,75 +31,124 @@ class FileData:
         level: Optional[int] = None,
         randomise: bool = False,
         quoting: int = csv.QUOTE_NONE,
-        first_line: bool = True,
     ) -> None:
         self.randomise = randomise
         self.delimiter = delimiter
         self.quoting = quoting
         self.level = level
-        self.first_line = first_line
         self.file = csv_file
 
         self.hierarchy = Hierarchy(level) if level else None
 
+        self.file_content = []
+
+    @classmethod
+    def parse(cls, *args, **kwargs):
+        file_data = cls(*args, **kwargs)
+        file_data.parse_file()
+        return file_data
+
     def __repr__(self) -> str:
         return f'LEVEL_{self.level}_DATA'
 
-    def create_agents(
-        self, next_hierarchy: Optional[Hierarchy] = None
-    ) -> None:
-        results_copy = deepcopy(self.results())
-        if self.randomise:
-            shuffle(results_copy)
-        for i, line in enumerate(results_copy):
-            preferences = [
-                next_hierarchy.name_agent_map.get(preference)
-                for preference in line.raw_preferences
-            ] if next_hierarchy else []
-            agent = Agent(
-                capacities=line.capacities,
-                preferences=preferences,
-                name=line.raw_name
-            )
-            self.hierarchy.agents.append(agent)
-
-    def results(self) -> List[Line]:
+    def parse_file(self) -> None:
         with open(self.file, 'r') as opened_file:
             reader = csv.reader(
                 opened_file,
                 delimiter=self.delimiter,
                 quoting=self.quoting
             )
-            results = []
+            file_content = []
             for i, row in enumerate(reader):
-                if i == 0 and self.first_line:
+                # Ignore header with columns.
+                if i == 0:
                     continue
-                results.append(Line(row))
-        return results
+                file_content.append(Line(row))
+        if self.randomise:
+            shuffle(file_content)
+        self.file_content = file_content
 
 
-class DataSequence:
-    """Container for file data objects and joins together to create graph."""
-    def __init__(self, *args: FileData) -> None:
-        self.sequence = args
-        self.hierarchies = []
-        self.block_list = []
+class FileWriter:
+    """Writes output allocation and profile files."""
+    def __init__(
+        self,
+        graph: AllocationGraph,
+        config: Dict,
+        first_level_agent_names: List[str]
+    ) -> None:
+        self.graph = graph
+        self.number_of_levels = len(config['level_paths'])
+        self.allocation_path = config['allocation_path']
+        self.allocation_profile_path = config['allocation_profile_path']
+        self.first_level_agent_names = first_level_agent_names
+        self.output_rows = []
 
-    def __len__(self) -> int:
-        return len(self.sequence)
+    def parse_graph(self) -> None:
 
-    def get_graph(self) -> AllocationGraph:
-        self._set_hierarchies()
-        graph = AllocationGraph.with_edges(self.hierarchies, cost=spa_cost)
-        return graph
+        if not self.graph.first_level_agents:
+            return
 
-    def _set_hierarchies(self) -> None:
-        backwards = self.sequence[::-1]
-        backwards[0].create_agents()
-        for i, file_data in enumerate(backwards[1:]):
-            last_level = backwards[i]
-            last_hierarchy = last_level.hierarchy
-            file_data.create_agents(last_hierarchy)
-            self.hierarchies.append(last_hierarchy)
-        self.hierarchies.append(self.sequence[0].hierarchy)
-        self.hierarchies = self.hierarchies[::-1]
+        allocation = self.graph.allocation
+
+        first_agent = self.graph.first_level_agents[0]
+        num_of_agents = len(allocation[first_agent]) // 2 + 1
+        name_columns, rank_columns = [], []
+        for i in range(num_of_agents):
+            name_columns.append(f'Level {i + 1} Agent Name')
+            rank_columns.append(f'Level {i + 1} Agent Rank')
+        column_names = ['Level 1 Agent Name'] + name_columns + rank_columns
+
+        number_of_columns = len(column_names)
+
+        rows = []
+
+        for agent in self.graph.first_level_agents:
+            row = [agent.name]
+            row.extend(
+                datum.agent.name for datum in allocation[agent]
+            )
+            row.extend(
+                datum.rank for datum in allocation[agent]
+            )
+
+            # Extend row to correct length in case agent is not allocated.
+            row.extend(None for _ in range(number_of_columns - len(row)))
+
+            rows.append(row)
+
+        # Sort so the output CSV file has the same order as the input CSV file
+        # for first level agents.
+        def _key(_row):
+            return self.first_level_agent_names.index(_row[0])
+
+        rows = sorted(rows, key=_key)
+        self.output_rows = [column_names] + rows
+
+    def write_allocations(self) -> None:
+        with open(self.allocation_path, 'w') as allocation:
+            writer = csv.writer(allocation, delimiter=',')
+            for row in self.output_rows:
+                writer.writerow(row)
+
+    def write_profile(self) -> None:
+        with open(self.allocation_profile_path, 'w') as profile:
+            profile.writelines([
+                f'Total number of assigned level 1 agents '
+                f'is {self.graph.max_flow}\n',
+                f'Total cost of assignment is {self.graph.flow_cost}\n'
+            ])
+            for i in range(self.number_of_levels - 1):
+                profile.write(
+                    f'\nLevel {i + 1} Preference Count\n'
+                )
+                for j in range(
+                    self.graph.hierarchies[i].max_preferences_length
+                ):
+                    split_point = self.number_of_levels
+                    column = [row[split_point + i] for row in self.output_rows]
+                    count = column.count(j + 1)
+                    profile.write(
+                        f'Number of level {i + 2} agents that were '
+                        f'choice #{j + 1}: {count}\n'
+                    )
