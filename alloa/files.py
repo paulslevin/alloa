@@ -1,5 +1,6 @@
 """Contains code for parsing input files and writing output files."""
 import csv
+from pathlib import Path
 from random import shuffle
 from typing import Dict, List, Optional
 
@@ -26,7 +27,7 @@ class FileReader:
     """Contains data parsed from input CSV file."""
     def __init__(
         self,
-        csv_file: str,
+        csv_file: Path,
         delimiter: str = ',',
         level: Optional[int] = None,
         randomise: bool = False,
@@ -43,8 +44,15 @@ class FileReader:
         self.file_content = []
 
     @classmethod
-    def parse(cls, *args, **kwargs):
-        file_data = cls(*args, **kwargs)
+    def parse(
+        cls,
+        csv_file: Path,
+        delimiter: str = ',',
+        level: Optional[int] = None,
+        randomise: bool = False,
+        quoting: int = csv.QUOTE_NONE,
+    ):
+        file_data = cls(csv_file, delimiter, level, randomise, quoting)
         file_data.parse_file()
         return file_data
 

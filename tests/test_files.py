@@ -1,7 +1,7 @@
-import os.path
 import shutil
 import unittest
 from datetime import datetime
+from pathlib import Path
 
 from alloa.costs import spa_cost
 from alloa.files import FileReader, FileWriter, Line
@@ -12,8 +12,8 @@ from alloa.settings import parse_config
 class TestLine(unittest.TestCase):
 
     def setUp(self):
-        self.test_dir = os.path.dirname(os.path.realpath(__file__))
-        self.input_dir = os.path.join(
+        self.test_dir = Path(__file__).parent
+        self.input_dir = Path(
             self.test_dir, 'data', 'unmatched_student', 'input'
         )
 
@@ -36,18 +36,18 @@ class TestFileReader(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        test_dir = os.path.dirname(os.path.realpath(__file__))
-        cls.input_dir = os.path.join(
+        test_dir = Path(__file__).parent
+        cls.input_dir = Path(
             test_dir, 'data', 'unmatched_student', 'input'
         )
         cls.student_file_data = FileReader.parse(
-            csv_file=os.path.join(cls.input_dir, 'students.csv'), level=1
+            csv_file=Path(cls.input_dir, 'students.csv'), level=1
         )
         cls.project_file_data = FileReader.parse(
-            csv_file=os.path.join(cls.input_dir, 'projects.csv'), level=2
+            csv_file=Path(cls.input_dir, 'projects.csv'), level=2
         )
         cls.academic_file_data = FileReader.parse(
-            csv_file=os.path.join(cls.input_dir, 'academics.csv'), level=3
+            csv_file=Path(cls.input_dir, 'academics.csv'), level=3
         )
 
     def test___eq__(self):
@@ -147,27 +147,20 @@ class TestFileWriter(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        test_dir = os.path.dirname(os.path.realpath(__file__))
-        input_dir = os.path.join(
-            test_dir, 'data', 'unmatched_student', 'input'
-        )
-        cls.output_dir = os.path.join(
-            test_dir, 'data', 'unmatched_student', 'output'
-        )
+        test_dir = Path(__file__).parent
+        input_dir = Path(test_dir, 'data', 'unmatched_student', 'input')
+        cls.output_dir = Path(test_dir, 'data', 'unmatched_student', 'output')
 
         graph_builder = GraphBuilder(
             file_data_objects=[
                 FileReader.parse(
-                    csv_file=os.path.join(input_dir, 'students.csv'),
-                    level=1
+                    csv_file=Path(input_dir, 'students.csv'), level=1
                 ),
                 FileReader.parse(
-                    csv_file=os.path.join(input_dir, 'projects.csv'),
-                    level=2
+                    csv_file=Path(input_dir, 'projects.csv'), level=2
                 ),
                 FileReader.parse(
-                    csv_file=os.path.join(input_dir, 'academics.csv'),
-                    level=3
+                    csv_file=Path(input_dir, 'academics.csv'), level=3
                 )
             ],
             cost=spa_cost
@@ -224,14 +217,14 @@ class TestFileWriter(unittest.TestCase):
 
     def test_write_allocations(self):
         self.file_writer.write_allocations()
-        allocation_filepath = os.path.join(
+        allocation_filepath = Path(
             self.output_dir, f'allocation_{self.current_date}.csv'
         )
-        self.assertTrue(os.path.isfile(allocation_filepath))
+        self.assertTrue(allocation_filepath.exists())
 
     def test_write_profile(self):
         self.file_writer.write_profile()
-        profile_filepath = os.path.join(
+        profile_filepath = Path(
             self.output_dir, f'allocation_profile_{self.current_date}.txt'
         )
-        self.assertTrue(os.path.isfile(profile_filepath))
+        self.assertTrue(profile_filepath.exists())

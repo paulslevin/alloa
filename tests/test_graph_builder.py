@@ -1,5 +1,5 @@
-import os.path
 import unittest
+from pathlib import Path
 
 from alloa.costs import spa_cost
 from alloa.files import FileReader
@@ -9,18 +9,18 @@ from alloa.graph_builder import GraphBuilder
 class TestGraphBuilder(unittest.TestCase):
 
     def setUp(self):
-        self.test_dir = os.path.dirname(os.path.realpath(__file__))
-        self.input_dir = os.path.join(
+        self.test_dir = Path(__file__).parent
+        self.input_dir = Path(
             self.test_dir, 'data', 'unmatched_student', 'input'
         )
         self.student_file_data = FileReader.parse(
-            csv_file=os.path.join(self.input_dir, 'students.csv'), level=1
+            csv_file=Path(self.input_dir, 'students.csv'), level=1
         )
         self.project_file_data = FileReader.parse(
-            csv_file=os.path.join(self.input_dir, 'projects.csv'), level=2
+            csv_file=Path(self.input_dir, 'projects.csv'), level=2
         )
         self.academic_file_data = FileReader.parse(
-            csv_file=os.path.join(self.input_dir, 'academics.csv'), level=3
+            csv_file=Path(self.input_dir, 'academics.csv'), level=3
         )
         self.graph_builder = GraphBuilder(
             file_data_objects=[

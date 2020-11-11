@@ -1,11 +1,12 @@
-from collections import OrderedDict
-from alloa.agents import Agent, Hierarchy
-from alloa.graph import AgentNode, AllocationGraph
-import networkx as nx
 import unittest
-from alloa.costs import spa_cost
-from alloa.utils.enums import GraphElement, Polarity
+from collections import OrderedDict
 
+import networkx as nx
+
+from alloa.agents import Agent, Hierarchy
+from alloa.costs import spa_cost
+from alloa.graph import AgentNode, AllocationGraph
+from alloa.utils.enums import GraphElement, Polarity
 
 POSITIVE = Polarity.POSITIVE
 NEGATIVE = Polarity.NEGATIVE

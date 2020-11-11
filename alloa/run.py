@@ -3,7 +3,6 @@ from typing import Dict
 
 from alloa.costs import spa_cost
 from alloa.files import FileReader, FileWriter
-from alloa.graph import AllocationGraph
 from alloa.graph_builder import GraphBuilder
 from alloa.settings import parse_config
 
@@ -23,7 +22,7 @@ class Runner:
             )
             self.data_objects.append(file_data)
 
-    def build_graph(self) -> AllocationGraph:
+    def build_graph(self) -> None:
         graph_builder = GraphBuilder(self.data_objects, spa_cost)
         graph = graph_builder.build_graph()
         self.graph = graph
