@@ -7,15 +7,15 @@ from typing import Dict
 
 
 def parse_config(filename: str) -> Dict:
-    date = time.strftime('%d%m%y')
+    datetime = time.strftime('%y%m%d_%H%M')
     current = Path(__file__).parent
     config_path = current.parent
 
     config = configparser.RawConfigParser()
     config.read(Path(config_path, filename))
 
-    allocation_profile_filename = f'allocation_profile_{date}.txt'
-    allocation_filename = f'allocation_{date}.csv'
+    allocation_profile_filename = f'allocation_profile_{datetime}.txt'
+    allocation_filename = f'allocation_{datetime}.csv'
 
     # Path for storing temporary files
     input_files = config.get('temporary_files', 'input_files')

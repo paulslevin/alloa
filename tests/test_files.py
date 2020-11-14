@@ -191,7 +191,7 @@ class TestFileWriter(unittest.TestCase):
         )
         cls.file_writer.parse_graph()
 
-        cls.current_date = datetime.today().strftime('%d%m%y')
+        cls.current_datetime = datetime.today().strftime('%y%m%d_%H%M')
 
     @classmethod
     def tearDownClass(cls):
@@ -218,13 +218,13 @@ class TestFileWriter(unittest.TestCase):
     def test_write_allocations(self):
         self.file_writer.write_allocations()
         allocation_filepath = Path(
-            self.output_dir, f'allocation_{self.current_date}.csv'
+            self.output_dir, f'allocation_{self.current_datetime}.csv'
         )
         self.assertTrue(allocation_filepath.exists())
 
     def test_write_profile(self):
         self.file_writer.write_profile()
         profile_filepath = Path(
-            self.output_dir, f'allocation_profile_{self.current_date}.txt'
+            self.output_dir, f'allocation_profile_{self.current_datetime}.txt'
         )
         self.assertTrue(profile_filepath.exists())

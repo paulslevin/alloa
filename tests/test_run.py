@@ -12,16 +12,16 @@ class TestRun(unittest.TestCase):
 
     def setUp(self):
         self.test_dir = Path(__file__).parent
-        self.current_date = datetime.today().strftime('%d%m%y')
+        self.current_datetime = datetime.today().strftime('%y%m%d_%H%M')
 
     def test_run_unmatched_student(self):
         run('tests/data/unmatched_student/alloa.conf')
         output_dir = Path(self.test_dir, 'data', 'unmatched_student', 'output')
         allocation_filepath = Path(
-            output_dir, f'allocation_{self.current_date}.csv'
+            output_dir, f'allocation_{self.current_datetime}.csv'
         )
         profile_filepath = Path(
-            output_dir, f'allocation_profile_{self.current_date}.txt'
+            output_dir, f'allocation_profile_{self.current_datetime}.txt'
         )
         self.assertTrue(allocation_filepath.exists())
         self.assertTrue(profile_filepath.exists())
@@ -72,10 +72,10 @@ class TestRun(unittest.TestCase):
         run('tests/data/large_input/alloa.conf')
         output_dir = Path(self.test_dir, 'data', 'large_input', 'output')
         allocation_filepath = Path(
-            output_dir, f'allocation_{self.current_date}.csv'
+            output_dir, f'allocation_{self.current_datetime}.csv'
         )
         profile_filepath = Path(
-            output_dir, f'allocation_profile_{self.current_date}.txt'
+            output_dir, f'allocation_profile_{self.current_datetime}.txt'
         )
         self.assertTrue(allocation_filepath.exists())
         self.assertTrue(profile_filepath.exists())
